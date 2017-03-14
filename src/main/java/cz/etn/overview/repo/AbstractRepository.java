@@ -56,18 +56,18 @@ public interface AbstractRepository<T, K, F extends Filter> {
 	 * @param overview
 	 * @return
 	 */
-	List<T> findByOverviewSettings(Overview<F> overview);
+	List<T> findByOverview(Overview<F> overview);
 	
 	/**
 	 * Returns total count of results for filtering settings in given overview.
 	 * @param overview
 	 * @return
 	 */
-	int countByOverviewSettings(Overview<F> overview);
+	int countByOverview(Overview<F> overview);
 	
 	default List<T> findByFilter(F filter, List<Order> ordering) {
 		Overview<F> overview = new Overview<>(filter, ordering, null);
-		return findByOverviewSettings(overview);
+		return findByOverview(overview);
 	}
 	
 	default List<T> findByFilter(F filter) {
@@ -81,9 +81,9 @@ public interface AbstractRepository<T, K, F extends Filter> {
 	 * @return
 	 */
 	default ResultsWithOverview<T, F> findResultsWithOverview(Overview<F> overview) {
-		List<T> results = findByOverviewSettings(overview);
+		List<T> results = findByOverview(overview);
 		// Total count of records regardless of page limit
-		int totalCount = countByOverviewSettings(overview);
+		int totalCount = countByOverview(overview);
 		return new ResultsWithOverview<>(results, overview.withPagination(overview.getPagination().withTotalCount(totalCount)));
 	}
 }

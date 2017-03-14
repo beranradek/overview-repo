@@ -65,7 +65,7 @@ public abstract class InMemoryRepository<T extends Identifiable<K>, K, F extends
 	}
 
 	@Override
-	public List<T> findByOverviewSettings(Overview<F> overview) {
+	public List<T> findByOverview(Overview<F> overview) {
 		if (overview.getOrder() != null) {
 			throw new UnsupportedOperationException("Ordering not supported by generic in-memory implementation");
 		}
@@ -86,7 +86,7 @@ public abstract class InMemoryRepository<T extends Identifiable<K>, K, F extends
 	}
 
 	@Override
-	public int countByOverviewSettings(Overview<F> overview) {
+	public int countByOverview(Overview<F> overview) {
 		if (overview.getFilter() != null) {
 			throw new UnsupportedOperationException("Filtering not supported by generic in-memory implementation");
 		}

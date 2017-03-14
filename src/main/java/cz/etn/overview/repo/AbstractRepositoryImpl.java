@@ -18,8 +18,7 @@ import cz.etn.overview.mapper.AttributeMapping;
 import cz.etn.overview.mapper.AttributeSource;
 import cz.etn.overview.mapper.EntityMapper;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,7 +37,7 @@ import javax.sql.DataSource;
 public abstract class AbstractRepositoryImpl<T extends Identifiable<K>, K, F extends Filter> implements AbstractRepository<T, K, F> {
 	
 	protected static final String LIKE_WITH_PLACEHOLDER = "LIKE CONCAT('%', ?, '%')";
-	
+
 	// for inner implementation only
 	private static class Pair<A, B> {
 		A first;
@@ -118,14 +117,14 @@ public abstract class AbstractRepositoryImpl<T extends Identifiable<K>, K, F ext
 	}
 	
 	@Override
-	public List<T> findByOverviewSettings(final Overview<F> overview) {
+	public List<T> findByOverview(final Overview<F> overview) {
 		List<String> attributeNames = getEntityMapper().getAttributeNames();
 		String from = getEntityMapper().getTableName();
 		return findByOverviewSettingsInternal(overview, attributeNames, from, rs -> getEntityMapper().buildEntity(rs));
 	}
 	
 	@Override
-	public int countByOverviewSettings(final Overview<F> overview) {
+	public int countByOverview(final Overview<F> overview) {
 		String selection = "COUNT(*)";
 		String from = getEntityMapper().getTableName();
 		return countByOverviewSettingsInternal(overview, selection, from);
@@ -258,9 +257,51 @@ public abstract class AbstractRepositoryImpl<T extends Identifiable<K>, K, F ext
 		return ordering;
 	}
 	
-	protected abstract K createInternal(Connection conn, String sql, List<Object> attributeValues, boolean autogenerateKey);
+	protected K createInternal(Connection conn, String sql, List<Object> attributeValues, boolean autogenerateKey) {
+		K generatedId = null;
+		try {
+			try (PreparedStatement statement = conn.prepareStatement(sql, autogenerateKey ? Statement.RETURN_GENERATED_KEYS : Statement.NO_GENERATED_KEYS)) {
+				if (attributeValues != null) {
+					int i = 0;
+					for (Object attributeValue : attributeValues) {
+						statement.setObject(i + 1, attributeValue);
+						i++;
+					}
+				}
+				if (autogenerateKey) {
+					statement.executeUpdate();
+					ResultSet rs = statement.getGeneratedKeys();
+					rs.next();
+					generatedId = convertGeneratedKey(rs.getInt(1));
+				} else {
+					statement.executeUpdate();
+				}
+				// TODO RBe: Statement logging?
+			}
+		} catch (Exception ex) {
+			throw new RuntimeException(ex.getMessage(), ex);
+		}
+		return generatedId;
+	}
 	
-	protected abstract int updateInternal(Connection conn, String sql, List<Object> attributeValues);
+	protected int updateInternal(Connection conn, String sql, List<Object> attributeValues) {
+		try {
+			try (PreparedStatement statement = conn.prepareStatement(sql)) {
+				if (attributeValues != null) {
+					int i = 0;
+					for (Object attributeValue : attributeValues) {
+						statement.setObject(i + 1, attributeValue);
+						i++;
+					}
+				}
+				int updatedCount = statement.executeUpdate();
+				// TODO RBe: Statement logging?
+				return updatedCount;
+			}
+		} catch (Exception ex) {
+			throw new RuntimeException(ex.getMessage(), ex);
+		}
+	}
 	
 	protected abstract List<T> queryWithOverview(Connection conn,
 		List<String> selectedAttributes,	

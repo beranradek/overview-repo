@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Base interface for implementing SQL entity mappers.
+ * Base interface for implementing entity mappers.
  * @author Radek Beran
  */
 public interface AbstractEntityMapper<T> extends EntityMapper<T>, AttributeMapping<T> {
