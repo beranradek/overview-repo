@@ -8,10 +8,15 @@ Various repository implementations can be introduced.
 Basic repository implementation uses an entity mapper which serves all entity attributes metadata, so the repository is able to construct all queries
 based on this metadata. Entity mappers can be possibly used also for other transformations of data objects.  
 
-Running tests: gradlew clean test
+## Running tests
 
-Publishing artifact: gradlew clean uploadArchives
+gradlew clean test
 
-Releasing artifact:
+## Publishing artifact
+
+gradlew clean uploadArchives
+
+## Releasing artifact
+
 * Increase version in gradle.properties
 * gradlew clean release
