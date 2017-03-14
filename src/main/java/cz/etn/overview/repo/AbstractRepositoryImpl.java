@@ -215,7 +215,7 @@ public abstract class AbstractRepositoryImpl<T extends Identifiable<K>, K, F ext
 				() -> null,
 				() -> null,
 				rs -> getEntityMapper().buildEntity(rs));
-			return results != null && !results.isEmpty() ? Optional.ofNullable(results.get(0)) : Optional.empty(); 
+			return results != null && !results.isEmpty() ? Optional.<T>ofNullable(results.get(0)) : Optional.<T>empty();
 		});
 	}
 	

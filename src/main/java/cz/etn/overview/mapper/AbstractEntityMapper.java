@@ -24,7 +24,7 @@ public interface AbstractEntityMapper<T> extends EntityMapper<T>, AttributeMappi
 	AttributeMapping<T>[] getAttributeMappings();
 	
 	@Override
-	default public String getPrimaryAttributeName() {
+	default String getPrimaryAttributeName() {
 		AttributeMapping<T> keyAttr = null;
 		for (AttributeMapping<T> con : getAttributeMappings()) {
 			if (con.isPrimaryAttribute()) {
@@ -36,19 +36,19 @@ public interface AbstractEntityMapper<T> extends EntityMapper<T>, AttributeMappi
 	}
 	
 	@Override
-	default public List<String> getAttributeNames() {
+	default List<String> getAttributeNames() {
 		return Arrays.asList(getAttributeMappings()).stream().map(v -> v.getAttributeName()).collect(Collectors.toList());
 	}
 	
 	@Override
-	default public List<String> getAttributeNamesWithPrefix(String prefix, String aliasPrefix) {
+	default List<String> getAttributeNamesWithPrefix(String prefix, String aliasPrefix) {
 		return Arrays.asList(getAttributeMappings()).stream()
 			.map(v -> (prefix + AttributeMapping.ATTR_NAME_SEPARATOR + v.getAttributeName() + (aliasPrefix != null ? (" AS " + aliasPrefix + v.getAttributeName()) : "")))
 			.collect(Collectors.toList());
 	}
 	
 	@Override
-	default public List<Object> getAttributeValues(T instance) {
+	default List<Object> getAttributeValues(T instance) {
 		List<Object> attrValues = new ArrayList<>();
 		for (AttributeMapping<T> fld : getAttributeMappings()) {
 			attrValues.add(fld.getAttributeValue(instance));
@@ -57,7 +57,7 @@ public interface AbstractEntityMapper<T> extends EntityMapper<T>, AttributeMappi
 	}
 	
 	@Override
-	default public Object getPrimaryAttributeValue(T instance) {
+	default Object getPrimaryAttributeValue(T instance) {
 		Object keyAttrValue = null;
 		for (AttributeMapping<T> con : getAttributeMappings()) {
 			if (con.isPrimaryAttribute()) {
@@ -69,7 +69,7 @@ public interface AbstractEntityMapper<T> extends EntityMapper<T>, AttributeMappi
 	}
 	
 	@Override
-	default public T buildEntity(AttributeSource attributeSource, String aliasPrefix) {
+	default T buildEntity(AttributeSource attributeSource, String aliasPrefix) {
 		try {
 			T instance = createEntity();
 			for (AttributeMapping<T> fld : getAttributeMappings()) {
@@ -77,7 +77,7 @@ public interface AbstractEntityMapper<T> extends EntityMapper<T>, AttributeMappi
 				if (aliasPrefix != null) {
 					alias = aliasPrefix + fld.getAttributeName();
 				}
-				instance = fld.entityUpdatedWithAttributeValue(instance, attributeSource, alias);
+				instance = fld.entityWithAttribute(instance, attributeSource, fld.getAttributeName(alias));
 			}
 			return instance;
 		} catch (Exception ex) {

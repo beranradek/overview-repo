@@ -26,7 +26,7 @@ public interface EntityMapper<T> {
 	 * Returns string that can be used to prefix all database attribute names for mapped entity to gain unique aliases.
 	 * @return
 	 */
-	default public String getAliasPrefix() {
+	default String getAliasPrefix() {
 		return getTableName() + "_";
 	}
 	
@@ -77,26 +77,26 @@ public interface EntityMapper<T> {
 	 * @param attributeSource
 	 * @return
 	 */
-	default public T buildEntity(AttributeSource attributeSource) {
+	default T buildEntity(AttributeSource attributeSource) {
 		return buildEntity(attributeSource, null);
 	}
 	
-	default public String getAttributeNamesCommaSeparated() {
+	default String getAttributeNamesCommaSeparated() {
 		return EntityMappers.join(getAttributeNames(), ",");
 	}
 	
-	default public String getAttributeNamesCommaSeparatedWithPrefix(String tableName, String aliasPrefix) {
+	default String getAttributeNamesCommaSeparatedWithPrefix(String tableName, String aliasPrefix) {
 		return EntityMappers.join(getAttributeNamesWithPrefix(tableName, aliasPrefix), ",");
 	}
 	
 	/** Returns string with comma-separated question marks, one for each database column name. */
-	default public String getPlaceholdersCommaSeparated() {
+	default String getPlaceholdersCommaSeparated() {
 		List<String> questionMarks = new ArrayList<>(Collections.nCopies(getAttributeNames().size(), "?"));
 		return EntityMappers.join(questionMarks, ",");
 	}
 	
 	/** Returns string with comma-separated database attribute names with placeholder values in form suitable for SQL update: column1=?,column2=?,... */
-	default public String getAttributeNamesEqToPlaceholdersCommaSeparated() {
+	default String getAttributeNamesEqToPlaceholdersCommaSeparated() {
 		return EntityMappers.join(getAttributeNames().stream().map(attrName -> attrName + "=?").collect(Collectors.toList()), ",");
 	}
 }

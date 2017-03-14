@@ -15,14 +15,30 @@ package cz.etn.overview.mapper;
 public interface AttributeMapping<T> {
 	/** Separator between prefix and attribute name. */
 	public static final String ATTR_NAME_SEPARATOR = ".";
-	
+
+	/**
+	 * Value of attribute extracted from given entity.
+	 * @param entity
+	 * @return
+     */
 	Object getAttributeValue(T entity);
-		
-	T entityUpdatedWithAttributeValue(T entity, AttributeSource attributeSource, String alias);
-	
+
+	/**
+	 * Name of attribute.
+	 * @return
+     */
 	String getAttributeName();
+
+	/**
+	 * Returns instance of entity updated with given attribute.
+	 * @param entity
+	 * @param attributeSource
+	 * @param attributeName name of attribute that should be used to extract attribute value from given attribute source
+     * @return
+     */
+	T entityWithAttribute(T entity, AttributeSource attributeSource, String attributeName);
 	
-	default public String getAttributeName(String alias) {
+	default String getAttributeName(String alias) {
 		String attrName = null;
 		if (alias == null || alias.isEmpty()) {
 			attrName = getAttributeName();
@@ -36,7 +52,7 @@ public interface AttributeMapping<T> {
 	 * Whether this database attribute is part of primary key.
 	 * @return
 	 */
-	default public boolean isPrimaryAttribute() {
+	default boolean isPrimaryAttribute() {
 		return false;
 	}
 }
