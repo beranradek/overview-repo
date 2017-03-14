@@ -1,0 +1,27 @@
+buildscript {
+    ext.artifactory = hasProperty("etn.artifactory.url") ? getProperty("etn.artifactory.url") : "http://artifactory.etn"
+    repositories {
+        ivy { url = "$artifactory/etn-all" }
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'com.etnetera.gradle', name: 'etn-plugins', version: '1.2.5'
+    }
+}
+
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+// See http://doc.etnetera.cz/developers/buildovani/gradle/etn_pluginy/EtnPlugin for uploadArchives, release tasks etc.
+apply plugin: 'etn-lib'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+  // 
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.4.1'
+}
