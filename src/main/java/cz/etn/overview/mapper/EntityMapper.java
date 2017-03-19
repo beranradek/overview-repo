@@ -8,6 +8,8 @@
 
 package cz.etn.overview.mapper;
 
+import cz.etn.overview.funs.CollectionFuns;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -82,21 +84,21 @@ public interface EntityMapper<T> {
 	}
 	
 	default String getAttributeNamesCommaSeparated() {
-		return EntityMappers.join(getAttributeNames(), ",");
+		return CollectionFuns.join(getAttributeNames(), ",");
 	}
 	
 	default String getAttributeNamesCommaSeparatedWithPrefix(String tableName, String aliasPrefix) {
-		return EntityMappers.join(getAttributeNamesWithPrefix(tableName, aliasPrefix), ",");
+		return CollectionFuns.join(getAttributeNamesWithPrefix(tableName, aliasPrefix), ",");
 	}
 	
 	/** Returns string with comma-separated question marks, one for each database column name. */
 	default String getPlaceholdersCommaSeparated() {
 		List<String> questionMarks = new ArrayList<>(Collections.nCopies(getAttributeNames().size(), "?"));
-		return EntityMappers.join(questionMarks, ",");
+		return CollectionFuns.join(questionMarks, ",");
 	}
 	
 	/** Returns string with comma-separated database attribute names with placeholder values in form suitable for SQL update: column1=?,column2=?,... */
 	default String getAttributeNamesEqToPlaceholdersCommaSeparated() {
-		return EntityMappers.join(getAttributeNames().stream().map(attrName -> attrName + "=?").collect(Collectors.toList()), ",");
+		return CollectionFuns.join(getAttributeNames().stream().map(attrName -> attrName + "=?").collect(Collectors.toList()), ",");
 	}
 }

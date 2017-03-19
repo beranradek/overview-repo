@@ -1,0 +1,87 @@
+/*
+ * Created on 17. 2. 2017
+ *
+ * Copyright (c) 2017 Etnetera, a.s. All rights reserved.
+ * Intended for internal use only.
+ * http://www.etnetera.cz
+ */
+
+package cz.etn.overview.repo;
+
+
+import com.google.common.collect.Lists;
+import cz.etn.overview.Order;
+import cz.etn.overview.Overview;
+import cz.etn.overview.common.Funs;
+import cz.etn.overview.domain.SupplyPoint;
+import cz.etn.overview.domain.SupplyPointFilter;
+import cz.etn.overview.mapper.EntityMapper;
+
+import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Default implementation of {@link SupplyPointRepository}.
+ * @author Radek Beran
+ */
+public class SupplyPointRepositoryImpl extends AbstractRepositoryImpl<SupplyPoint, Integer, SupplyPointFilter> implements SupplyPointRepository {
+	
+	private final DataSource dataSource;
+
+	public SupplyPointRepositoryImpl(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+	
+	@Override
+	public EntityMapper<SupplyPoint> getEntityMapper() {
+		return SupplyPointMapper.INSTANCE;
+	}
+
+	@Override
+	protected DataSource getDataSource() {
+		return dataSource;
+	}
+
+	@Override
+	public List<SupplyPoint> findByCustomerIds(List<Integer> customerIds) {
+		List<Order> ordering = new ArrayList<>();
+		ordering.add(new Order(getEntityMapper().getTableName() + "." + SupplyPointMapper.code.getAttributeName(), false));
+		SupplyPointFilter filter = new SupplyPointFilter();
+		filter.setCustomerIds(customerIds);
+		return findByOverview(new Overview<>(filter, ordering, null));
+	}
+	
+	@Override
+	protected SupplyPoint entityUpdatedWithId(SupplyPoint entity, Integer id) {
+		entity.setId(id);
+		return entity;
+	}
+	
+	@Override
+	protected List<FilterCondition> composeFilterConditions(SupplyPointFilter filter) {
+		List<FilterCondition> conditions = new ArrayList<>(); 
+		String tableName = getEntityMapper().getTableName();
+		if (filter != null) {
+			if (filter.getId() != null) {
+				String attrName = tableName + "." + SupplyPointMapper.id.getAttributeName();
+				conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getId())));
+			}
+			if (filter.getCustomerId() != null) {
+				String attrName = tableName + "." + SupplyPointMapper.customer_id.getAttributeName();
+				conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getCustomerId())));
+			}
+			if (filter.getCustomerIds() != null) {
+				if (!filter.getCustomerIds().isEmpty()) {
+					String attrName = tableName + "." + SupplyPointMapper.customer_id.getAttributeName();
+					conditions.add(new FilterCondition(attrName + " IN (" + Funs.mkString(filter.getCustomerIds(), customerId -> "" + customerId, ", ") + ")", Lists.newArrayList()));
+				} else {
+					// empty customer ids
+					conditions.add(new FilterCondition("1=0", Lists.newArrayList()));
+				}
+			}
+		}
+		return conditions;
+	}
+
+}

@@ -14,28 +14,28 @@ import cz.etn.overview.Overview;
 import cz.etn.overview.Pagination;
 import cz.etn.overview.domain.Identifiable;
 import cz.etn.overview.funs.CheckedFunction;
-import cz.etn.overview.mapper.AttributeMapping;
+import cz.etn.overview.funs.CollectionFuns;
 import cz.etn.overview.mapper.AttributeSource;
 import cz.etn.overview.mapper.EntityMapper;
-
-import java.sql.*;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import cz.etn.overview.mapper.ResultSetAttributeSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.sql.*;
+import java.time.Instant;
+import java.util.*;
+import java.util.Date;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Basic abstract implementation of {@link AbstractRepository}.
  * @author Radek Beran
  */
 public abstract class AbstractRepositoryImpl<T extends Identifiable<K>, K, F extends Filter> implements AbstractRepository<T, K, F> {
-	
+
+	protected static final Logger log = LoggerFactory.getLogger(AbstractRepositoryImpl.class);
 	protected static final String LIKE_WITH_PLACEHOLDER = "LIKE CONCAT('%', ?, '%')";
 
 	// for inner implementation only
@@ -120,18 +120,22 @@ public abstract class AbstractRepositoryImpl<T extends Identifiable<K>, K, F ext
 	public List<T> findByOverview(final Overview<F> overview) {
 		List<String> attributeNames = getEntityMapper().getAttributeNames();
 		String from = getEntityMapper().getTableName();
-		return findByOverviewSettingsInternal(overview, attributeNames, from, rs -> getEntityMapper().buildEntity(rs));
+		return findByOverviewInternal(overview, attributeNames, from, rs -> getEntityMapper().buildEntity(rs));
 	}
 	
 	@Override
 	public int countByOverview(final Overview<F> overview) {
 		String selection = "COUNT(*)";
 		String from = getEntityMapper().getTableName();
-		return countByOverviewSettingsInternal(overview, selection, from);
+		return countByOverviewInternal(overview, selection, from);
 	}
-	
+
+	protected abstract DataSource getDataSource();
+
+	protected abstract EntityMapper<T> getEntityMapper();
+
 	/**
-	 * Should be overriden in subclasses to apply filtering set in input filter. 
+	 * Should be overriden in subclasses to apply filtering set in input filter.
 	 * @param filter
 	 * @return
 	 */
@@ -146,7 +150,7 @@ public abstract class AbstractRepositoryImpl<T extends Identifiable<K>, K, F ext
 	 * @param entityBuilder
 	 * @return
 	 */
-	protected List<T> findByOverviewSettingsInternal(final Overview<F> overview, List<String> selectedAttributes, String from, Function<AttributeSource, T> entityBuilder) {
+	protected List<T> findByOverviewInternal(final Overview<F> overview, List<String> selectedAttributes, String from, Function<AttributeSource, T> entityBuilder) {
 		Objects.requireNonNull(overview, "overview should be specified");
 		return withNewConnection(conn -> {
 			
@@ -155,9 +159,9 @@ public abstract class AbstractRepositoryImpl<T extends Identifiable<K>, K, F ext
 			return queryWithOverview(conn, 
 				selectedAttributes, 
 				from,
-				() -> composeFilterConditions(overview.getFilter()),
-				() -> ordering,
-				() -> overview.getPagination(),
+				overview.getFilter(),
+				ordering,
+				overview.getPagination(),
 				entityBuilder);
 		});
 	}
@@ -168,11 +172,9 @@ public abstract class AbstractRepositoryImpl<T extends Identifiable<K>, K, F ext
 	 * @param from
 	 * @return
 	 */
-	protected int countByOverviewSettingsInternal(final Overview<F> overview, String selection, String from) {
+	protected int countByOverviewInternal(final Overview<F> overview, String selection, String from) {
 		Objects.requireNonNull(overview, "overview should be specified");
-		return withNewConnection(conn -> {
-			return queryCount(conn, selection, from, () -> composeFilterConditions(overview.getFilter()));
-		});
+		return withNewConnection(conn -> queryCount(conn, selection, from, overview.getFilter()));
 	}
 	
 	protected <U> U withNewConnection(CheckedFunction<Connection, U> queryData) {
@@ -210,17 +212,13 @@ public abstract class AbstractRepositoryImpl<T extends Identifiable<K>, K, F ext
 			List<T> results = queryWithOverview(conn, 
 				attributeNames, 
 				from,
-				() -> filterConditions,
-				() -> null,
-				() -> null,
+				filterConditions,
+				null,
+				null,
 				rs -> getEntityMapper().buildEntity(rs));
 			return results != null && !results.isEmpty() ? Optional.<T>ofNullable(results.get(0)) : Optional.<T>empty();
 		});
 	}
-	
-	protected abstract DataSource getDataSource();
-	
-	protected abstract EntityMapper<T> getEntityMapper();
 	
 	/**
 	 * It is recommended that subclasses provide more effective implementation. 
@@ -245,10 +243,6 @@ public abstract class AbstractRepositoryImpl<T extends Identifiable<K>, K, F ext
 		if (date == null) return null;
 		return new Date(date.toEpochMilli());
 	}
-	
-	protected <U> String dbAttributeWithPrefix(String prefix, AttributeMapping<U> attr) {
-		return prefix + "." + attr.getAttributeName();
-	}
 
 	protected List<Order> createDefaultOrdering() {
 		// default ordering by id
@@ -261,13 +255,7 @@ public abstract class AbstractRepositoryImpl<T extends Identifiable<K>, K, F ext
 		K generatedId = null;
 		try {
 			try (PreparedStatement statement = conn.prepareStatement(sql, autogenerateKey ? Statement.RETURN_GENERATED_KEYS : Statement.NO_GENERATED_KEYS)) {
-				if (attributeValues != null) {
-					int i = 0;
-					for (Object attributeValue : attributeValues) {
-						statement.setObject(i + 1, attributeValue);
-						i++;
-					}
-				}
+				setParameters(statement, attributeValues);
 				if (autogenerateKey) {
 					statement.executeUpdate();
 					ResultSet rs = statement.getGeneratedKeys();
@@ -276,7 +264,7 @@ public abstract class AbstractRepositoryImpl<T extends Identifiable<K>, K, F ext
 				} else {
 					statement.executeUpdate();
 				}
-				// TODO RBe: Statement logging?
+				logSqlWithParameters(statement.toString(), attributeValues);
 			}
 		} catch (Exception ex) {
 			throw new RuntimeException(ex.getMessage(), ex);
@@ -287,37 +275,151 @@ public abstract class AbstractRepositoryImpl<T extends Identifiable<K>, K, F ext
 	protected int updateInternal(Connection conn, String sql, List<Object> attributeValues) {
 		try {
 			try (PreparedStatement statement = conn.prepareStatement(sql)) {
-				if (attributeValues != null) {
-					int i = 0;
-					for (Object attributeValue : attributeValues) {
-						statement.setObject(i + 1, attributeValue);
-						i++;
-					}
-				}
+				setParameters(statement, attributeValues);
 				int updatedCount = statement.executeUpdate();
-				// TODO RBe: Statement logging?
+				logSqlWithParameters(statement.toString(), attributeValues);
 				return updatedCount;
 			}
 		} catch (Exception ex) {
 			throw new RuntimeException(ex.getMessage(), ex);
 		}
 	}
+
+	protected List<T> queryWithOverview(Connection conn,
+		List<String> selectedAttributes,
+		String from,
+		F filter,
+		List<Order> ordering,
+		Pagination pagination,
+		Function<AttributeSource, T> entityBuilder) {
+
+		return queryWithOverview(conn,
+			selectedAttributes,
+			from,
+			filter != null ? composeFilterConditions(filter) : null,
+			ordering,
+			pagination,
+			entityBuilder);
+	}
 	
-	protected abstract List<T> queryWithOverview(Connection conn,
+	protected List<T> queryWithOverview(Connection conn,
 		List<String> selectedAttributes,	
 		String from,
-		Supplier<List<FilterCondition>> filterConditionsSupplier, 
-		Supplier<List<Order>> orderingSupplier, 
-		Supplier<Pagination> paginationSupplier,
-		Function<AttributeSource, T> entityBuilder);
-	
-	protected abstract int queryCount(Connection conn, String selection, String from, Supplier<List<FilterCondition>> filterSupplier);
-	
+		List<FilterCondition> filterConditions,
+		List<Order> ordering,
+		Pagination pagination,
+		Function<AttributeSource, T> entityBuilder) {
+
+		List<T> results = null;
+		try {
+			StringBuilder sqlBuilder = new StringBuilder("SELECT " + CollectionFuns.join(selectedAttributes, ", ") + " FROM " + from);
+			List<Object> parameters = appendFilter(sqlBuilder, filterConditions);
+			appendOrdering(sqlBuilder, ordering);
+			appendPagination(sqlBuilder, pagination);
+
+			String sql = sqlBuilder.toString();
+
+			try (PreparedStatement statement = conn.prepareStatement(sql)) {
+				setParameters(statement, parameters);
+
+				try (ResultSet rs = statement.executeQuery()) {
+					results = new ArrayList<>();
+					while (rs.next()) {
+						results.add(entityBuilder.apply(new ResultSetAttributeSource(rs)));
+					}
+				}
+			}
+
+			logSqlWithParameters(sql, parameters);
+		} catch (Exception ex) {
+			throw new RuntimeException(ex.getMessage(), ex);
+		}
+
+		return results;
+	}
+
+	protected int queryCount(Connection conn, String selection, String from, F filter) {
+		int count = 0;
+		try {
+			StringBuilder sqlBuilder = new StringBuilder("SELECT " + selection + " FROM " + from);
+			List<Object> parameters = appendFilter(sqlBuilder, filter != null ? composeFilterConditions(filter) : null);
+
+			String sql = sqlBuilder.toString();
+
+			try (PreparedStatement statement = conn.prepareStatement(sql)) {
+				setParameters(statement, parameters);
+
+				try (ResultSet rs = statement.executeQuery()) {
+					if (rs.next()) {
+						count = rs.getInt(1);
+					}
+				}
+			}
+
+			logSqlWithParameters(sql, parameters);
+		} catch (Exception ex) {
+			throw new RuntimeException(ex.getMessage(), ex);
+		}
+
+		return count;
+	}
+
+	protected List<Object> appendFilter(StringBuilder sqlBuilder, List<FilterCondition> filterConditions) {
+		List<Object> parameters = null;
+		if (filterConditions != null && !filterConditions.isEmpty()) {
+			List<String> whereClause = filterConditions.stream().map(c -> c.getConditionWithPlaceholders()).collect(Collectors.toList());
+			parameters = filterConditions.stream().flatMap(c -> c.getValues().stream()).collect(Collectors.toList());
+			sqlBuilder.append(" WHERE ").append(CollectionFuns.join(whereClause, " AND "));
+		}
+		return parameters;
+	}
+
+	protected void appendOrdering(StringBuilder sqlBuilder, List<Order> ordering) {
+		if (ordering != null && !ordering.isEmpty()) {
+			List<String> orderByClause = ordering.stream().map(c -> c.getDbString()).collect(Collectors.toList());
+			sqlBuilder.append(" ORDER BY ").append(CollectionFuns.join(orderByClause, ", "));
+		}
+	}
+
+	protected void appendPagination(StringBuilder sqlBuilder, Pagination pagination) {
+		if (pagination != null) {
+			// TODO RBe: Abstraction over different databases?
+			sqlBuilder.append(" LIMIT " + pagination.getLimit() + " OFFSET " + pagination.getOffset());
+		}
+	}
+
+	protected void setParameters(PreparedStatement statement, List<Object> parameters) throws SQLException {
+		if (parameters != null) {
+            int i = 0;
+            for (Object paramValue : parameters) {
+                statement.setObject(i + 1, paramValue);
+                i++;
+            }
+        }
+	}
+
+	protected void logSqlWithParameters(String sql, List<Object> parameters) {
+		if (log.isTraceEnabled()) {
+            log.trace(sql.toString());
+            logParameters(parameters);
+        }
+	}
+
+	protected void logParameters(List<Object> parameters) {
+		if (parameters != null) {
+            for (int i = 0; i < parameters.size(); i++) {
+                Object p = parameters.get(i);
+                log.trace("{}: {}", i + 1, p);
+            }
+        }
+	}
+
 	protected List<Object> getAttributeValues(T entity) {
 		List<Object> attributeValues = getEntityMapper().getAttributeValues(entity);
 		List<Object> result = new ArrayList<>();
 		if (attributeValues != null) {
 			for (Object v : attributeValues) {
+				// TODO RBe: Conversion of another data types when not supported their passing to JDBC?
 				if (v instanceof Instant) {
 					result.add(instantToUtilDate((Instant)v));
 				} else {
