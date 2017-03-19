@@ -13,7 +13,6 @@ import cz.etn.overview.domain.Voucher;
 import cz.etn.overview.mapper.EntityMapper;
 
 import javax.sql.DataSource;
-import java.util.Optional;
 
 
 /**
@@ -29,12 +28,7 @@ public class VoucherRepositoryImpl extends AbstractRepositoryImpl<Voucher, Strin
 	}
 
 	@Override
-	public Optional<Voucher> findByCode(String code) {
-		return findByAttributeValue(VoucherMapper.code.getAttributeName(), Voucher.normalizedVoucherCode(code));
-	}
-	
-	@Override
-	public EntityMapper<Voucher> getEntityMapper() {
+	protected EntityMapper<Voucher> getEntityMapper() {
 		return VoucherMapper.INSTANCE;
 	}
 

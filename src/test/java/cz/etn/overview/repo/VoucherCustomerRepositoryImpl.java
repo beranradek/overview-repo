@@ -13,6 +13,7 @@ import com.google.common.collect.Lists;
 import cz.etn.overview.Overview;
 import cz.etn.overview.common.Funs;
 import cz.etn.overview.domain.*;
+import cz.etn.overview.mapper.AttributeSource;
 import cz.etn.overview.mapper.EntityMapper;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -38,7 +39,7 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepositoryImpl<Vouche
     }
 
     @Override
-    public EntityMapper<VoucherCustomer> getEntityMapper() {
+    protected EntityMapper<VoucherCustomer> getEntityMapper() {
         return VoucherCustomerMapper.INSTANCE;
     }
 
@@ -53,8 +54,7 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepositoryImpl<Vouche
     public Optional<VoucherCustomer> findById(Integer id) {
         VoucherCustomerFilter filter = new VoucherCustomerFilter();
         filter.setId(id);
-        Overview<VoucherCustomerFilter> overview = new Overview<>(filter, new ArrayList<>(), null);
-        return Funs.headOpt(findByOverview(overview));
+        return Funs.headOpt(findByOverview(new Overview<>(filter, null, null)));
     }
 
     /**
@@ -66,17 +66,8 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepositoryImpl<Vouche
         List<VoucherCustomer> customers = withNewConnection(conn -> {
             // First load customers joined with (optional) vouchers
             // Resulting records are suitable for directly applying pagination settings
-            Pair<List<String>, String> attrsAndFrom = dbAttributesAndFromWithJoinedVoucher();
-            return findByOverviewInternal(overview, attrsAndFrom.getLeft(), attrsAndFrom.getRight(), attributeSource -> {
-                VoucherCustomer customer = getEntityMapper().buildEntity(attributeSource, getEntityMapper().getAliasPrefix());
-                Voucher voucher = getVoucherMapper().buildEntity(attributeSource, getVoucherMapper().getAliasPrefix());
-
-                // Join the object representation of customer with voucher
-                if (voucher.getId() != null && !voucher.getId().isEmpty()) {
-                    customer.setVoucher(voucher);
-                }
-                return customer;
-            });
+            Pair<List<String>, String> attrsAndFrom = joinedSelectionAndFrom();
+            return findByOverviewInternal(overview, attrsAndFrom.getLeft(), attrsAndFrom.getRight(), attributeSource -> customerFromAttributeSource(attributeSource));
         });
 
         // Lazy loading of related supply points using one additional query (if they would be joined with customers in one query, it would break pagination limit)
@@ -97,35 +88,16 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepositoryImpl<Vouche
      */
     @Override
     public int countByOverview(Overview<VoucherCustomerFilter> overview) {
-        Pair<List<String>, String> attrsAndFrom = dbAttributesAndFromWithJoinedVoucher();
-        String qualifiedCustomerId = getEntityMapper().getTableName() + "." + VoucherCustomerMapper.id.getAttributeName();
-        return countByOverviewInternal(overview, "COUNT(DISTINCT " + qualifiedCustomerId + ")", attrsAndFrom.getRight());
-    }
-
-    protected List<VoucherCustomer> aggregateSupplyPointsOfUniqueCustomers(List<VoucherCustomer> customers) {
-        List<VoucherCustomer> aggregated = new ArrayList<>();
-        for (VoucherCustomer customer : customers) {
-            VoucherCustomer customerAggregated = Iterables.find(aggregated, c -> c.getId() != null && c.getId().equals(customer.getId()), null);
-            if (customerAggregated == null) {
-                // Resulting customer not found yet
-                aggregated.add(customer);
-            } else {
-                // Resulting customer already exists
-                // Merging supply points for one customer
-                List<SupplyPoint> supplyPoints = new ArrayList<>();
-                supplyPoints.addAll(customerAggregated.getSupplyPoints());
-                supplyPoints.addAll(customer.getSupplyPoints());
-                customerAggregated.setSupplyPoints(supplyPoints);
-            }
-        }
-        return aggregated;
+        Pair<List<String>, String> attributesAndFrom = joinedSelectionAndFrom();
+        String customerIdAttribute = getEntityMapper().getTableName() + "." + VoucherCustomerMapper.id.getAttributeName();
+        return countByOverviewInternal(overview, "COUNT(" + customerIdAttribute + ")", attributesAndFrom.getRight());
     }
 
     /**
      * Returns select clause and from clause for joined customer with voucher data.
      * @return
      */
-    protected Pair<List<String>, String> dbAttributesAndFromWithJoinedVoucher() {
+    protected Pair<List<String>, String> joinedSelectionAndFrom() {
         String customerTable = getEntityMapper().getTableName();
         List<String> customerAttrs = getEntityMapper().getAttributeNamesWithPrefix(customerTable, getEntityMapper().getAliasPrefix());
         String voucherTable = getVoucherMapper().getTableName();
@@ -136,7 +108,7 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepositoryImpl<Vouche
         dbAttributesJoined.addAll(voucherAttrs);
 
         String fromJoined = customerTable +
-                " LEFT JOIN " + voucherTable + " ON (" + customerTable + "." + VoucherCustomerMapper.id + "=" + voucherTable + "." + VoucherMapper.reserved_by + ")";
+            " LEFT JOIN " + voucherTable + " ON (" + customerTable + "." + VoucherCustomerMapper.id + "=" + voucherTable + "." + VoucherMapper.reserved_by + ")";
 
         return Pair.of(dbAttributesJoined, fromJoined);
     }
@@ -179,6 +151,17 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepositoryImpl<Vouche
             }
         }
         return conditions;
+    }
+
+    private VoucherCustomer customerFromAttributeSource(AttributeSource attributeSource) {
+        VoucherCustomer customer = getEntityMapper().buildEntity(attributeSource, getEntityMapper().getAliasPrefix());
+        Voucher voucher = getVoucherMapper().buildEntity(attributeSource, getVoucherMapper().getAliasPrefix());
+
+        // Join the object representation of customer with voucher
+        if (voucher.getId() != null && !voucher.getId().isEmpty()) {
+            customer.setVoucher(voucher);
+        }
+        return customer;
     }
 
     private EntityMapper<Voucher> getVoucherMapper() {

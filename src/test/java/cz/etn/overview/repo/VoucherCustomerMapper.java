@@ -21,7 +21,7 @@ import cz.etn.overview.mapper.EntityMapper;
  * Mapping of voucher customer attributes to database fields.
  * @author Radek Beran
  */
-public enum VoucherCustomerMapper implements AbstractEntityMapper<VoucherCustomer> {
+public enum VoucherCustomerMapper implements AbstractEntityMapper<VoucherCustomer>, AttributeMapping<VoucherCustomer> {
 	
 	id {
 		@Override

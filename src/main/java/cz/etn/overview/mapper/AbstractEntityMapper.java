@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * Base interface for implementing entity mappers.
  * @author Radek Beran
  */
-public interface AbstractEntityMapper<T> extends EntityMapper<T>, AttributeMapping<T> {
+public interface AbstractEntityMapper<T> extends EntityMapper<T> {
 	
 	T createEntity();
 	

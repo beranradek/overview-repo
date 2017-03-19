@@ -19,7 +19,7 @@ import cz.etn.overview.mapper.EntityMapper;
  * Mapping of supply point attributes to database fields.
  * @author Radek Beran
  */
-public enum SupplyPointMapper implements AbstractEntityMapper<SupplyPoint> {
+public enum SupplyPointMapper implements AbstractEntityMapper<SupplyPoint>, AttributeMapping<SupplyPoint> {
 	id {
 		@Override
 		public Object getAttributeValue(SupplyPoint instance) {

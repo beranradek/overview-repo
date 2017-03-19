@@ -19,7 +19,7 @@ import cz.etn.overview.mapper.EntityMapper;
  * Mapping of voucher attributes to database attributes.
  * @author Radek Beran
  */
-public enum VoucherMapper implements AbstractEntityMapper<Voucher> {
+public enum VoucherMapper implements AbstractEntityMapper<Voucher>, AttributeMapping<Voucher> {
 	
 	code {
 		@Override

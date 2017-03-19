@@ -11,13 +11,10 @@ package cz.etn.overview.repo;
 import cz.etn.overview.Filter;
 import cz.etn.overview.domain.Voucher;
 
-import java.util.Optional;
-
 /**
  * Voucher repository.
  * @author Radek Beran
  */
 public interface VoucherRepository extends AbstractRepository<Voucher, String, Filter> {
-
-	Optional<Voucher> findByCode(String code);
+	// nothing new here
 }

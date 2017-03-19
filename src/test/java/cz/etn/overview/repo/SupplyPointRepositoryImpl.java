@@ -34,7 +34,7 @@ public class SupplyPointRepositoryImpl extends AbstractRepositoryImpl<SupplyPoin
 	}
 	
 	@Override
-	public EntityMapper<SupplyPoint> getEntityMapper() {
+	protected EntityMapper<SupplyPoint> getEntityMapper() {
 		return SupplyPointMapper.INSTANCE;
 	}
 
