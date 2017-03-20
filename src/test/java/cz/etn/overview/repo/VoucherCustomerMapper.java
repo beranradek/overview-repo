@@ -17,180 +17,182 @@ import cz.etn.overview.mapper.AttributeMapping;
 import cz.etn.overview.mapper.AttributeSource;
 import cz.etn.overview.mapper.EntityMapper;
 
+import java.time.Instant;
+
 /**
  * Mapping of voucher customer attributes to database fields.
  * @author Radek Beran
  */
-public enum VoucherCustomerMapper implements AbstractEntityMapper<VoucherCustomer>, AttributeMapping<VoucherCustomer> {
+public enum VoucherCustomerMapper implements AbstractEntityMapper<VoucherCustomer>, AttributeMapping<VoucherCustomer, Object> {
 	
 	id {
 		@Override
-		public Object getAttributeValue(VoucherCustomer instance) {
+		public Object getValue(VoucherCustomer instance) {
 			return instance.getId();
 		}
 
 		@Override
 		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setId(attributeSource.getInteger(attributeName));
+			instance.setId(attributeSource.get(Integer.class, attributeName));
 			return instance;
 		}
 		
 		@Override
-		public boolean isPrimaryAttribute() {
+		public boolean isPrimary() {
 			return true;
 		}
-	},
-	creation_time {
-		@Override
-		public Object getAttributeValue(VoucherCustomer instance) {
-			return instance.getCreationTime();
-		}
-		
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setCreationTime(attributeSource.getInstant(attributeName));
-			return instance;
-		}
-	},
-	email {
-		@Override
-		public Object getAttributeValue(VoucherCustomer instance) {
-			return instance.getEmail();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setEmail(attributeSource.getString(attributeName));
-			return instance;
-		}
-	},
-	first_name {
-		@Override
-		public Object getAttributeValue(VoucherCustomer instance) {
-			return instance.getFirstName();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setFirstName(attributeSource.getString(attributeName));
-			return instance;
-		}
-	},
-	last_name {
-		@Override
-		public Object getAttributeValue(VoucherCustomer instance) {
-			return instance.getLastName();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setLastName(attributeSource.getString(attributeName));
-			return instance;
-		}
-	},
-	salutation {
-		@Override
-		public Object getAttributeValue(VoucherCustomer instance) {
-			return instance.getSalutation();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setSalutation(attributeSource.getString(attributeName));
-			return instance;
-		}
-	},
-	business_partner_code {
-		@Override
-		public Object getAttributeValue(VoucherCustomer instance) {
-			return instance.getBusinessPartnerCode();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setBusinessPartnerCode(attributeSource.getString(attributeName));
-			return instance;
-		}
-	},
-	discount_email_type {
-		@Override
-		public Object getAttributeValue(VoucherCustomer instance) {
-			if (instance.getDiscountEmailType() == null) return null;
-			return instance.getDiscountEmailType().name();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			String dbValue = attributeSource.getString(attributeName);
-			DiscountEmailType emailType = null;
-			if (dbValue != null && !dbValue.isEmpty()) {
-				emailType = DiscountEmailType.valueOf(dbValue);
-			}
-			instance.setDiscountEmailType(emailType);
-			return instance;
-		}
-	},
-	email_sent_time {
-		@Override
-		public Object getAttributeValue(VoucherCustomer instance) {
-			return instance.getEmailSentTime();
-		}
-		
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setEmailSentTime(attributeSource.getInstant(attributeName));
-			return instance;
-		}
-	},
-	email_sending_state {
-		@Override
-		public Object getAttributeValue(VoucherCustomer instance) {
-			if (instance.getEmailSendingState() == null) return null;
-			return instance.getEmailSendingState().name();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			String dbValue = attributeSource.getString(attributeName);
-			SendingState emailSendingState = null;
-			if (dbValue != null && !dbValue.isEmpty()) {
-				emailSendingState = SendingState.valueOf(dbValue);
-			}
-			instance.setEmailSendingState(emailSendingState);
-			return instance;
-		}
-	},
-	email_text {
-		@Override
-		public Object getAttributeValue(VoucherCustomer instance) {
-			return instance.getEmailText();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setEmailText(attributeSource.getString(attributeName));
-			return instance;
-		}
-	},
-	import_file_name {
-		@Override
-		public Object getAttributeValue(VoucherCustomer instance) {
-			return instance.getImportFileName();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setImportFileName(attributeSource.getString(attributeName));
-			return instance;
-		}
 	};
+//	creation_time {
+//		@Override
+//		public Object getValue(VoucherCustomer instance) {
+//			return instance.getCreationTime();
+//		}
+//
+//		@Override
+//		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
+//			instance.setCreationTime(attributeSource.get(Instant.class, attributeName));
+//			return instance;
+//		}
+//	},
+//	email {
+//		@Override
+//		public Object getValue(VoucherCustomer instance) {
+//			return instance.getEmail();
+//		}
+//
+//		@Override
+//		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
+//			instance.setEmail(attributeSource.getString(attributeName));
+//			return instance;
+//		}
+//	},
+//	first_name {
+//		@Override
+//		public Object getValue(VoucherCustomer instance) {
+//			return instance.getFirstName();
+//		}
+//
+//		@Override
+//		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
+//			instance.setFirstName(attributeSource.getString(attributeName));
+//			return instance;
+//		}
+//	},
+//	last_name {
+//		@Override
+//		public Object getValue(VoucherCustomer instance) {
+//			return instance.getLastName();
+//		}
+//
+//		@Override
+//		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
+//			instance.setLastName(attributeSource.getString(attributeName));
+//			return instance;
+//		}
+//	},
+//	salutation {
+//		@Override
+//		public Object getValue(VoucherCustomer instance) {
+//			return instance.getSalutation();
+//		}
+//
+//		@Override
+//		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
+//			instance.setSalutation(attributeSource.getString(attributeName));
+//			return instance;
+//		}
+//	},
+//	business_partner_code {
+//		@Override
+//		public Object getValue(VoucherCustomer instance) {
+//			return instance.getBusinessPartnerCode();
+//		}
+//
+//		@Override
+//		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
+//			instance.setBusinessPartnerCode(attributeSource.getString(attributeName));
+//			return instance;
+//		}
+//	},
+//	discount_email_type {
+//		@Override
+//		public Object getValue(VoucherCustomer instance) {
+//			if (instance.getDiscountEmailType() == null) return null;
+//			return instance.getDiscountEmailType().name();
+//		}
+//
+//		@Override
+//		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
+//			String dbValue = attributeSource.getString(attributeName);
+//			DiscountEmailType emailType = null;
+//			if (dbValue != null && !dbValue.isEmpty()) {
+//				emailType = DiscountEmailType.valueOf(dbValue);
+//			}
+//			instance.setDiscountEmailType(emailType);
+//			return instance;
+//		}
+//	},
+//	email_sent_time {
+//		@Override
+//		public Object getValue(VoucherCustomer instance) {
+//			return instance.getEmailSentTime();
+//		}
+//
+//		@Override
+//		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
+//			instance.setEmailSentTime(attributeSource.getInstant(attributeName));
+//			return instance;
+//		}
+//	},
+//	email_sending_state {
+//		@Override
+//		public Object getValue(VoucherCustomer instance) {
+//			if (instance.getEmailSendingState() == null) return null;
+//			return instance.getEmailSendingState().name();
+//		}
+//
+//		@Override
+//		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
+//			String dbValue = attributeSource.getString(attributeName);
+//			SendingState emailSendingState = null;
+//			if (dbValue != null && !dbValue.isEmpty()) {
+//				emailSendingState = SendingState.valueOf(dbValue);
+//			}
+//			instance.setEmailSendingState(emailSendingState);
+//			return instance;
+//		}
+//	},
+//	email_text {
+//		@Override
+//		public Object getValue(VoucherCustomer instance) {
+//			return instance.getEmailText();
+//		}
+//
+//		@Override
+//		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
+//			instance.setEmailText(attributeSource.getString(attributeName));
+//			return instance;
+//		}
+//	},
+//	import_file_name {
+//		@Override
+//		public Object getValue(VoucherCustomer instance) {
+//			return instance.getImportFileName();
+//		}
+//
+//		@Override
+//		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
+//			instance.setImportFileName(attributeSource.getString(attributeName));
+//			return instance;
+//		}
+//	};
 	
 	private static final String DB_TABLE_NAME = "voucher_customer";
 	
 	public static final EntityMapper<VoucherCustomer> INSTANCE = id; // any enum constant will suffice here
 	
 	@Override
-	public AttributeMapping<VoucherCustomer>[] getAttributeMappings() {
+	public AttributeMapping<VoucherCustomer, Object>[] getAttributeMappings() {
 		return values();
 	}
 	
@@ -205,7 +207,7 @@ public enum VoucherCustomerMapper implements AbstractEntityMapper<VoucherCustome
 	}
 	
 	@Override
-	public String getAttributeName() {
+	public String getName() {
 		return name();
 	}
 }

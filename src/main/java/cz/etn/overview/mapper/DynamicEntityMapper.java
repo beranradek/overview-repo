@@ -6,29 +6,30 @@ import java.util.*;
  * Entity mapper with dynamic registration of attributes.
  * @author Radek Beran
  */
-public abstract class DynamicEntityMapper<T> implements AbstractEntityMapper<T> {
+public abstract class DynamicEntityMapper<E> implements AbstractEntityMapper<E> {
 
-    private Map<String, AttributeMapping<T>> attributesByNames;
+    private Map<String, AttributeMapping<E, ?>> attributesByNames;
 
     public DynamicEntityMapper() {
-        this.attributesByNames = new LinkedHashMap<>();
+        attributesByNames = new LinkedHashMap<>();
     }
 
     /**
      * Registers new attribute.
      * @param attribute new attribute (must not be already registered)
      */
-    public synchronized void add(AttributeMapping<T> attribute) {
-        String name = attribute.getAttributeName();
-        if (this.attributesByNames.containsKey(name)) {
+    public synchronized <A> AttributeMapping<E, A> add(AttributeMapping<E, A> attribute) {
+        String name = attribute.getName();
+        if (attributesByNames.containsKey(name)) {
             throw new IllegalStateException("Attribute " + name + " is already registered");
         }
 
-        this.attributesByNames.put(name, attribute);
+        attributesByNames.put(name, attribute);
+        return attribute;
     }
 
     @Override
-    public AttributeMapping<T>[] getAttributeMappings() {
-        return this.attributesByNames.values().toArray(new AttributeMapping[0]);
+    public AttributeMapping<E, ?>[] getAttributeMappings() {
+        return attributesByNames.values().toArray(new AttributeMapping[0]);
     }
 }

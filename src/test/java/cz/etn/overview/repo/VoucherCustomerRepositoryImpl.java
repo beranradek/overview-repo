@@ -89,7 +89,7 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepositoryImpl<Vouche
     @Override
     public int countByOverview(Overview<VoucherCustomerFilter> overview) {
         Pair<List<String>, String> attributesAndFrom = joinedSelectionAndFrom();
-        String customerIdAttribute = getEntityMapper().getTableName() + "." + VoucherCustomerMapper.id.getAttributeName();
+        String customerIdAttribute = getEntityMapper().getTableName() + "." + VoucherCustomerMapper.id.getName();
         return countByOverviewInternal(overview, "COUNT(" + customerIdAttribute + ")", attributesAndFrom.getRight());
     }
 
@@ -123,32 +123,32 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepositoryImpl<Vouche
         List<FilterCondition> conditions = new ArrayList<>();
         String tableName = getEntityMapper().getTableName();
         if (filter != null) {
-            if (filter.getId() != null) {
-                String attrName = tableName + "." + VoucherCustomerMapper.id.getAttributeName();
-                conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getId())));
-            }
-            if (filter.getImportFileName() != null) {
-                String attrName = tableName + "." + VoucherCustomerMapper.import_file_name.getAttributeName();
-                conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getImportFileName())));
-            }
-            if (filter.getSoldBy() != null) {
-                String attrName = VoucherMapper.INSTANCE.getTableName() + "." + VoucherMapper.sold_by.getAttributeName();
-                conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getSoldBy())));
-            }
-            if (filter.getCustomerIds() != null) {
-                if (!filter.getCustomerIds().isEmpty()) {
-                    String attrName = tableName + "." + VoucherCustomerMapper.id.getAttributeName();
-                    conditions.add(new FilterCondition(attrName + " IN (" + Funs.mkString(filter.getCustomerIds(), customerId -> "" + customerId, ", ") + ")", Lists.newArrayList()));
-                } else {
-                    // empty customer ids
-                    conditions.add(new FilterCondition("1=0", Lists.newArrayList()));
-                }
-            }
-            if (filter.getLatestInvoiceOfSeller() != null && filter.getLatestInvoiceOfSeller().booleanValue() && filter.getSoldBy() != null) {
-                String invoiceTimeAttrName = VoucherMapper.INSTANCE.getTableName() + "." + VoucherMapper.invoice_time.getAttributeName();
-                String soldByAttrName = VoucherMapper.INSTANCE.getTableName() + "." + VoucherMapper.sold_by.getAttributeName();
-                conditions.add(new FilterCondition(invoiceTimeAttrName + " IS NOT NULL AND " + invoiceTimeAttrName + "=(SELECT MAX(" + invoiceTimeAttrName + ") FROM " + VoucherMapper.INSTANCE.getTableName() + " WHERE " + soldByAttrName + "=" + filter.getSoldBy() + ")", Lists.newArrayList()));
-            }
+//            if (filter.getId() != null) {
+//                String attrName = tableName + "." + VoucherCustomerMapper.id.getName();
+//                conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getId())));
+//            }
+//            if (filter.getImportFileName() != null) {
+//                String attrName = tableName + "." + VoucherCustomerMapper.import_file_name.getName();
+//                conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getImportFileName())));
+//            }
+//            if (filter.getSoldBy() != null) {
+//                String attrName = VoucherMapper.INSTANCE.getTableName() + "." + VoucherMapper.sold_by.getName();
+//                conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getSoldBy())));
+//            }
+//            if (filter.getCustomerIds() != null) {
+//                if (!filter.getCustomerIds().isEmpty()) {
+//                    String attrName = tableName + "." + VoucherCustomerMapper.id.getName();
+//                    conditions.add(new FilterCondition(attrName + " IN (" + Funs.mkString(filter.getCustomerIds(), customerId -> "" + customerId, ", ") + ")", Lists.newArrayList()));
+//                } else {
+//                    // empty customer ids
+//                    conditions.add(new FilterCondition("1=0", Lists.newArrayList()));
+//                }
+//            }
+//            if (filter.getLatestInvoiceOfSeller() != null && filter.getLatestInvoiceOfSeller().booleanValue() && filter.getSoldBy() != null) {
+//                String invoiceTimeAttrName = VoucherMapper.INSTANCE.getTableName() + "." + VoucherMapper.invoice_time.getName();
+//                String soldByAttrName = VoucherMapper.INSTANCE.getTableName() + "." + VoucherMapper.sold_by.getName();
+//                conditions.add(new FilterCondition(invoiceTimeAttrName + " IS NOT NULL AND " + invoiceTimeAttrName + "=(SELECT MAX(" + invoiceTimeAttrName + ") FROM " + VoucherMapper.INSTANCE.getTableName() + " WHERE " + soldByAttrName + "=" + filter.getSoldBy() + ")", Lists.newArrayList()));
+//            }
         }
         return conditions;
     }

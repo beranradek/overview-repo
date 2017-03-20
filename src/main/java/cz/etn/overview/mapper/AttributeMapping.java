@@ -12,7 +12,7 @@ package cz.etn.overview.mapper;
  * Mapped attribute.
  * @author Radek Beran
  */
-public interface AttributeMapping<T> {
+public interface AttributeMapping<E, A> {
 	/** Separator between prefix and attribute name. */
 	public static final String ATTR_NAME_SEPARATOR = ".";
 
@@ -21,13 +21,13 @@ public interface AttributeMapping<T> {
 	 * @param entity
 	 * @return
      */
-	Object getAttributeValue(T entity);
+	A getValue(E entity);
 
 	/**
 	 * Name of attribute.
 	 * @return
      */
-	String getAttributeName();
+	String getName();
 
 	/**
 	 * Returns instance of entity updated with given attribute.
@@ -36,12 +36,12 @@ public interface AttributeMapping<T> {
 	 * @param attributeName name of attribute that should be used to extract attribute value from given attribute source
      * @return
      */
-	T entityWithAttribute(T entity, AttributeSource attributeSource, String attributeName);
+	E entityWithAttribute(E entity, AttributeSource attributeSource, String attributeName);
 	
-	default String getAttributeName(String alias) {
+	default String getName(String alias) {
 		String attrName = null;
 		if (alias == null || alias.isEmpty()) {
-			attrName = getAttributeName();
+			attrName = getName();
 		} else {
 			attrName = alias;
 		}
@@ -52,7 +52,7 @@ public interface AttributeMapping<T> {
 	 * Whether this database attribute is part of primary key.
 	 * @return
 	 */
-	default boolean isPrimaryAttribute() {
+	default boolean isPrimary() {
 		return false;
 	}
 }
