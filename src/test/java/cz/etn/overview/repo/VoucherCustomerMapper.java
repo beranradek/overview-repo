@@ -9,21 +9,17 @@
 package cz.etn.overview.repo;
 
 
-import cz.etn.overview.domain.DiscountEmailType;
-import cz.etn.overview.domain.SendingState;
 import cz.etn.overview.domain.VoucherCustomer;
 import cz.etn.overview.mapper.AbstractEntityMapper;
-import cz.etn.overview.mapper.AttributeMapping;
+import cz.etn.overview.mapper.Attribute;
 import cz.etn.overview.mapper.AttributeSource;
 import cz.etn.overview.mapper.EntityMapper;
-
-import java.time.Instant;
 
 /**
  * Mapping of voucher customer attributes to database fields.
  * @author Radek Beran
  */
-public enum VoucherCustomerMapper implements AbstractEntityMapper<VoucherCustomer>, AttributeMapping<VoucherCustomer, Object> {
+public enum VoucherCustomerMapper implements AbstractEntityMapper<VoucherCustomer>, Attribute<VoucherCustomer, Object> {
 	
 	id {
 		@Override
@@ -192,7 +188,7 @@ public enum VoucherCustomerMapper implements AbstractEntityMapper<VoucherCustome
 	public static final EntityMapper<VoucherCustomer> INSTANCE = id; // any enum constant will suffice here
 	
 	@Override
-	public AttributeMapping<VoucherCustomer, Object>[] getAttributeMappings() {
+	public Attribute<VoucherCustomer, Object>[] getAttributes() {
 		return values();
 	}
 	

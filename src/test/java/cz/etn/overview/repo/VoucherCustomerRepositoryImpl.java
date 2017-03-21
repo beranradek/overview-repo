@@ -108,7 +108,7 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepositoryImpl<Vouche
         dbAttributesJoined.addAll(voucherAttrs);
 
         String fromJoined = customerTable +
-            " LEFT JOIN " + voucherTable + " ON (" + customerTable + "." + VoucherCustomerMapper.id + "=" + voucherTable + "." + VoucherMapper.reserved_by + ")";
+            " LEFT JOIN " + voucherTable + " ON (" + customerTable + "." + VoucherCustomerMapper.id + "=" + voucherTable + "." + VoucherMapper.RESERVED_BY.getName() + ")";
 
         return Pair.of(dbAttributesJoined, fromJoined);
     }

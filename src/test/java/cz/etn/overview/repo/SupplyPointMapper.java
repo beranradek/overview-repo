@@ -11,7 +11,7 @@ package cz.etn.overview.repo;
 import cz.etn.overview.domain.Address;
 import cz.etn.overview.domain.SupplyPoint;
 import cz.etn.overview.mapper.AbstractEntityMapper;
-import cz.etn.overview.mapper.AttributeMapping;
+import cz.etn.overview.mapper.Attribute;
 import cz.etn.overview.mapper.AttributeSource;
 import cz.etn.overview.mapper.EntityMapper;
 
@@ -19,7 +19,7 @@ import cz.etn.overview.mapper.EntityMapper;
  * Mapping of supply point attributes to database fields.
  * @author Radek Beran
  */
-public enum SupplyPointMapper implements AbstractEntityMapper<SupplyPoint>, AttributeMapping<SupplyPoint, Object> {
+public enum SupplyPointMapper implements AbstractEntityMapper<SupplyPoint>, Attribute<SupplyPoint, Object> {
 	id {
 		@Override
 		public Object getValue(SupplyPoint instance) {
@@ -215,7 +215,7 @@ public enum SupplyPointMapper implements AbstractEntityMapper<SupplyPoint>, Attr
 	public static final EntityMapper<SupplyPoint> INSTANCE = id; // any enum constant will suffice here
 	
 	@Override
-	public AttributeMapping<SupplyPoint, Object>[] getAttributeMappings() {
+	public Attribute<SupplyPoint, Object>[] getAttributes() {
 		return values();
 	}
 

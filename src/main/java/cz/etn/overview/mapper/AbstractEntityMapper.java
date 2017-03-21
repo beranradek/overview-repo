@@ -21,12 +21,12 @@ public interface AbstractEntityMapper<T> extends EntityMapper<T> {
 	
 	T createEntity();
 	
-	AttributeMapping<T, ?>[] getAttributeMappings();
+	Attribute<T, ?>[] getAttributes();
 	
 	@Override
 	default String getPrimaryAttributeName() {
-		AttributeMapping<T, ?> keyAttr = null;
-		for (AttributeMapping<T, ?> con : getAttributeMappings()) {
+		Attribute<T, ?> keyAttr = null;
+		for (Attribute<T, ?> con : getAttributes()) {
 			if (con.isPrimary()) {
 				keyAttr = con;
 				break;
@@ -37,20 +37,20 @@ public interface AbstractEntityMapper<T> extends EntityMapper<T> {
 	
 	@Override
 	default List<String> getAttributeNames() {
-		return Arrays.asList(getAttributeMappings()).stream().map(v -> v.getName()).collect(Collectors.toList());
+		return Arrays.asList(getAttributes()).stream().map(v -> v.getName()).collect(Collectors.toList());
 	}
 	
 	@Override
 	default List<String> getAttributeNamesWithPrefix(String prefix, String aliasPrefix) {
-		return Arrays.asList(getAttributeMappings()).stream()
-			.map(v -> (prefix + AttributeMapping.ATTR_NAME_SEPARATOR + v.getName() + (aliasPrefix != null ? (" AS " + aliasPrefix + v.getName()) : "")))
+		return Arrays.asList(getAttributes()).stream()
+			.map(v -> (prefix + "." + v.getName() + (aliasPrefix != null ? (" AS " + aliasPrefix + v.getName()) : "")))
 			.collect(Collectors.toList());
 	}
 	
 	@Override
 	default List<Object> getAttributeValues(T instance) {
 		List<Object> attrValues = new ArrayList<>();
-		for (AttributeMapping<T, ?> fld : getAttributeMappings()) {
+		for (Attribute<T, ?> fld : getAttributes()) {
 			attrValues.add(fld.getValue(instance));
 		}
 		return attrValues;
@@ -59,7 +59,7 @@ public interface AbstractEntityMapper<T> extends EntityMapper<T> {
 	@Override
 	default Object getPrimaryAttributeValue(T instance) {
 		Object keyAttrValue = null;
-		for (AttributeMapping<T, ?> con : getAttributeMappings()) {
+		for (Attribute<T, ?> con : getAttributes()) {
 			if (con.isPrimary()) {
 				keyAttrValue = con.getValue(instance);
 				break;
@@ -72,7 +72,7 @@ public interface AbstractEntityMapper<T> extends EntityMapper<T> {
 	default T buildEntity(AttributeSource attributeSource, String aliasPrefix) {
 		try {
 			T instance = createEntity();
-			for (AttributeMapping<T, ?> attr : getAttributeMappings()) {
+			for (Attribute<T, ?> attr : getAttributes()) {
 				String alias = null;
 				if (aliasPrefix != null) {
 					alias = aliasPrefix + attr.getName();

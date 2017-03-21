@@ -135,7 +135,7 @@ public abstract class AbstractRepositoryImpl<T extends Identifiable<K>, K, F ext
 	protected abstract EntityMapper<T> getEntityMapper();
 
 	/**
-	 * Should be overriden in subclasses to apply filtering set in input filter.
+	 * Should be overriden in subclasses to apply filtering updatedEntity in input filter.
 	 * @param filter
 	 * @return
 	 */
