@@ -1,6 +1,6 @@
 # ETN-overview
 
-The library ensures **loading overview data** - data with filtering, ordering and pagination settings.
+The library ensures **loading of data with filtering, ordering and pagination settings**.
 It contains **full-featured repository** which can load objects using this filtering, ordering and pagination settings,
 create, update and delete database entities, only with metadata provided by an entity mapper. Library uses plain JDBC and has no dependencies (except the logging api).
 Various repository implementations can be introduced.
