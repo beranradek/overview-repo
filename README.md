@@ -6,10 +6,10 @@ create, update and delete database entities, only with metadata provided by an e
 Various repository implementations can be introduced.
 
 Basic repository implementation uses an **entity mapper** which serves all entity attributes metadata, so the repository is able to construct all the queries
-based on this metadata. Entity mappers can possibly be used also for other transformations of data objects, outside scope of this library.  
+based on this metadata. Entity mappers can possibly be used also for other transformations of data objects, outside the scope of this library.  
 
 ## Planned features
- * Composition of mappers (joins) to allow fetching of 1:0..1 or 1:1 related pageable records with no effort (can be automatized).
+ * Composition of mappers (joins) to allow fetching of 1:0..1 or 1:1 related entities to one composed pageable entity, with almost no effort from user (can be automatized).
  * Storage of new immutable versions of entity instead of updates using version flag on an attribute.
  * CREATE TABLE SQL generated from entity mapper.
  * Cooperation with another data processing libraries that can leverage general, yet simple definition of attributes (generated forms, XLS report from database, ...).
