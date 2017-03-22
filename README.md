@@ -8,6 +8,12 @@ Various repository implementations can be introduced.
 Basic repository implementation uses an entity mapper which serves all entity attributes metadata, so the repository is able to construct all queries
 based on this metadata. Entity mappers can be possibly used also for other transformations of data objects.  
 
+## Planned features
+ * Mapper composition to allow 1:0..1 or 1:1 automatic pageable joins.
+ * Storage of immutable additions instead of updates using version flag on attribute.
+ * CREATE TABLE SQL generating from mapper definition.
+ * Cooperation with another data processing libraries (forms, XLS(X) generating, ...).
+
 ## Running tests
 
 gradlew clean test
