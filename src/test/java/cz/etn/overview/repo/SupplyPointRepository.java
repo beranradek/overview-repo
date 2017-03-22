@@ -17,7 +17,7 @@ import java.util.List;
  * Repository for supply points.
  * @author Radek Beran
  */
-public interface SupplyPointRepository extends AbstractRepository<SupplyPoint, Integer, SupplyPointFilter> {
+public interface SupplyPointRepository extends Repository<SupplyPoint, Integer, SupplyPointFilter> {
 
 	List<SupplyPoint> findByCustomerIds(List<Integer> customerIds);
 }

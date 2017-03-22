@@ -15,6 +15,9 @@ import cz.etn.overview.mapper.Attribute;
 import cz.etn.overview.mapper.AttributeSource;
 import cz.etn.overview.mapper.EntityMapper;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+
 /**
  * Mapping of supply point attributes to database fields.
  * @author Radek Beran
@@ -48,167 +51,167 @@ public enum SupplyPointMapper implements AbstractEntityMapper<SupplyPoint>, Attr
 			instance.setCode(attributeSource.get(String.class, attributeName));
 			return instance;
 		}
+	},
+	address_street {
+		@Override
+		public Object getValue(SupplyPoint instance) {
+			return instance.getAddress() != null ? instance.getAddress().getStreet() : null;
+		}
+
+		@Override
+		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
+			String value = attributeSource.get(String.class, attributeName);
+			if (value != null) {
+				ensureAddressExists(instance);
+				instance.getAddress().setStreet(value);
+			}
+			return instance;
+		}
+	},
+	address_street_number {
+		@Override
+		public Object getValue(SupplyPoint instance) {
+			return instance.getAddress() != null ? instance.getAddress().getStreetNumber() : null;
+		}
+
+		@Override
+		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
+			String value = attributeSource.get(String.class, attributeName);
+			if (value != null) {
+				ensureAddressExists(instance);
+				instance.getAddress().setStreetNumber(value);
+			}
+			return instance;
+		}
+	},
+	address_city {
+		@Override
+		public Object getValue(SupplyPoint instance) {
+			return instance.getAddress() != null ? instance.getAddress().getCity() : null;
+		}
+
+		@Override
+		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
+			String value = attributeSource.get(String.class, attributeName);
+			if (value != null) {
+				ensureAddressExists(instance);
+				instance.getAddress().setCity(value);
+			}
+			return instance;
+		}
+	},
+	address_postal_code {
+		@Override
+		public Object getValue(SupplyPoint instance) {
+			return instance.getAddress() != null ? instance.getAddress().getPostalCode() : null;
+		}
+
+		@Override
+		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
+			String value = attributeSource.get(String.class, attributeName);
+			if (value != null) {
+				ensureAddressExists(instance);
+				instance.getAddress().setPostalCode(value);
+			}
+			return instance;
+		}
+	},
+	customer_id {
+		@Override
+		public Object getValue(SupplyPoint instance) {
+			return instance.getCustomerId();
+		}
+
+		@Override
+		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
+			instance.setCustomerId(attributeSource.get(Long.class, attributeName));
+			return instance;
+		}
+	},
+	creation_time {
+		@Override
+		public Object getValue(SupplyPoint instance) {
+			return instance.getCreationTime();
+		}
+
+		@Override
+		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
+			instance.setCreationTime(attributeSource.get(Instant.class, attributeName));
+			return instance;
+		}
+	},
+	bonus_points {
+		@Override
+		public Object getValue(SupplyPoint instance) {
+			return instance.getBonusPoints();
+		}
+
+		@Override
+		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
+			instance.setBonusPoints(attributeSource.get(Integer.class, attributeName));
+			return instance;
+		}
+	},
+	previous_year_consumption {
+		@Override
+		public Object getValue(SupplyPoint instance) {
+			return instance.getPreviousYearConsumption();
+		}
+
+		@Override
+		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
+			instance.setPreviousYearConsumption(attributeSource.get(BigDecimal.class, attributeName));
+			return instance;
+		}
+	},
+	current_year_consumption {
+		@Override
+		public Object getValue(SupplyPoint instance) {
+			return instance.getCurrentYearConsumption();
+		}
+
+		@Override
+		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
+			instance.setCurrentYearConsumption(attributeSource.get(BigDecimal.class, attributeName));
+			return instance;
+		}
+	},
+	consumption_diff {
+		@Override
+		public Object getValue(SupplyPoint instance) {
+			return instance.getConsumptionDiff();
+		}
+
+		@Override
+		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
+			instance.setConsumptionDiff(attributeSource.get(BigDecimal.class, attributeName));
+			return instance;
+		}
+	},
+	voucher_discount {
+		@Override
+		public Object getValue(SupplyPoint instance) {
+			return instance.getVoucherDiscount();
+		}
+
+		@Override
+		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
+			instance.setVoucherDiscount(attributeSource.get(BigDecimal.class, attributeName));
+			return instance;
+		}
+	},
+	benefit_years {
+		@Override
+		public Object getValue(SupplyPoint instance) {
+			return instance.getBenefitYears();
+		}
+
+		@Override
+		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
+			instance.setBenefitYears(attributeSource.get(Integer.class, attributeName));
+			return instance;
+		}
 	};
-//	address_street {
-//		@Override
-//		public Object getValue(SupplyPoint instance) {
-//			return instance.getAddress() != null ? instance.getAddress().getStreet() : null;
-//		}
-//
-//		@Override
-//		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
-//			String value = attributeSource.getString(attributeName);
-//			if (value != null) {
-//				ensureAddressExists(instance);
-//				instance.getAddress().setStreet(value);
-//			}
-//			return instance;
-//		}
-//	},
-//	address_street_number {
-//		@Override
-//		public Object getValue(SupplyPoint instance) {
-//			return instance.getAddress() != null ? instance.getAddress().getStreetNumber() : null;
-//		}
-//
-//		@Override
-//		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
-//			String value = attributeSource.getString(attributeName);
-//			if (value != null) {
-//				ensureAddressExists(instance);
-//				instance.getAddress().setStreetNumber(value);
-//			}
-//			return instance;
-//		}
-//	},
-//	address_city {
-//		@Override
-//		public Object getValue(SupplyPoint instance) {
-//			return instance.getAddress() != null ? instance.getAddress().getCity() : null;
-//		}
-//
-//		@Override
-//		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
-//			String value = attributeSource.getString(attributeName);
-//			if (value != null) {
-//				ensureAddressExists(instance);
-//				instance.getAddress().setCity(value);
-//			}
-//			return instance;
-//		}
-//	},
-//	address_postal_code {
-//		@Override
-//		public Object getValue(SupplyPoint instance) {
-//			return instance.getAddress() != null ? instance.getAddress().getPostalCode() : null;
-//		}
-//
-//		@Override
-//		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
-//			String value = attributeSource.getString(attributeName);
-//			if (value != null) {
-//				ensureAddressExists(instance);
-//				instance.getAddress().setPostalCode(value);
-//			}
-//			return instance;
-//		}
-//	},
-//	customer_id {
-//		@Override
-//		public Object getValue(SupplyPoint instance) {
-//			return instance.getCustomerId();
-//		}
-//
-//		@Override
-//		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
-//			instance.setCustomerId(attributeSource.getLong(attributeName));
-//			return instance;
-//		}
-//	},
-//	creation_time {
-//		@Override
-//		public Object getValue(SupplyPoint instance) {
-//			return instance.getCreationTime();
-//		}
-//
-//		@Override
-//		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
-//			instance.setCreationTime(attributeSource.getInstant(attributeName));
-//			return instance;
-//		}
-//	},
-//	bonus_points {
-//		@Override
-//		public Object getValue(SupplyPoint instance) {
-//			return instance.getBonusPoints();
-//		}
-//
-//		@Override
-//		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
-//			instance.setBonusPoints(attributeSource.getInteger(attributeName));
-//			return instance;
-//		}
-//	},
-//	previous_year_consumption {
-//		@Override
-//		public Object getValue(SupplyPoint instance) {
-//			return instance.getPreviousYearConsumption();
-//		}
-//
-//		@Override
-//		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
-//			instance.setPreviousYearConsumption(attributeSource.getBigDecimal(attributeName));
-//			return instance;
-//		}
-//	},
-//	current_year_consumption {
-//		@Override
-//		public Object getValue(SupplyPoint instance) {
-//			return instance.getCurrentYearConsumption();
-//		}
-//
-//		@Override
-//		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
-//			instance.setCurrentYearConsumption(attributeSource.getBigDecimal(attributeName));
-//			return instance;
-//		}
-//	},
-//	consumption_diff {
-//		@Override
-//		public Object getValue(SupplyPoint instance) {
-//			return instance.getConsumptionDiff();
-//		}
-//
-//		@Override
-//		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
-//			instance.setConsumptionDiff(attributeSource.getBigDecimal(attributeName));
-//			return instance;
-//		}
-//	},
-//	voucher_discount {
-//		@Override
-//		public Object getValue(SupplyPoint instance) {
-//			return instance.getVoucherDiscount();
-//		}
-//
-//		@Override
-//		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
-//			instance.setVoucherDiscount(attributeSource.getBigDecimal(attributeName));
-//			return instance;
-//		}
-//	},
-//	benefit_years {
-//		@Override
-//		public Object getValue(SupplyPoint instance) {
-//			return instance.getBenefitYears();
-//		}
-//
-//		@Override
-//		public SupplyPoint entityWithAttribute(SupplyPoint instance, AttributeSource attributeSource, String attributeName) {
-//			instance.setBenefitYears(attributeSource.getInteger(attributeName));
-//			return instance;
-//		}
-//	};
 	
 	private static final String DB_TABLE_NAME = "voucher_supply_point";
 	
@@ -220,7 +223,7 @@ public enum SupplyPointMapper implements AbstractEntityMapper<SupplyPoint>, Attr
 	}
 
 	@Override
-	public String getTableName() {
+	public String getDataSet() {
 		return DB_TABLE_NAME;
 	}
 	

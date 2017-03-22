@@ -15,6 +15,6 @@ import cz.etn.overview.domain.Voucher;
  * Voucher repository.
  * @author Radek Beran
  */
-public interface VoucherRepository extends AbstractRepository<Voucher, String, Filter> {
+public interface VoucherRepository extends Repository<Voucher, String, Filter> {
 	// nothing new here
 }

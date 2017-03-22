@@ -19,7 +19,7 @@ import javax.sql.DataSource;
  * Default implementation of {@link VoucherRepository}. 
  * @author Radek Beran
  */
-public class VoucherRepositoryImpl extends AbstractRepositoryImpl<Voucher, String, Filter> implements VoucherRepository {
+public class VoucherRepositoryImpl extends AbstractRepository<Voucher, String, Filter> implements VoucherRepository {
 	
 	private final DataSource dataSource;
 

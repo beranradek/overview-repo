@@ -10,11 +10,12 @@ package cz.etn.overview.repo.inmemory;
 
 import cz.etn.overview.Filter;
 import cz.etn.overview.domain.Identifiable;
+import cz.etn.overview.repo.Repository;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Basic abstract in-memory implementation of {@link cz.etn.overview.repo.AbstractRepository} with Long key.
+ * Basic abstract in-memory implementation of {@link Repository} with Long key.
  * @author Radek Beran
  */
 public abstract class InMemoryLongKeyRepository<T extends Identifiable<Long>, F extends Filter> extends InMemoryRepository<T, Long, F> {

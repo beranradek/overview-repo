@@ -27,7 +27,7 @@ import java.util.Optional;
  * Default implementation of {@link VoucherCustomerRepository}.
  * @author Radek Beran
  */
-public class VoucherCustomerRepositoryImpl extends AbstractRepositoryImpl<VoucherCustomer, Integer, VoucherCustomerFilter> implements VoucherCustomerRepository {
+public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCustomer, Integer, VoucherCustomerFilter> implements VoucherCustomerRepository {
 
     private final DataSource dataSource;
 
@@ -89,7 +89,7 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepositoryImpl<Vouche
     @Override
     public int countByOverview(Overview<VoucherCustomerFilter> overview) {
         Pair<List<String>, String> attributesAndFrom = joinedSelectionAndFrom();
-        String customerIdAttribute = getEntityMapper().getTableName() + "." + VoucherCustomerMapper.id.getName();
+        String customerIdAttribute = getEntityMapper().getDataSet() + "." + VoucherCustomerMapper.id.getName();
         return countByOverviewInternal(overview, "COUNT(" + customerIdAttribute + ")", attributesAndFrom.getRight());
     }
 
@@ -98,17 +98,17 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepositoryImpl<Vouche
      * @return
      */
     protected Pair<List<String>, String> joinedSelectionAndFrom() {
-        String customerTable = getEntityMapper().getTableName();
-        List<String> customerAttrs = getEntityMapper().getAttributeNamesWithPrefix(customerTable, getEntityMapper().getAliasPrefix());
-        String voucherTable = getVoucherMapper().getTableName();
+        String dataSet = getEntityMapper().getDataSet();
+        List<String> customerAttrs = getEntityMapper().getAttributeNamesWithPrefix(dataSet, getEntityMapper().getAliasPrefix());
+        String voucherTable = getVoucherMapper().getDataSet();
         List<String> voucherAttrs = getVoucherMapper().getAttributeNamesWithPrefix(voucherTable, getVoucherMapper().getAliasPrefix());
 
         List<String> dbAttributesJoined = new ArrayList<>();
         dbAttributesJoined.addAll(customerAttrs);
         dbAttributesJoined.addAll(voucherAttrs);
 
-        String fromJoined = customerTable +
-            " LEFT JOIN " + voucherTable + " ON (" + customerTable + "." + VoucherCustomerMapper.id + "=" + voucherTable + "." + VoucherMapper.RESERVED_BY.getName() + ")";
+        String fromJoined = dataSet +
+            " LEFT JOIN " + voucherTable + " ON (" + dataSet + "." + VoucherCustomerMapper.id + "=" + voucherTable + "." + VoucherMapper.RESERVED_BY.getName() + ")";
 
         return Pair.of(dbAttributesJoined, fromJoined);
     }
@@ -121,34 +121,34 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepositoryImpl<Vouche
     @Override
     public List<FilterCondition> composeFilterConditions(VoucherCustomerFilter filter) {
         List<FilterCondition> conditions = new ArrayList<>();
-        String tableName = getEntityMapper().getTableName();
+        String dataSet = getEntityMapper().getDataSet();
         if (filter != null) {
-//            if (filter.getId() != null) {
-//                String attrName = tableName + "." + VoucherCustomerMapper.id.getName();
-//                conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getId())));
-//            }
-//            if (filter.getImportFileName() != null) {
-//                String attrName = tableName + "." + VoucherCustomerMapper.import_file_name.getName();
-//                conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getImportFileName())));
-//            }
-//            if (filter.getSoldBy() != null) {
-//                String attrName = VoucherMapper.INSTANCE.getTableName() + "." + VoucherMapper.sold_by.getName();
-//                conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getSoldBy())));
-//            }
-//            if (filter.getCustomerIds() != null) {
-//                if (!filter.getCustomerIds().isEmpty()) {
-//                    String attrName = tableName + "." + VoucherCustomerMapper.id.getName();
-//                    conditions.add(new FilterCondition(attrName + " IN (" + Funs.mkString(filter.getCustomerIds(), customerId -> "" + customerId, ", ") + ")", Lists.newArrayList()));
-//                } else {
-//                    // empty customer ids
-//                    conditions.add(new FilterCondition("1=0", Lists.newArrayList()));
-//                }
-//            }
-//            if (filter.getLatestInvoiceOfSeller() != null && filter.getLatestInvoiceOfSeller().booleanValue() && filter.getSoldBy() != null) {
-//                String invoiceTimeAttrName = VoucherMapper.INSTANCE.getTableName() + "." + VoucherMapper.invoice_time.getName();
-//                String soldByAttrName = VoucherMapper.INSTANCE.getTableName() + "." + VoucherMapper.sold_by.getName();
-//                conditions.add(new FilterCondition(invoiceTimeAttrName + " IS NOT NULL AND " + invoiceTimeAttrName + "=(SELECT MAX(" + invoiceTimeAttrName + ") FROM " + VoucherMapper.INSTANCE.getTableName() + " WHERE " + soldByAttrName + "=" + filter.getSoldBy() + ")", Lists.newArrayList()));
-//            }
+            if (filter.getId() != null) {
+                String attrName = dataSet + "." + VoucherCustomerMapper.id.getName();
+                conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getId())));
+            }
+            if (filter.getImportFileName() != null) {
+                String attrName = dataSet + "." + VoucherCustomerMapper.import_file_name.getName();
+                conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getImportFileName())));
+            }
+            if (filter.getSoldBy() != null) {
+                String attrName = VoucherMapper.INSTANCE.getDataSet() + "." + VoucherMapper.SOLD_BY.getName();
+                conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getSoldBy())));
+            }
+            if (filter.getCustomerIds() != null) {
+                if (!filter.getCustomerIds().isEmpty()) {
+                    String attrName = dataSet + "." + VoucherCustomerMapper.id.getName();
+                    conditions.add(new FilterCondition(attrName + " IN (" + Funs.mkString(filter.getCustomerIds(), customerId -> "" + customerId, ", ") + ")", Lists.newArrayList()));
+                } else {
+                    // empty customer ids
+                    conditions.add(new FilterCondition("1=0", Lists.newArrayList()));
+                }
+            }
+            if (filter.getLatestInvoiceOfSeller() != null && filter.getLatestInvoiceOfSeller().booleanValue() && filter.getSoldBy() != null) {
+                String invoiceTimeAttrName = VoucherMapper.INSTANCE.getDataSet() + "." + VoucherMapper.INVOICE_TIME.getName();
+                String soldByAttrName = VoucherMapper.INSTANCE.getDataSet() + "." + VoucherMapper.SOLD_BY.getName();
+                conditions.add(new FilterCondition(invoiceTimeAttrName + " IS NOT NULL AND " + invoiceTimeAttrName + "=(SELECT MAX(" + invoiceTimeAttrName + ") FROM " + VoucherMapper.INSTANCE.getDataSet() + " WHERE " + soldByAttrName + "=" + filter.getSoldBy() + ")", Lists.newArrayList()));
+            }
         }
         return conditions;
     }

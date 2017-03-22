@@ -21,15 +21,19 @@ import java.util.stream.Collectors;
  * @author Radek Beran
  */
 public interface EntityMapper<T> {
-	
-	String getTableName();
+
+	/**
+	 * Name of database table/collection that contains entities.
+	 * @return
+     */
+	String getDataSet();
 	
 	/**
 	 * Returns string that can be used to prefix all database attribute names for mapped entity to gain unique aliases.
 	 * @return
 	 */
 	default String getAliasPrefix() {
-		return getTableName() + "_";
+		return getDataSet() + "_";
 	}
 	
 	/**
