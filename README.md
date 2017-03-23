@@ -8,6 +8,13 @@ Various repository implementations can be introduced.
 Basic repository implementation uses an **entity mapper** which serves all entity attributes metadata, so the repository is able to construct all the queries
 based on this metadata. Entity mappers can possibly be used also for other transformations of data objects, outside the scope of this library.  
 
+## Quick start example
+
+TODO: For now, just see
+ * [VoucherMapper](https://git.etnetera.cz/etn-libs/etn-overview/blob/master/src/test/java/cz/etn/overview/repo/VoucherMapper.java)
+ * [VoucherRepository](https://git.etnetera.cz/etn-libs/etn-overview/blob/master/src/test/java/cz/etn/overview/repo/VoucherRepository.java)
+ * [VoucherRepositoryImpl](https://git.etnetera.cz/etn-libs/etn-overview/blob/master/src/test/java/cz/etn/overview/repo/VoucherRepositoryImpl.java)
+
 ## Planned features
  * Composition of mappers (joins) to allow fetching of 1:0..1 or 1:1 related entities to one composed pageable entity, with almost no effort from user (can be automatized).
  * Storage of new immutable versions of entity instead of updates, using version flag on an attribute.
