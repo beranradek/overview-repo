@@ -10,11 +10,13 @@ based on this metadata. Entity mappers can possibly be used also for other trans
 
 ## Quick start example
 
-TODO: For now, just see
+TODO
+
+For now, just see:
  * [VoucherMapper](https://git.etnetera.cz/etn-libs/etn-overview/blob/master/src/test/java/cz/etn/overview/repo/VoucherMapper.java)
  * [VoucherRepository](https://git.etnetera.cz/etn-libs/etn-overview/blob/master/src/test/java/cz/etn/overview/repo/VoucherRepository.java)
  * [VoucherRepositoryImpl](https://git.etnetera.cz/etn-libs/etn-overview/blob/master/src/test/java/cz/etn/overview/repo/VoucherRepositoryImpl.java)
- * Methods in repository that you will gain (repo interface): [Repository](https://git.etnetera.cz/etn-libs/etn-overview/blob/master/src/main/java/cz/etn/overview/repo/Repository.java)
+ * Methods in repository that you will gain implemented (repo interface): [Repository](https://git.etnetera.cz/etn-libs/etn-overview/blob/master/src/main/java/cz/etn/overview/repo/Repository.java)
 
 ## Planned features
  * Composition of mappers (joins) to allow fetching of 1:0..1 or 1:1 related entities to one composed pageable entity, with almost no effort from user (can be automatized).
