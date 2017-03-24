@@ -34,5 +34,5 @@ gradlew clean uploadArchives
 
 ## Releasing artifact
 
-* Increase version in gradle.properties
 * gradlew clean release
+* Increase version in gradle.properties to next version
