@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.3] - 2017-03-24
+- Default implementation of createInternal and updateInternal in AbstractRepositoryImpl.
+- DynamicEntityMapper and Attr as Attribute builder/attribute API entry point.
+- Tests
+
 ## [1.0.2] - 2017-03-14
 - Simplified AttributeMapping contract
 
