@@ -86,8 +86,8 @@ public abstract class InMemoryRepository<T extends Identifiable<K>, K, F extends
 	}
 
 	@Override
-	public int countByOverview(Overview<F> overview) {
-		if (overview.getFilter() != null) {
+	public int countByFilter(F filter) {
+		if (filter != null) {
 			throw new UnsupportedOperationException("Filtering not supported by generic in-memory implementation");
 		}
 		return records.size();

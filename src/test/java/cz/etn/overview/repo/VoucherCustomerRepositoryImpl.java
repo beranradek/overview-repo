@@ -87,10 +87,10 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
      * Computes customers count including applied conditions on joined voucher and supply points data.
      */
     @Override
-    public int countByOverview(Overview<VoucherCustomerFilter> overview) {
+    public int countByFilter(VoucherCustomerFilter filter) {
         Pair<List<String>, String> attributesAndFrom = joinedSelectionAndFrom();
         String customerIdAttribute = getEntityMapper().getDataSet() + "." + VoucherCustomerMapper.id.getName();
-        return countByOverviewInternal(overview, "COUNT(" + customerIdAttribute + ")", attributesAndFrom.getRight());
+        return countByFilterInternal(filter, "COUNT(" + customerIdAttribute + ")", attributesAndFrom.getRight());
     }
 
     /**

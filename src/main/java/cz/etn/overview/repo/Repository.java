@@ -43,6 +43,13 @@ public interface Repository<T, K, F extends Filter> {
 	 * @return
 	 */
 	boolean delete(K id);
+
+	/**
+	 * Deletes entity by given filter. Be aware to set the correct filter!
+	 * @param filter
+	 * @return count of deleted entities
+     */
+	int deleteByFilter(F filter);
 	
 	/**
 	 * Finds entity by given id.
@@ -57,22 +64,13 @@ public interface Repository<T, K, F extends Filter> {
 	 * @return
 	 */
 	List<T> findByOverview(Overview<F> overview);
-	
-	/**
-	 * Returns total count of results for filtering settings in given overview.
-	 * @param overview
-	 * @return
-	 */
-	int countByOverview(Overview<F> overview);
 
 	/**
 	 * Returns total count of results for given filter.
 	 * @param filter
 	 * @return
 	 */
-	default int countByFilter(F filter) {
-		return countByOverview(new Overview<>(filter, null, null));
-	}
+	int countByFilter(F filter);
 
 	/**
 	 * Returns results for given filtering and sorting settings.
@@ -103,7 +101,7 @@ public interface Repository<T, K, F extends Filter> {
 	default ResultsWithOverview<T, F> findResultsWithOverview(Overview<F> overview) {
 		List<T> results = findByOverview(overview);
 		// Total count of records regardless of page limit
-		int totalCount = countByOverview(overview);
+		int totalCount = countByFilter(overview.getFilter());
 		return new ResultsWithOverview<>(results, overview.withPagination(overview.getPagination().withTotalCount(totalCount)));
 	}
 }

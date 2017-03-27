@@ -110,7 +110,25 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 			return updatedCount == 1;
 		});
 	}
-	
+
+	@Override
+	public int deleteByFilter(F filter) {
+		Objects.requireNonNull(filter, "filter should be specified");
+		return withNewConnection(conn -> {
+			String from = getEntityMapper().getDataSet();
+			StringBuilder sqlBuilder = new StringBuilder("DELETE FROM " + from);
+			List<Object> parameters = appendFilter(sqlBuilder, composeFilterConditions(filter));
+			return updateInternal(conn, sqlBuilder.toString(), parameters);
+		});
+	}
+
+	@Override
+	public int countByFilter(F filter) {
+		String selection = "COUNT(*)";
+		String from = getEntityMapper().getDataSet();
+		return countByFilterInternal(filter, selection, from);
+	}
+
 	@Override
 	public Optional<T> findById(K id) {
 		return findByAttributeValue(getEntityMapper().getPrimaryAttributeName(), id);
@@ -121,13 +139,6 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 		List<String> attributeNames = getEntityMapper().getAttributeNames();
 		String from = getEntityMapper().getDataSet();
 		return findByOverviewInternal(overview, attributeNames, from, rs -> getEntityMapper().buildEntity(rs));
-	}
-	
-	@Override
-	public int countByOverview(final Overview<F> overview) {
-		String selection = "COUNT(*)";
-		String from = getEntityMapper().getDataSet();
-		return countByOverviewInternal(overview, selection, from);
 	}
 
 	protected abstract DataSource getDataSource();
@@ -167,34 +178,47 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 	}
 	
 	/**
-	 * @param overview
+	 * @param filter
 	 * @param selection
 	 * @param from
 	 * @return
 	 */
-	protected int countByOverviewInternal(final Overview<F> overview, String selection, String from) {
-		Objects.requireNonNull(overview, "overview should be specified");
-		return withNewConnection(conn -> queryCount(conn, selection, from, overview.getFilter()));
+	protected int countByFilterInternal(final F filter, String selection, String from) {
+		return withNewConnection(conn -> queryCount(conn, selection, from, filter));
 	}
 	
 	protected <U> U withNewConnection(CheckedFunction<Connection, U> queryData) {
-		try (Connection conn = getDataSource().getConnection()) {
-			U result = queryData.apply(conn);
-			handleCommit(conn);
-			return result;
+		Connection conn = null;
+		boolean success = false;
+		U result = null;
+		try {
+			conn = getDataSource().getConnection();
+			result = queryData.apply(conn);
+			success = true;
 		} catch (Exception ex) {
 			throw new RuntimeException(ex.getMessage(), ex);
-		}
-	}
-	
-	protected void handleCommit(Connection conn) {
-		try {
-			if (!conn.getAutoCommit()) {
-				conn.commit();
+		} finally {
+			if (conn != null) {
+				try {
+					if (!conn.getAutoCommit()) {
+						if (success) {
+							conn.commit();
+						} else {
+							conn.rollback();
+						}
+					}
+				} catch (SQLException ex) {
+					throw new RuntimeException(ex.getMessage(), ex);
+				} finally {
+					try {
+						conn.close();
+					} catch (SQLException e) {
+						throw new RuntimeException(e.getMessage(), e);
+					}
+				}
 			}
-		} catch (SQLException ex) {
-			throw new RuntimeException(ex.getMessage(), ex);
 		}
+		return result;
 	}
 	
 	protected <U> Optional<T> findByAttributeValue(String attrName, U attrValue) {
