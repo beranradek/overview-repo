@@ -14,7 +14,6 @@ import cz.etn.overview.Overview;
 import cz.etn.overview.common.Funs;
 import cz.etn.overview.domain.*;
 import cz.etn.overview.mapper.AttributeSource;
-import cz.etn.overview.mapper.EntityMapper;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.sql.DataSource;
@@ -39,7 +38,7 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
     }
 
     @Override
-    protected EntityMapper<VoucherCustomer> getEntityMapper() {
+    protected VoucherCustomerMapper getEntityMapper() {
         return VoucherCustomerMapper.INSTANCE;
     }
 
@@ -89,7 +88,7 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
     @Override
     public int countByFilter(VoucherCustomerFilter filter) {
         Pair<List<String>, String> attributesAndFrom = joinedSelectionAndFrom();
-        String customerIdAttribute = getEntityMapper().getDataSet() + "." + VoucherCustomerMapper.id.getName();
+        String customerIdAttribute = getEntityMapper().getDataSet() + "." + getEntityMapper().id.getName();
         return countByFilterInternal(filter, "COUNT(" + customerIdAttribute + ")", attributesAndFrom.getRight());
     }
 
@@ -98,17 +97,13 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
      * @return
      */
     protected Pair<List<String>, String> joinedSelectionAndFrom() {
-        String dataSet = getEntityMapper().getDataSet();
-        List<String> customerAttrs = getEntityMapper().getAttributeNamesWithPrefix(dataSet, getEntityMapper().getAliasPrefix());
-        String voucherTable = getVoucherMapper().getDataSet();
-        List<String> voucherAttrs = getVoucherMapper().getAttributeNamesWithPrefix(voucherTable, getVoucherMapper().getAliasPrefix());
-
         List<String> dbAttributesJoined = new ArrayList<>();
-        dbAttributesJoined.addAll(customerAttrs);
-        dbAttributesJoined.addAll(voucherAttrs);
+        dbAttributesJoined.addAll(getEntityMapper().getAttributeNamesFullAliased());
+        dbAttributesJoined.addAll(getVoucherMapper().getAttributeNamesFullAliased());
 
-        String fromJoined = dataSet +
-            " LEFT JOIN " + voucherTable + " ON (" + dataSet + "." + VoucherCustomerMapper.id + "=" + voucherTable + "." + VoucherMapper.RESERVED_BY.getName() + ")";
+        String fromJoined = getEntityMapper().getDataSet() +
+            " LEFT JOIN " + getVoucherMapper().getDataSet() +
+            " ON (" + getEntityMapper().getDataSet() + "." + getEntityMapper().id + "=" + getVoucherMapper().getDataSet() + "." + getVoucherMapper().reserved_by.getName() + ")";
 
         return Pair.of(dbAttributesJoined, fromJoined);
     }
@@ -121,23 +116,23 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
     @Override
     public List<FilterCondition> composeFilterConditions(VoucherCustomerFilter filter) {
         List<FilterCondition> conditions = new ArrayList<>();
-        String dataSet = getEntityMapper().getDataSet();
         if (filter != null) {
+            String dataSet = getEntityMapper().getDataSet();
             if (filter.getId() != null) {
-                String attrName = dataSet + "." + VoucherCustomerMapper.id.getName();
+                String attrName = dataSet + "." + getEntityMapper().id.getName();
                 conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getId())));
             }
             if (filter.getImportFileName() != null) {
-                String attrName = dataSet + "." + VoucherCustomerMapper.import_file_name.getName();
+                String attrName = dataSet + "." + getEntityMapper().import_file_name.getName();
                 conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getImportFileName())));
             }
             if (filter.getSoldBy() != null) {
-                String attrName = VoucherMapper.INSTANCE.getDataSet() + "." + VoucherMapper.SOLD_BY.getName();
+                String attrName = getVoucherMapper().getDataSet() + "." + getVoucherMapper().sold_by.getName();
                 conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getSoldBy())));
             }
             if (filter.getCustomerIds() != null) {
                 if (!filter.getCustomerIds().isEmpty()) {
-                    String attrName = dataSet + "." + VoucherCustomerMapper.id.getName();
+                    String attrName = dataSet + "." + getEntityMapper().id.getName();
                     conditions.add(new FilterCondition(attrName + " IN (" + Funs.mkString(filter.getCustomerIds(), customerId -> "" + customerId, ", ") + ")", Lists.newArrayList()));
                 } else {
                     // empty customer ids
@@ -145,9 +140,10 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
                 }
             }
             if (filter.getLatestInvoiceOfSeller() != null && filter.getLatestInvoiceOfSeller().booleanValue() && filter.getSoldBy() != null) {
-                String invoiceTimeAttrName = VoucherMapper.INSTANCE.getDataSet() + "." + VoucherMapper.INVOICE_TIME.getName();
-                String soldByAttrName = VoucherMapper.INSTANCE.getDataSet() + "." + VoucherMapper.SOLD_BY.getName();
-                conditions.add(new FilterCondition(invoiceTimeAttrName + " IS NOT NULL AND " + invoiceTimeAttrName + "=(SELECT MAX(" + invoiceTimeAttrName + ") FROM " + VoucherMapper.INSTANCE.getDataSet() + " WHERE " + soldByAttrName + "=" + filter.getSoldBy() + ")", Lists.newArrayList()));
+                String invoiceTimeAttrName = getVoucherMapper().getDataSet() + "." + getVoucherMapper().invoice_time.getName();
+                String soldByAttrName = getVoucherMapper().getDataSet() + "." + getVoucherMapper().sold_by.getName();
+                conditions.add(new FilterCondition(invoiceTimeAttrName + " IS NOT NULL AND " + invoiceTimeAttrName + "=(SELECT MAX(" + invoiceTimeAttrName + ") FROM " + getVoucherMapper().getDataSet() +
+                    " WHERE " + soldByAttrName + "=" + filter.getSoldBy() + ")", Lists.newArrayList()));
             }
         }
         return conditions;
@@ -164,7 +160,7 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
         return customer;
     }
 
-    private EntityMapper<Voucher> getVoucherMapper() {
-        return VoucherMapper.INSTANCE;
+    private VoucherMapper getVoucherMapper() {
+        return VoucherMapper.getInstance();
     }
 }

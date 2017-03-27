@@ -36,6 +36,10 @@ public interface Repository<T, K, F extends Filter> {
 	 * @return data of entity after update
 	 */
 	Optional<T> update(T entity);
+
+	// TODO RBe: Partial update method accepting function that returns updated entity.
+
+	// TODO RBe: Support for update of entity by creating new immutable record with new version.
 	
 	/**
 	 * Deletes entity with given id. Returns true if entity was successfully deleted.

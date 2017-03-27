@@ -49,14 +49,6 @@ public interface EntityMapper<T> {
 	List<String> getAttributeNames();
 	
 	/**
-	 * Returns names of database attributes with given prefix.
-	 * @param tableName
-	 * @param aliasPrefix
-	 * @return
-	 */
-	List<String> getAttributeNamesWithPrefix(String tableName, String aliasPrefix);
-	
-	/**
 	 * Extracts values for database attributes from given entity instance.
 	 * @param instance
 	 * @return
@@ -69,6 +61,12 @@ public interface EntityMapper<T> {
 	 * @return
 	 */
 	Object getPrimaryAttributeValue(T instance);
+
+	/**
+	 * Returns full attribute names with aliases that can be used to extract attribute values from {@link AttributeSource}.
+	 * @return
+     */
+	List<String> getAttributeNamesFullAliased();
 	
 	/**
 	 * Builds new data entity from attribute source.
@@ -89,10 +87,6 @@ public interface EntityMapper<T> {
 	
 	default String getAttributeNamesCommaSeparated() {
 		return CollectionFuns.join(getAttributeNames(), ",");
-	}
-	
-	default String getAttributeNamesCommaSeparatedWithPrefix(String tableName, String aliasPrefix) {
-		return CollectionFuns.join(getAttributeNamesWithPrefix(tableName, aliasPrefix), ",");
 	}
 	
 	/** Returns string with comma-separated question marks, one for each database column name. */

@@ -8,25 +8,27 @@ import java.util.*;
  */
 public abstract class DynamicEntityMapper<E> implements AbstractEntityMapper<E> {
 
-    private static Map<String, Attribute<?, ?>> attributesByNames;
+    private final Map<String, Attribute<?, ?>> attributesByNames;
 
-    static {
+    public DynamicEntityMapper() {
         attributesByNames = new LinkedHashMap<>();
     }
 
     /**
      * Registers new attribute.
+     * This method is an instance method (not a static one) so the mapper implementations can inject various components.
      * @param attributeBuilder filled builder of new attribute (attribute must not be already registered)
      */
-    public static synchronized <U, V> Attribute<U, V> add(Attr.Builder<U, V> attributeBuilder) {
+    public synchronized <U, V> Attribute<U, V> add(Attr.Builder<U, V> attributeBuilder) {
         return add(attributeBuilder.build());
     }
 
     /**
      * Registers new attribute.
+     * This method is an instance method (not a static one) so the mapper implementations can inject various components.
      * @param attribute new attribute (attribute must not be already registered)
      */
-    public static synchronized <U, V> Attribute<U, V> add(Attribute<U, V> attribute) {
+    public synchronized <U, V> Attribute<U, V> add(Attribute<U, V> attribute) {
         String name = attribute.getName();
         if (attributesByNames.containsKey(name)) {
             throw new IllegalStateException("Attribute " + name + " is already registered");

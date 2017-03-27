@@ -39,9 +39,11 @@ public interface AbstractEntityMapper<T> extends EntityMapper<T> {
 	default List<String> getAttributeNames() {
 		return Arrays.asList(getAttributes()).stream().map(v -> v.getName()).collect(Collectors.toList());
 	}
-	
+
 	@Override
-	default List<String> getAttributeNamesWithPrefix(String prefix, String aliasPrefix) {
+	default List<String> getAttributeNamesFullAliased() {
+		String prefix = getDataSet();
+		String aliasPrefix = getAliasPrefix();
 		return Arrays.asList(getAttributes()).stream()
 			.map(v -> (prefix + "." + v.getName() + (aliasPrefix != null ? (" AS " + aliasPrefix + v.getName()) : "")))
 			.collect(Collectors.toList());

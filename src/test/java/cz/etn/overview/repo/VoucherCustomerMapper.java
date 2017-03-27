@@ -15,7 +15,6 @@ import cz.etn.overview.domain.VoucherCustomer;
 import cz.etn.overview.mapper.AbstractEntityMapper;
 import cz.etn.overview.mapper.Attribute;
 import cz.etn.overview.mapper.AttributeSource;
-import cz.etn.overview.mapper.EntityMapper;
 
 import java.time.Instant;
 
@@ -189,7 +188,7 @@ public enum VoucherCustomerMapper implements AbstractEntityMapper<VoucherCustome
 	
 	private static final String DB_TABLE_NAME = "voucher_customer";
 	
-	public static final EntityMapper<VoucherCustomer> INSTANCE = id; // any enum constant will suffice here
+	public static final VoucherCustomerMapper INSTANCE = id; // any enum constant will suffice here
 	
 	@Override
 	public Attribute<VoucherCustomer, Object>[] getAttributes() {
