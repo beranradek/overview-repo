@@ -21,6 +21,7 @@ For now, just see:
 
 ## Planned features
  * Composition of mappers (joins) to allow fetching of 1:0..1 or 1:1 related entities to one composed pageable entity, with almost no effort from user (can be automatized).
+ * Partial update only of some subset of attributes (update defined using a passed function).
  * Storage of new immutable versions of entity instead of updates, using version flag on an attribute.
  * "CREATE TABLE" SQL string generated from an entity mapper as an useful start to write DB schema.
  * Fetch levels configurable on attributes so not every attribute must be loaded (e.g. info, detail).
