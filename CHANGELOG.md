@@ -1,7 +1,11 @@
 # Changelog
 
-## [1.0.4] - 2017-?-?
-- What is new?
+## [1.0.5] - 2017-?-?
+- What is next?
+
+## [1.0.4] - 2017-03-31
+- DynamicEntityMapper without static methods (other classes can be injected to implement its logic).
+- Removed redundant countByOverview, added deleteByFilter.
 
 ## [1.0.3] - 2017-03-24
 - Default implementation of createInternal and updateInternal in AbstractRepositoryImpl.
