@@ -1,7 +1,10 @@
 # Changelog
 
-## [1.0.5] - 2017-?-?
-- What is next?
+## [1.0.6] - 2017-?-?
+- What is new?
+
+## [1.0.5] - 2017-03-31
+- deleteByFilter implemented in InMemoryRepository
 
 ## [1.0.4] - 2017-03-31
 - DynamicEntityMapper without static methods (other classes can be injected to implement its logic).
