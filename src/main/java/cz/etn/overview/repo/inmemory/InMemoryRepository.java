@@ -13,10 +13,7 @@ import cz.etn.overview.Overview;
 import cz.etn.overview.domain.Identifiable;
 import cz.etn.overview.repo.Repository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -56,6 +53,11 @@ public abstract class InMemoryRepository<T extends Identifiable<K>, K, F extends
 	public boolean delete(K id) {
 		if (id == null) return false;
 		return records.removeIf(r -> id.equals(r.getId()));
+	}
+
+	@Override
+	public int deleteByFilter(F filter) {
+		throw new UnsupportedOperationException("Filtering not supported by generic in-memory implementation");
 	}
 
 	@Override
