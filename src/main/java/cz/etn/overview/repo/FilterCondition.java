@@ -9,6 +9,7 @@
 package cz.etn.overview.repo;
 
 import cz.etn.overview.funs.CollectionFuns;
+import cz.etn.overview.mapper.Attribute;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +29,16 @@ public final class FilterCondition {
 
 	/**
 	 * Equals condition for one attribute with one value.
+	 * @param attribute
+	 * @param value
+	 * @return
+	 */
+	public static FilterCondition eq(Attribute<?, ?> attribute, Object value) {
+		return eq(attribute.getNameFull(), value);
+	}
+
+	/**
+	 * Equals condition for one attribute with one value.
 	 * @param attrName
 	 * @param value
 	 * @return
@@ -36,6 +47,15 @@ public final class FilterCondition {
 		List<Object> values = new ArrayList<>();
 		values.add(value);
 		return new FilterCondition(attrName + "=?", values);
+	}
+
+	/**
+	 * Condition on NULL value of attribute.
+	 * @param attribute
+	 * @return
+	 */
+	public static FilterCondition nullValue(Attribute<?, ?> attribute) {
+		return nullValue(attribute.getNameFull());
 	}
 
 	/**
@@ -49,6 +69,16 @@ public final class FilterCondition {
 
 	/**
 	 * Attribute value contains some given value.
+	 * @param attribute
+	 * @param value
+	 * @return
+	 */
+	public static FilterCondition contains(Attribute<?, ?> attribute, Object value) {
+		return contains(attribute.getNameFull(), value);
+	}
+
+	/**
+	 * Attribute value contains some given value.
 	 * @param attrName
 	 * @param value
 	 * @return
@@ -57,6 +87,16 @@ public final class FilterCondition {
 		List<Object> values = new ArrayList<>();
 		values.add(value);
 		return new FilterCondition(attrName + " " + CONTAINS_WITH_PLACEHOLDER, values);
+	}
+
+	/**
+	 * Attribute value is contained in given values.
+	 * @param attribute
+	 * @param values
+	 * @return
+	 */
+	public static FilterCondition in(Attribute<?, ?> attribute, List<Object> values) {
+		return in(attribute.getNameFull(), values);
 	}
 
 	/**
