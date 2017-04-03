@@ -2,6 +2,7 @@ package cz.etn.overview.mapper;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Date;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -30,16 +31,44 @@ public class Attr<E, A> implements Attribute<E, A> {
         return new Builder<>(entityClass, attributeClass, name);
     }
 
+    public static <E> Builder<E, Date> ofDate(Class<E> entityClass, String name) {
+        return of(entityClass, Date.class, name);
+    }
+
     public static <E> Builder<E, Instant> ofInstant(Class<E> entityClass, String name) {
-        return new Builder<>(entityClass, Instant.class, name);
+        return of(entityClass, Instant.class, name);
+    }
+
+    public static <E> Builder<E, Byte> ofByte(Class<E> entityClass, String name) {
+        return of(entityClass, Byte.class, name);
+    }
+
+    public static <E> Builder<E, Integer> ofInteger(Class<E> entityClass, String name) {
+        return of(entityClass, Integer.class, name);
+    }
+
+    public static <E> Builder<E, Long> ofLong(Class<E> entityClass, String name) {
+        return of(entityClass, Long.class, name);
+    }
+
+    public static <E> Builder<E, Float> ofFloat(Class<E> entityClass, String name) {
+        return of(entityClass, Float.class, name);
+    }
+
+    public static <E> Builder<E, Double> ofDouble(Class<E> entityClass, String name) {
+        return of(entityClass, Double.class, name);
+    }
+
+    public static <E> Builder<E, Boolean> ofBoolean(Class<E> entityClass, String name) {
+        return of(entityClass, Boolean.class, name);
     }
 
     public static <E> Builder<E, String> ofString(Class<E> entityClass, String name) {
-        return new Builder<>(entityClass, String.class, name);
+        return of(entityClass, String.class, name);
     }
 
     public static <E> Builder<E, BigDecimal> ofBigDecimal(Class<E> entityClass, String name) {
-        return new Builder<>(entityClass, BigDecimal.class, name);
+        return of(entityClass, BigDecimal.class, name);
     }
 
     /**

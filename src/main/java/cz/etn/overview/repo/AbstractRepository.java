@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
 public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends Filter> implements Repository<T, K, F> {
 
 	protected static final Logger log = LoggerFactory.getLogger(AbstractRepository.class);
-	protected static final String LIKE_WITH_PLACEHOLDER = "LIKE CONCAT('%', ?, '%')";
 
 	// for inner implementation only
 	private static class Pair<A, B> {
