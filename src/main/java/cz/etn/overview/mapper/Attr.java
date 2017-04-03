@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 /**
  * Attribute class with its builder for convenient construction of instance
- * with many parameters.
+ * with many parameters. This attribute implementation supports name prefixes.
  * <p>
  * Example of construction:
  * {@code Attribute attr = new Attribute.of(..).mapping(...)...build();}
@@ -24,6 +24,7 @@ public class Attr<E, A> implements Attribute<E, A> {
     private final boolean primary;
     private final Function<E, A> fromEntity;
     private final BiFunction<E, A, E> toEntity;
+    private String namePrefix;
 
     public static <E, A> Builder<E, A> of(Class<E> entityClass, Class<A> attributeClass, String name) {
         return new Builder<>(entityClass, attributeClass, name);
@@ -41,6 +42,19 @@ public class Attr<E, A> implements Attribute<E, A> {
         return new Builder<>(entityClass, BigDecimal.class, name);
     }
 
+    /**
+     * Copy constructor.
+     */
+    public Attr(Attr source) {
+        this.entityClass = source.entityClass;
+        this.attributeClass = source.attributeClass;
+        this.name = source.name;
+        this.primary = source.primary;
+        this.fromEntity = source.fromEntity;
+        this.toEntity = source.toEntity;
+        this.namePrefix = source.namePrefix;
+    }
+
     public static class Builder<E, A> {
         // Required parameters
         private final Class<E> entityClass;
@@ -48,6 +62,7 @@ public class Attr<E, A> implements Attribute<E, A> {
         private final String name;
         private Function<E, A> fromEntity;
         private BiFunction<E, A, E> toEntity;
+        String namePrefix;
 
         // Optional parameters - initialized to default values (these are only here in a single location)
         private boolean primary = false;
@@ -77,6 +92,11 @@ public class Attr<E, A> implements Attribute<E, A> {
             return updatedEntity((e, a) -> { setToEntity.accept(e, a); return e; });
         }
 
+        public Builder<E, A> namePrefix(String namePrefix) {
+            this.namePrefix = namePrefix;
+            return this;
+        }
+
         public Attr build() {
             Attr attr = new Attr(this);
             // Possible validations here (checks on fields)...
@@ -97,6 +117,7 @@ public class Attr<E, A> implements Attribute<E, A> {
         primary = builder.primary;
         fromEntity = builder.fromEntity;
         toEntity = builder.toEntity;
+        namePrefix = builder.namePrefix;
     }
 
     public Class<E> getEntityClass() {
@@ -133,5 +154,17 @@ public class Attr<E, A> implements Attribute<E, A> {
 
     public BiFunction<E, A, E> getToEntity() {
         return toEntity;
+    }
+
+    @Override
+    public String getNamePrefix() {
+        return namePrefix;
+    }
+
+    @Override
+    public Attribute<E, A> withNamePrefix(String namePrefix) {
+        Attr attr = new Attr(this);
+        attr.namePrefix = namePrefix;
+        return attr;
     }
 }

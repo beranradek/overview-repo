@@ -20,6 +20,10 @@ public abstract class DynamicEntityMapper<E> implements AbstractEntityMapper<E> 
      * @param attributeBuilder filled builder of new attribute (attribute must not be already registered)
      */
     public synchronized <U, V> Attribute<U, V> add(Attr.Builder<U, V> attributeBuilder) {
+        if (attributeBuilder.namePrefix == null) {
+            // name prefix not set yet
+            attributeBuilder = attributeBuilder.namePrefix(getNamePrefix());
+        }
         return add(attributeBuilder.build());
     }
 
@@ -34,6 +38,11 @@ public abstract class DynamicEntityMapper<E> implements AbstractEntityMapper<E> 
             throw new IllegalStateException("Attribute " + name + " is already registered");
         }
 
+        if (attribute.getNamePrefix() == null) {
+            // name prefix not set yet
+            attribute = attribute.withNamePrefix(getNamePrefix());
+        }
+
         attributesByNames.put(name, attribute);
         return attribute;
     }
@@ -41,5 +50,9 @@ public abstract class DynamicEntityMapper<E> implements AbstractEntityMapper<E> 
     @Override
     public Attribute<E, ?>[] getAttributes() {
         return attributesByNames.values().toArray(new Attribute[0]);
+    }
+
+    protected String getNamePrefix() {
+        return getDataSet();
     }
 }

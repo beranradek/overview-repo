@@ -1,7 +1,11 @@
 # Changelog
 
-## [1.0.6] - 2017-?-?
+## [1.0.7] - 2017-?-?
 - What is new?
+
+## [1.0.6] - 2017-04-03
+- Common filter conditions.
+- nameFull property of attributes containing entity table prefix.
 
 ## [1.0.5] - 2017-03-31
 - deleteByFilter implemented in InMemoryRepository

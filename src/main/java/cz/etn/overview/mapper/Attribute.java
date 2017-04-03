@@ -28,6 +28,26 @@ public interface Attribute<E, A> {
 	String getName();
 
 	/**
+	 * <p>Name prefix for attribute derived from an entity so that full attribute name including entity qualification
+	 * can be constructed.
+	 * <p>This should be overridden by subclasses if prefixes should be supported. Default implementation returns {@code null}.
+	 * @return
+	 */
+	default String getNamePrefix() {
+		return null; // no name prefix by default
+	}
+
+	/**
+	 * <p>Returns copy of this attribute with given name prefix set.
+	 * <p>This should be overridden by subclasses if prefixes should be supported. Default implementation returns {@code this} attribute.
+	 * @param namePrefix
+	 * @return
+	 */
+	default Attribute<E, A> withNamePrefix(String namePrefix) {
+		return this;
+	}
+
+	/**
 	 * Returns instance of entity updated with given attribute.
 	 * @param entity
 	 * @param attributeSource
@@ -35,6 +55,21 @@ public interface Attribute<E, A> {
      * @return
      */
 	E entityWithAttribute(E entity, AttributeSource attributeSource, String attributeName);
+
+	/**
+	 * Full name of attribute including "entity namespace".
+	 * @return
+	 */
+	default String getNameFull() {
+		String fullName = null;
+		String prefix = getNamePrefix();
+		if (prefix != null) {
+			fullName = prefix + "." + getName();
+		} else {
+			fullName = getName();
+		}
+		return fullName;
+	}
 	
 	default String getName(String alias) {
 		String attrName = null;
