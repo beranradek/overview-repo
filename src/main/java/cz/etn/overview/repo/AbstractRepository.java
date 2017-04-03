@@ -129,6 +129,25 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 	}
 
 	@Override
+	public <R> R sumByFilter(Class<R> resultClass, String attrName, F filter) {
+		Objects.requireNonNull(resultClass, "result class should be specified");
+		Objects.requireNonNull(attrName, "attribute name should be specified");
+
+		return withNewConnection(conn -> {
+			String from = getEntityMapper().getDataSet();
+			String sumAlias = attrName + "_sum";
+			List<R> results = queryWithOverview(conn,
+				"SUM(" + attrName + ") AS " + sumAlias,
+				from,
+				composeFilterConditions(filter),
+				null,
+				null,
+				as -> as.get(resultClass, sumAlias));
+			return results != null && !results.isEmpty() ? results.get(0) : null;
+		});
+	}
+
+	@Override
 	public Optional<T> findById(K id) {
 		return findByAttributeValue(getEntityMapper().getPrimaryAttributeName(), id);
 	}
@@ -308,7 +327,8 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 		}
 	}
 
-	protected List<T> queryWithOverview(Connection conn,
+	// Custom T type is used, this method should be independent on entity type (can be used to load specific attribute type).
+	protected <T> List<T> queryWithOverview(Connection conn,
 		List<String> selectedAttributes,
 		String from,
 		F filter,
@@ -324,9 +344,29 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 			pagination,
 			entityBuilder);
 	}
-	
-	protected List<T> queryWithOverview(Connection conn,
-		List<String> selectedAttributes,	
+
+	// Custom T type is used, this method should be independent on entity type (can be used to load specific attribute type).
+	protected <T> List<T> queryWithOverview(Connection conn,
+		List<String> selectedAttributes,
+		String from,
+		List<FilterCondition> filterConditions,
+		List<Order> ordering,
+		Pagination pagination,
+		Function<AttributeSource, T> entityBuilder) {
+
+		return queryWithOverview(conn,
+			CollectionFuns.join(selectedAttributes, ", "),
+			from,
+			filterConditions,
+			ordering,
+			pagination,
+			entityBuilder
+		);
+	}
+
+	// Custom T type is used, this method should be independent on entity type (can be used to load specific attribute type).
+	protected <T> List<T> queryWithOverview(Connection conn,
+		String selection,
 		String from,
 		List<FilterCondition> filterConditions,
 		List<Order> ordering,
@@ -335,7 +375,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 
 		List<T> results = null;
 		try {
-			StringBuilder sqlBuilder = new StringBuilder("SELECT " + CollectionFuns.join(selectedAttributes, ", ") + " FROM " + from);
+			StringBuilder sqlBuilder = new StringBuilder("SELECT " + selection + " FROM " + from);
 			List<Object> parameters = appendFilter(sqlBuilder, filterConditions);
 			appendOrdering(sqlBuilder, ordering);
 			appendPagination(sqlBuilder, pagination);

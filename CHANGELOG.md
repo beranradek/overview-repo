@@ -1,7 +1,10 @@
 # Changelog
 
-## [1.0.8] - 2017-?-?
+## [1.0.9] - 2017-?-?
 - What is new?
+
+## [1.0.8] - 2017-04-03
+- sumByFilter method in repository.
 
 ## [1.0.7] - 2017-04-03
 - Additional attribute construction methods.
