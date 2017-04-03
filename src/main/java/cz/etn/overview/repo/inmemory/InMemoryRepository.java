@@ -94,7 +94,12 @@ public abstract class InMemoryRepository<T extends Identifiable<K>, K, F extends
 		}
 		return records.size();
 	}
-	
+
+	@Override
+	public <R> R sumByFilter(Class<R> resultClass, String attrName, F filter) {
+		throw new UnsupportedOperationException("Filtering not supported by generic in-memory implementation");
+	}
+
 	abstract protected T entityUpdatedWithId(T entity, K id);
 	
 }
