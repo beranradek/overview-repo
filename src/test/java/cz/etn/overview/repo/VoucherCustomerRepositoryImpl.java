@@ -11,8 +11,8 @@ package cz.etn.overview.repo;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import cz.etn.overview.Overview;
-import cz.etn.overview.common.Funs;
 import cz.etn.overview.domain.*;
+import cz.etn.overview.funs.CollectionFuns;
 import cz.etn.overview.mapper.AttributeSource;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -53,7 +53,7 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
     public Optional<VoucherCustomer> findById(Integer id) {
         VoucherCustomerFilter filter = new VoucherCustomerFilter();
         filter.setId(id);
-        return Funs.headOpt(findByOverview(new Overview<>(filter, null, null)));
+        return CollectionFuns.headOpt(findByOverview(new Overview<>(filter, null, null)));
     }
 
     /**
@@ -133,7 +133,7 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
             if (filter.getCustomerIds() != null) {
                 if (!filter.getCustomerIds().isEmpty()) {
                     String attrName = dataSet + "." + getEntityMapper().id.getName();
-                    conditions.add(new FilterCondition(attrName + " IN (" + Funs.mkString(filter.getCustomerIds(), customerId -> "" + customerId, ", ") + ")", Lists.newArrayList()));
+                    conditions.add(new FilterCondition(attrName + " IN (" + CollectionFuns.mkString(filter.getCustomerIds(), customerId -> "" + customerId, ", ") + ")", Lists.newArrayList()));
                 } else {
                     // empty customer ids
                     conditions.add(new FilterCondition("1=0", Lists.newArrayList()));

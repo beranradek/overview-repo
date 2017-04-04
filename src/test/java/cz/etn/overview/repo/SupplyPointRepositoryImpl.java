@@ -12,9 +12,9 @@ package cz.etn.overview.repo;
 import com.google.common.collect.Lists;
 import cz.etn.overview.Order;
 import cz.etn.overview.Overview;
-import cz.etn.overview.common.Funs;
 import cz.etn.overview.domain.SupplyPoint;
 import cz.etn.overview.domain.SupplyPointFilter;
+import cz.etn.overview.funs.CollectionFuns;
 import cz.etn.overview.mapper.EntityMapper;
 
 import javax.sql.DataSource;
@@ -74,7 +74,7 @@ public class SupplyPointRepositoryImpl extends AbstractRepository<SupplyPoint, I
 			if (filter.getCustomerIds() != null) {
 				if (!filter.getCustomerIds().isEmpty()) {
 					String attrName = dataSet + "." + SupplyPointMapper.customer_id.getName();
-					conditions.add(new FilterCondition(attrName + " IN (" + Funs.mkString(filter.getCustomerIds(), customerId -> "" + customerId, ", ") + ")", Lists.newArrayList()));
+					conditions.add(new FilterCondition(attrName + " IN (" + CollectionFuns.mkString(filter.getCustomerIds(), customerId -> "" + customerId, ", ") + ")", Lists.newArrayList()));
 				} else {
 					// empty customer ids
 					conditions.add(new FilterCondition("1=0", Lists.newArrayList()));
