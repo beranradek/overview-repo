@@ -75,16 +75,15 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 	public Optional<T> update(T entity) {
 		Objects.requireNonNull(entity, "Entity should be specified");
 		return withNewConnection(conn -> {
-			String tableName = getEntityMapper().getDataSet();
 			String attributeNamesEqToPlaceholders = getEntityMapper().getAttributeNamesEqToPlaceholdersCommaSeparated();
-			List<Object> attributeValues = getAttributeValues(entity);
-			String pkAttrName = getEntityMapper().getPrimaryAttributeName();
-			Object pkAttrValue = getEntityMapper().getPrimaryAttributeValue(entity);
-			
-			String sql = "UPDATE " + tableName + " SET " + attributeNamesEqToPlaceholders + " WHERE " + pkAttrName + "=?";
+
+			StringBuilder sqlBuilder = new StringBuilder("UPDATE " + getEntityMapper().getDataSet() + " SET " + attributeNamesEqToPlaceholders);
+			List<Object> primaryKeyParameters = appendFilter(sqlBuilder, composeFilterConditionsForPrimaryKey(entity));
+			String sql = sqlBuilder.toString();
+
 			final List<Object> parameterValues = new ArrayList<>();
-			parameterValues.addAll(attributeValues);
-			parameterValues.add(pkAttrValue);
+			parameterValues.addAll(getAttributeValues(entity));
+			parameterValues.addAll(primaryKeyParameters);
 			
 			int updatedCount = updateInternal(conn, sql, parameterValues);
 			if (updatedCount == 1) {
@@ -98,14 +97,11 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 	public boolean delete(K id) {
 		Objects.requireNonNull(id, "id should be specified");
 		return withNewConnection(conn -> {
-			String tableName = getEntityMapper().getDataSet();
-			String idFieldName = getEntityMapper().getPrimaryAttributeName();
+			StringBuilder sqlBuilder = new StringBuilder("DELETE FROM " + getEntityMapper().getDataSet());
+			List<Object> primaryKeyParameters = appendFilter(sqlBuilder, composeFilterConditionsForPrimaryKey(id));
+			String sql = sqlBuilder.toString();
 			
-			String sql = "DELETE FROM " + tableName + " WHERE " + idFieldName + "=?";
-			final List<Object> parameterValues = new ArrayList<>();
-			parameterValues.add(id);
-			
-			int updatedCount = updateInternal(conn, sql, parameterValues);
+			int updatedCount = updateInternal(conn, sql, primaryKeyParameters);
 			return updatedCount == 1;
 		});
 	}
@@ -149,7 +145,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 
 	@Override
 	public Optional<T> findById(K id) {
-		return findByAttributeValue(getEntityMapper().getPrimaryAttributeName(), id);
+		return CollectionFuns.headOpt(findByFilterConditions(composeFilterConditionsForPrimaryKey(id), null));
 	}
 	
 	@Override
@@ -170,6 +166,61 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 	 */
 	protected List<FilterCondition> composeFilterConditions(F filter) {
 		return new ArrayList<>();
+	}
+
+	/**
+	 * Composes filter conditions to match primary key attributes.
+	 * @param id
+	 * @return
+	 */
+	protected List<FilterCondition> composeFilterConditionsForPrimaryKey(K id) {
+		List<FilterCondition> conditions = new ArrayList<>();
+		List<String> names = getEntityMapper().getPrimaryAttributeNames();
+		if (names.size() == 1) {
+			conditions.add(FilterCondition.eq(names.get(0), id));
+		} else {
+			// composed primary key
+			conditions.addAll(composeFilterConditionsForCompositePrimaryKey(id));
+		}
+		return conditions;
+	}
+
+	/**
+	 * Composes filter conditions to match primary key attributes.
+	 * @param entity
+	 * @return
+	 */
+	protected List<FilterCondition> composeFilterConditionsForPrimaryKey(T entity) {
+		List<FilterCondition> conditions = new ArrayList<>();
+		List<String> names = getEntityMapper().getPrimaryAttributeNames();
+		List<Object> values = getEntityMapper().getPrimaryAttributeValues(entity);
+		for (int i = 0; i < names.size(); i++) {
+			String attrName = names.get(i);
+			Object attrValue = values.get(i);
+			conditions.add(FilterCondition.eq(attrName, attrValue));
+		}
+		return conditions;
+	}
+
+	/**
+	 * Composes filter conditions to match primary key attributes.
+	 * @param id
+	 * @return
+	 */
+	protected List<FilterCondition> composeFilterConditionsForCompositePrimaryKey(K id) {
+		throw new UnsupportedOperationException("Decomposition of composite key to filter conditions is not implemented. Key: " + id);
+	}
+
+	protected List<Order> composeOrderingForPrimaryKey() {
+		List<Order> ordering = new ArrayList<>();
+		List<String> names = getEntityMapper().getPrimaryAttributeNames();
+		if (names != null) {
+			for (String name : names) {
+				String tablePrefix = getEntityMapper().getDataSet() + ".";
+				ordering.add(new Order(name.startsWith(tablePrefix) ? name : tablePrefix + name, false));
+			}
+		}
+		return ordering;
 	}
 	
 	/**
@@ -238,28 +289,31 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 		}
 		return result;
 	}
-	
+
+	protected List<T> findByFilterConditions(List<FilterCondition> filterConditions, List<Order> ordering) {
+		return withNewConnection(conn -> {
+			return queryWithOverview(conn,
+					getEntityMapper().getAttributeNames(),
+					getEntityMapper().getDataSet(),
+					filterConditions,
+					ordering,
+					null,
+					as -> getEntityMapper().buildEntity(as));
+		});
+	}
+
+	/**
+	 * Returns one entity for given unique attribute name and value.
+	 * @param attrName
+	 * @param attrValue
+	 * @param <U>
+	 * @return
+	 */
 	protected <U> Optional<T> findByAttributeValue(String attrName, U attrValue) {
 		Objects.requireNonNull(attrValue, attrName + " value should be specified");
-		return withNewConnection(conn -> {
-			List<String> attributeNames = getEntityMapper().getAttributeNames();
-			String from = getEntityMapper().getDataSet();
-			
-			List<Object> attributeValues = new ArrayList<>();
-			attributeValues.add(attrValue);
-			
-			List<FilterCondition> filterConditions = new ArrayList<>();
-			filterConditions.add(new FilterCondition(attrName + "=?", attributeValues));
-			
-			List<T> results = queryWithOverview(conn, 
-				attributeNames, 
-				from,
-				filterConditions,
-				null,
-				null,
-				rs -> getEntityMapper().buildEntity(rs));
-			return results != null && !results.isEmpty() ? Optional.<T>ofNullable(results.get(0)) : Optional.<T>empty();
-		});
+		List<FilterCondition> conditions = new ArrayList<>();
+		conditions.add(FilterCondition.eq(attrName, attrValue));
+		return CollectionFuns.headOpt(findByFilterConditions(conditions, createDefaultOrdering()));
 	}
 	
 	/**
@@ -288,9 +342,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 
 	protected List<Order> createDefaultOrdering() {
 		// default ordering by id
-		List<Order> ordering = new ArrayList<>();
-		ordering.add(new Order(getEntityMapper().getDataSet() + "." + getEntityMapper().getPrimaryAttributeName(), false));
-		return ordering;
+		return composeOrderingForPrimaryKey();
 	}
 	
 	protected K createInternal(Connection conn, String sql, List<Object> attributeValues, boolean autogenerateKey) {

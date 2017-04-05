@@ -22,17 +22,28 @@ public interface AbstractEntityMapper<T> extends EntityMapper<T> {
 	T createEntity();
 	
 	Attribute<T, ?>[] getAttributes();
-	
-	@Override
-	default String getPrimaryAttributeName() {
-		Attribute<T, ?> keyAttr = null;
-		for (Attribute<T, ?> con : getAttributes()) {
-			if (con.isPrimary()) {
-				keyAttr = con;
-				break;
+
+	default List<Attribute<T, ?>> getPrimaryAttributes() {
+		List<Attribute<T, ?>> primAttrs = new ArrayList<>();
+		Attribute<T, ?>[] attributes = getAttributes();
+		if (attributes != null) {
+			for (Attribute<T, ?> attr : attributes) {
+				if (attr.isPrimary()) {
+					primAttrs.add(attr);
+				}
 			}
 		}
-		return keyAttr != null ? keyAttr.getName() : null;
+		return primAttrs;
+	}
+	
+	@Override
+	default List<String> getPrimaryAttributeNames() {
+		return getPrimaryAttributes().stream().map(attr -> attr.getName()).collect(Collectors.toList());
+	}
+
+	@Override
+	default List<Object> getPrimaryAttributeValues(T entity) {
+		return getPrimaryAttributes().stream().map(attr -> attr.getValue(entity)).collect(Collectors.toList());
 	}
 	
 	@Override
@@ -56,18 +67,6 @@ public interface AbstractEntityMapper<T> extends EntityMapper<T> {
 			attrValues.add(fld.getValue(instance));
 		}
 		return attrValues;
-	}
-	
-	@Override
-	default Object getPrimaryAttributeValue(T instance) {
-		Object keyAttrValue = null;
-		for (Attribute<T, ?> con : getAttributes()) {
-			if (con.isPrimary()) {
-				keyAttrValue = con.getValue(instance);
-				break;
-			}
-		}
-		return keyAttrValue;
 	}
 	
 	@Override

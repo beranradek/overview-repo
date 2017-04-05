@@ -1,7 +1,10 @@
 # Changelog
 
-## [1.0.10] - 2017-?-?
+## [1.0.11] - 2017-?-?
 - What is new?
+
+## [1.0.10] - 2017-04-05
+- Support for composite primary keys.
 
 ## [1.0.9] - 2017-04-04
 - Simple builder of base of MySQL create table command.

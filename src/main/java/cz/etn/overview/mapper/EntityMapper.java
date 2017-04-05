@@ -37,10 +37,17 @@ public interface EntityMapper<T> {
 	}
 	
 	/**
-	 * Returns name of database attribute that represents primary key.
+	 * Returns names of database attributes that represents primary key.
 	 * @return
 	 */
-	String getPrimaryAttributeName();
+	List<String> getPrimaryAttributeNames();
+
+	/**
+	 * Extracts values of primary key attributes.
+	 * @param instance
+	 * @return
+	 */
+	List<Object> getPrimaryAttributeValues(T instance);
 	
 	/**
 	 * Returns names of database attributes.
@@ -54,13 +61,6 @@ public interface EntityMapper<T> {
 	 * @return
 	 */
 	List<Object> getAttributeValues(T instance);
-	
-	/**
-	 * Extracts value of primary key attribute.
-	 * @param instance
-	 * @return
-	 */
-	Object getPrimaryAttributeValue(T instance);
 
 	/**
 	 * Returns full attribute names with aliases that can be used to extract attribute values from {@link AttributeSource}.
