@@ -14,7 +14,9 @@ import cz.etn.overview.Overview;
 import cz.etn.overview.ResultsWithOverview;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Abstract repository.
@@ -37,7 +39,15 @@ public interface Repository<T, K, F extends Filter> {
 	 */
 	Optional<T> update(T entity);
 
-	// TODO RBe: Partial update method accepting function that returns updated entity.
+	/**
+	 * Updates entity with given transformation function. Returns updated entity if entity was successfully updated, or empty result if entity was not found.
+	 * @param partialUpdate transformation function
+	 * @return data of entity after update
+	 */
+	default Optional<T> update(K id, Function<T, T> partialUpdate) {
+		Objects.requireNonNull(partialUpdate, "Update function should be specified");
+		return findById(id).flatMap(e -> update(partialUpdate.apply(e)));
+	}
 
 	// TODO RBe: Support for update of entity by creating new immutable record with new version.
 	

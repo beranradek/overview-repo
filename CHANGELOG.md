@@ -1,7 +1,10 @@
 # Changelog
 
-## [1.0.11] - 2017-?-?
+## [1.0.12] - 2017-?-?
 - What is new?
+
+## [1.0.11] - 2017-04-06
+- Method for partial update.
 
 ## [1.0.10] - 2017-04-05
 - Support for composite primary keys.
