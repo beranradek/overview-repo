@@ -84,17 +84,20 @@ public interface Repository<T, K, F extends Filter> {
 	 * @param filter
 	 * @return
 	 */
-	int countByFilter(F filter);
+	default int countByFilter(F filter) {
+		return aggByFilter(AggType.COUNT, Integer.class, "*", filter);
+	}
 
 	/**
-	 * Returns sum of values of given attribute for given filter.
+	 * Returns aggregated values of given attribute for given filter.
+	 * @param aggType aggregation type
 	 * @param resultClass
 	 * @param attrName
 	 * @param filter
 	 * @param <R>
 	 * @return
 	 */
-	<R> R sumByFilter(Class<R> resultClass, String attrName, F filter);
+	<R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter);
 
 	/**
 	 * Returns results for given filtering and sorting settings.

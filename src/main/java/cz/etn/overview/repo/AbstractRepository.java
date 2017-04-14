@@ -56,7 +56,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 			
 			T createdEntity = entity;
 			
-			K generatedId = createInternal(conn, sql, attributeValues, autogenerateKey);
+			K generatedId = create(conn, sql, attributeValues, autogenerateKey);
 			
 			Pair<T, K> p = new Pair<>();
 			p.first = createdEntity;
@@ -85,7 +85,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 			parameterValues.addAll(getAttributeValues(entity));
 			parameterValues.addAll(primaryKeyParameters);
 			
-			int updatedCount = updateInternal(conn, sql, parameterValues);
+			int updatedCount = update(conn, sql, parameterValues);
 			if (updatedCount == 1) {
 				return Optional.<T>of(entity);
 			}
@@ -101,7 +101,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 			List<Object> primaryKeyParameters = appendFilter(sqlBuilder, composeFilterConditionsForPrimaryKey(id));
 			String sql = sqlBuilder.toString();
 			
-			int updatedCount = updateInternal(conn, sql, primaryKeyParameters);
+			int updatedCount = update(conn, sql, primaryKeyParameters);
 			return updatedCount == 1;
 		});
 	}
@@ -113,34 +113,41 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 			String from = getEntityMapper().getDataSet();
 			StringBuilder sqlBuilder = new StringBuilder("DELETE FROM " + from);
 			List<Object> parameters = appendFilter(sqlBuilder, composeFilterConditions(filter));
-			return updateInternal(conn, sqlBuilder.toString(), parameters);
+			return update(conn, sqlBuilder.toString(), parameters);
 		});
 	}
 
-	@Override
-	public int countByFilter(F filter) {
-		String selection = "COUNT(*)";
-		String from = getEntityMapper().getDataSet();
-		return countByFilterInternal(filter, selection, from);
-	}
+    /**
+     * Returns aggregated values of given attribute for given filter.
+     * @param aggType aggregation type
+     * @param resultClass
+     * @param attrName
+     * @param filter
+     * @param from
+     * @param <R>
+     * @return
+     */
+    protected <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter, String from) {
+        Objects.requireNonNull(aggType, "aggregation type should be specified");
+        Objects.requireNonNull(resultClass, "result class should be specified");
+        Objects.requireNonNull(attrName, "attribute name should be specified");
+
+        return withNewConnection(conn -> {
+            String aggAttributeAlias = attrName + "_agg";
+            List<R> results = queryWithOverview(conn,
+                    aggFunction(aggType, attrName) + " AS " + aggAttributeAlias,
+                    from,
+                    composeFilterConditions(filter),
+                    null,
+                    null,
+                    as -> as.get(resultClass, aggAttributeAlias));
+            return results != null && !results.isEmpty() ? results.get(0) : null;
+        });
+    }
 
 	@Override
-	public <R> R sumByFilter(Class<R> resultClass, String attrName, F filter) {
-		Objects.requireNonNull(resultClass, "result class should be specified");
-		Objects.requireNonNull(attrName, "attribute name should be specified");
-
-		return withNewConnection(conn -> {
-			String from = getEntityMapper().getDataSet();
-			String sumAlias = attrName + "_sum";
-			List<R> results = queryWithOverview(conn,
-				"SUM(" + attrName + ") AS " + sumAlias,
-				from,
-				composeFilterConditions(filter),
-				null,
-				null,
-				as -> as.get(resultClass, sumAlias));
-			return results != null && !results.isEmpty() ? results.get(0) : null;
-		});
+	public <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter) {
+		return aggByFilter(aggType, resultClass, attrName, filter, getEntityMapper().getDataSet());
 	}
 
 	@Override
@@ -152,7 +159,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 	public List<T> findByOverview(final Overview<F> overview) {
 		List<String> attributeNames = getEntityMapper().getAttributeNames();
 		String from = getEntityMapper().getDataSet();
-		return findByOverviewInternal(overview, attributeNames, from, rs -> getEntityMapper().buildEntity(rs));
+		return findByOverview(overview, attributeNames, from, rs -> getEntityMapper().buildEntity(rs));
 	}
 
 	protected abstract DataSource getDataSource();
@@ -230,7 +237,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 	 * @param entityBuilder
 	 * @return
 	 */
-	protected List<T> findByOverviewInternal(final Overview<F> overview, List<String> selectedAttributes, String from, Function<AttributeSource, T> entityBuilder) {
+	protected List<T> findByOverview(final Overview<F> overview, List<String> selectedAttributes, String from, Function<AttributeSource, T> entityBuilder) {
 		Objects.requireNonNull(overview, "overview should be specified");
 		return withNewConnection(conn -> {
 			
@@ -244,16 +251,6 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 				overview.getPagination(),
 				entityBuilder);
 		});
-	}
-	
-	/**
-	 * @param filter
-	 * @param selection
-	 * @param from
-	 * @return
-	 */
-	protected int countByFilterInternal(final F filter, String selection, String from) {
-		return withNewConnection(conn -> queryCount(conn, selection, from, filter));
 	}
 	
 	protected <U> U withNewConnection(CheckedFunction<Connection, U> queryData) {
@@ -345,7 +342,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 		return composeOrderingForPrimaryKey();
 	}
 	
-	protected K createInternal(Connection conn, String sql, List<Object> attributeValues, boolean autogenerateKey) {
+	protected K create(Connection conn, String sql, List<Object> attributeValues, boolean autogenerateKey) {
 		K generatedId = null;
 		try {
 			try (PreparedStatement statement = conn.prepareStatement(sql, autogenerateKey ? Statement.RETURN_GENERATED_KEYS : Statement.NO_GENERATED_KEYS)) {
@@ -366,7 +363,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 		return generatedId;
 	}
 	
-	protected int updateInternal(Connection conn, String sql, List<Object> attributeValues) {
+	protected int update(Connection conn, String sql, List<Object> attributeValues) {
 		try {
 			try (PreparedStatement statement = conn.prepareStatement(sql)) {
 				setParameters(statement, attributeValues);
@@ -453,32 +450,6 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 		return results;
 	}
 
-	protected int queryCount(Connection conn, String selection, String from, F filter) {
-		int count = 0;
-		try {
-			StringBuilder sqlBuilder = new StringBuilder("SELECT " + selection + " FROM " + from);
-			List<Object> parameters = appendFilter(sqlBuilder, filter != null ? composeFilterConditions(filter) : null);
-
-			String sql = sqlBuilder.toString();
-
-			try (PreparedStatement statement = conn.prepareStatement(sql)) {
-				setParameters(statement, parameters);
-
-				try (ResultSet rs = statement.executeQuery()) {
-					if (rs.next()) {
-						count = rs.getInt(1);
-					}
-				}
-			}
-
-			logSqlWithParameters(sql, parameters);
-		} catch (Exception ex) {
-			throw new RuntimeException(ex.getMessage(), ex);
-		}
-
-		return count;
-	}
-
 	protected List<Object> appendFilter(StringBuilder sqlBuilder, List<FilterCondition> filterConditions) {
 		List<Object> parameters = null;
 		if (filterConditions != null && !filterConditions.isEmpty()) {
@@ -543,5 +514,29 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 			}
 		}
 		return result;
+	}
+
+	protected String aggFunction(AggType aggType, String attrName) {
+		String fun;
+		switch (aggType) {
+			case COUNT:
+				fun = "COUNT(" + attrName + ")";
+				break;
+			case SUM:
+				fun = "SUM(" + attrName + ")";
+				break;
+			case MIN:
+				fun = "MIN(" + attrName + ")";
+				break;
+			case MAX:
+				fun = "MAX(" + attrName + ")";
+				break;
+			case AVG:
+				fun = "AVG(" + attrName + ")";
+				break;
+			default:
+				throw new IllegalArgumentException("Unsupported aggregation type: " + aggType);
+		}
+		return fun;
 	}
 }

@@ -11,6 +11,7 @@ package cz.etn.overview.repo.inmemory;
 import cz.etn.overview.Filter;
 import cz.etn.overview.Overview;
 import cz.etn.overview.domain.Identifiable;
+import cz.etn.overview.repo.AggType;
 import cz.etn.overview.repo.Repository;
 
 import java.util.*;
@@ -88,16 +89,8 @@ public abstract class InMemoryRepository<T extends Identifiable<K>, K, F extends
 	}
 
 	@Override
-	public int countByFilter(F filter) {
-		if (filter != null) {
-			throw new UnsupportedOperationException("Filtering not supported by generic in-memory implementation");
-		}
-		return records.size();
-	}
-
-	@Override
-	public <R> R sumByFilter(Class<R> resultClass, String attrName, F filter) {
-		throw new UnsupportedOperationException("Filtering not supported by generic in-memory implementation");
+	public <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter) {
+		throw new UnsupportedOperationException("Aggregation is not supported by generic in-memory implementation");
 	}
 
 	abstract protected T entityUpdatedWithId(T entity, K id);

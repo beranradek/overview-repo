@@ -1,7 +1,7 @@
 # Changelog
 
 ## [1.0.12] - 2017-?-?
-- What is new?
+- General agg method in repository.
 
 ## [1.0.11] - 2017-04-06
 - Method for partial update.

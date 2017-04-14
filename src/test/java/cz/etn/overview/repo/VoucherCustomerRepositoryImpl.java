@@ -66,7 +66,7 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
             // First load customers joined with (optional) vouchers
             // Resulting records are suitable for directly applying pagination settings
             Pair<List<String>, String> attrsAndFrom = joinedSelectionAndFrom();
-            return findByOverviewInternal(overview, attrsAndFrom.getLeft(), attrsAndFrom.getRight(), attributeSource -> customerFromAttributeSource(attributeSource));
+            return findByOverview(overview, attrsAndFrom.getLeft(), attrsAndFrom.getRight(), attributeSource -> customerFromAttributeSource(attributeSource));
         });
 
         // Lazy loading of related supply points using one additional query (if they would be joined with customers in one query, it would break pagination limit)
@@ -83,13 +83,12 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
     }
 
     /**
-     * Computes customers count including applied conditions on joined voucher and supply points data.
+     * Computes customers aggregation value including applied conditions on joined customer and voucher data.
      */
     @Override
-    public int countByFilter(VoucherCustomerFilter filter) {
+    public <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, VoucherCustomerFilter filter) {
         Pair<List<String>, String> attributesAndFrom = joinedSelectionAndFrom();
-        String customerIdAttribute = getEntityMapper().getDataSet() + "." + getEntityMapper().id.getName();
-        return countByFilterInternal(filter, "COUNT(" + customerIdAttribute + ")", attributesAndFrom.getRight());
+        return super.aggByFilter(aggType, resultClass, attrName, filter, attributesAndFrom.getRight());
     }
 
     /**
@@ -103,7 +102,7 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
 
         String fromJoined = getEntityMapper().getDataSet() +
             " LEFT JOIN " + getVoucherMapper().getDataSet() +
-            " ON (" + getEntityMapper().getDataSet() + "." + getEntityMapper().id + "=" + getVoucherMapper().getDataSet() + "." + getVoucherMapper().reserved_by.getName() + ")";
+            " ON (" + getEntityMapper().id.getNameFull() + "=" + getVoucherMapper().reserved_by.getNameFull() + ")";
 
         return Pair.of(dbAttributesJoined, fromJoined);
     }
