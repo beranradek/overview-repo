@@ -62,12 +62,10 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
     @Override
     public List<VoucherCustomer> findByOverview(Overview<VoucherCustomerFilter> overview) {
         Objects.requireNonNull(overview, "overview should be specified");
-        List<VoucherCustomer> customers = withNewConnection(conn -> {
-            // First load customers joined with (optional) vouchers
-            // Resulting records are suitable for directly applying pagination settings
-            Pair<List<String>, String> attrsAndFrom = joinedSelectionAndFrom();
-            return findByOverview(overview, attrsAndFrom.getLeft(), attrsAndFrom.getRight(), attributeSource -> customerFromAttributeSource(attributeSource));
-        });
+        // First load customers joined with (optional) vouchers
+        // Resulting records are suitable for directly applying pagination settings
+        Pair<List<String>, String> attrsAndFrom = joinedSelectionAndFrom();
+        List<VoucherCustomer> customers = findByOverview(overview, attrsAndFrom.getLeft(), attrsAndFrom.getRight(), attributeSource -> customerFromAttributeSource(attributeSource));
 
         // Lazy loading of related supply points using one additional query (if they would be joined with customers in one query, it would break pagination limit)
         List<Integer> customerIds = Lists.newArrayList(Iterables.transform(customers, c -> c.getId()));
@@ -118,29 +116,20 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
         if (filter != null) {
             String dataSet = getEntityMapper().getDataSet();
             if (filter.getId() != null) {
-                String attrName = dataSet + "." + getEntityMapper().id.getName();
-                conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getId())));
+                conditions.add(FilterCondition.eq(getEntityMapper().id, filter.getId()));
             }
             if (filter.getImportFileName() != null) {
-                String attrName = dataSet + "." + getEntityMapper().import_file_name.getName();
-                conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getImportFileName())));
+                conditions.add(FilterCondition.eq(getEntityMapper().import_file_name, filter.getImportFileName()));
             }
             if (filter.getSoldBy() != null) {
-                String attrName = getVoucherMapper().getDataSet() + "." + getVoucherMapper().sold_by.getName();
-                conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getSoldBy())));
+                conditions.add(FilterCondition.eq(getVoucherMapper().sold_by, filter.getSoldBy()));
             }
             if (filter.getCustomerIds() != null) {
-                if (!filter.getCustomerIds().isEmpty()) {
-                    String attrName = dataSet + "." + getEntityMapper().id.getName();
-                    conditions.add(new FilterCondition(attrName + " IN (" + CollectionFuns.mkString(filter.getCustomerIds(), customerId -> "" + customerId, ", ") + ")", Lists.newArrayList()));
-                } else {
-                    // empty customer ids
-                    conditions.add(new FilterCondition("1=0", Lists.newArrayList()));
-                }
+                conditions.add(FilterCondition.in(getEntityMapper().id.getNameFull(), CollectionFuns.toObjectList(filter.getCustomerIds())));
             }
             if (filter.getLatestInvoiceOfSeller() != null && filter.getLatestInvoiceOfSeller().booleanValue() && filter.getSoldBy() != null) {
-                String invoiceTimeAttrName = getVoucherMapper().getDataSet() + "." + getVoucherMapper().invoice_time.getName();
-                String soldByAttrName = getVoucherMapper().getDataSet() + "." + getVoucherMapper().sold_by.getName();
+                String invoiceTimeAttrName = getVoucherMapper().invoice_time.getNameFull();
+                String soldByAttrName = getVoucherMapper().sold_by.getNameFull();
                 conditions.add(new FilterCondition(invoiceTimeAttrName + " IS NOT NULL AND " + invoiceTimeAttrName + "=(SELECT MAX(" + invoiceTimeAttrName + ") FROM " + getVoucherMapper().getDataSet() +
                     " WHERE " + soldByAttrName + "=" + filter.getSoldBy() + ")", Lists.newArrayList()));
             }

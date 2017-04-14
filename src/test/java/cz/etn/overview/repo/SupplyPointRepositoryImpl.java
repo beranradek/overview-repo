@@ -8,8 +8,6 @@
 
 package cz.etn.overview.repo;
 
-
-import com.google.common.collect.Lists;
 import cz.etn.overview.Order;
 import cz.etn.overview.Overview;
 import cz.etn.overview.domain.SupplyPoint;
@@ -46,10 +44,10 @@ public class SupplyPointRepositoryImpl extends AbstractRepository<SupplyPoint, I
 	@Override
 	public List<SupplyPoint> findByCustomerIds(List<Integer> customerIds) {
 		List<Order> ordering = new ArrayList<>();
-		ordering.add(new Order(getEntityMapper().getDataSet() + "." + SupplyPointMapper.code.getName(), false));
+		ordering.add(new Order(SupplyPointMapper.code.getNameFull(), false));
 		SupplyPointFilter filter = new SupplyPointFilter();
 		filter.setCustomerIds(customerIds);
-		return findByOverview(new Overview<>(filter, ordering, null));
+		return findByFilter(filter, ordering);
 	}
 	
 	@Override
@@ -64,21 +62,13 @@ public class SupplyPointRepositoryImpl extends AbstractRepository<SupplyPoint, I
 		String dataSet = getEntityMapper().getDataSet();
 		if (filter != null) {
 			if (filter.getId() != null) {
-				String attrName = dataSet + "." + SupplyPointMapper.id.getName();
-				conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getId())));
+				conditions.add(FilterCondition.eq(SupplyPointMapper.id, filter.getId()));
 			}
 			if (filter.getCustomerId() != null) {
-				String attrName = dataSet + "." + SupplyPointMapper.customer_id.getName();
-				conditions.add(new FilterCondition(attrName + "=?", Lists.newArrayList(filter.getCustomerId())));
+				conditions.add(FilterCondition.eq(SupplyPointMapper.customer_id, filter.getCustomerId()));
 			}
 			if (filter.getCustomerIds() != null) {
-				if (!filter.getCustomerIds().isEmpty()) {
-					String attrName = dataSet + "." + SupplyPointMapper.customer_id.getName();
-					conditions.add(new FilterCondition(attrName + " IN (" + CollectionFuns.mkString(filter.getCustomerIds(), customerId -> "" + customerId, ", ") + ")", Lists.newArrayList()));
-				} else {
-					// empty customer ids
-					conditions.add(new FilterCondition("1=0", Lists.newArrayList()));
-				}
+				conditions.add(FilterCondition.in(SupplyPointMapper.customer_id, CollectionFuns.toObjectList(filter.getCustomerIds())));
 			}
 		}
 		return conditions;
