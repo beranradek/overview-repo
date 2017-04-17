@@ -9,10 +9,8 @@
 package cz.etn.overview.repo;
 
 import cz.etn.overview.Order;
-import cz.etn.overview.Overview;
 import cz.etn.overview.domain.SupplyPoint;
 import cz.etn.overview.domain.SupplyPointFilter;
-import cz.etn.overview.funs.CollectionFuns;
 import cz.etn.overview.mapper.EntityMapper;
 
 import javax.sql.DataSource;
@@ -32,7 +30,7 @@ public class SupplyPointRepositoryImpl extends AbstractRepository<SupplyPoint, I
 	}
 	
 	@Override
-	protected EntityMapper<SupplyPoint> getEntityMapper() {
+	protected EntityMapper<SupplyPoint, SupplyPointFilter> getEntityMapper() {
 		return SupplyPointMapper.INSTANCE;
 	}
 
@@ -54,24 +52,6 @@ public class SupplyPointRepositoryImpl extends AbstractRepository<SupplyPoint, I
 	protected SupplyPoint entityUpdatedWithId(SupplyPoint entity, Integer id) {
 		entity.setId(id);
 		return entity;
-	}
-	
-	@Override
-	protected List<FilterCondition> composeFilterConditions(SupplyPointFilter filter) {
-		List<FilterCondition> conditions = new ArrayList<>(); 
-		String dataSet = getEntityMapper().getDataSet();
-		if (filter != null) {
-			if (filter.getId() != null) {
-				conditions.add(FilterCondition.eq(SupplyPointMapper.id, filter.getId()));
-			}
-			if (filter.getCustomerId() != null) {
-				conditions.add(FilterCondition.eq(SupplyPointMapper.customer_id, filter.getCustomerId()));
-			}
-			if (filter.getCustomerIds() != null) {
-				conditions.add(FilterCondition.in(SupplyPointMapper.customer_id, CollectionFuns.toObjectList(filter.getCustomerIds())));
-			}
-		}
-		return conditions;
 	}
 
 }

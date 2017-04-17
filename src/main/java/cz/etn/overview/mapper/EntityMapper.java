@@ -8,7 +8,9 @@
 
 package cz.etn.overview.mapper;
 
+import cz.etn.overview.Filter;
 import cz.etn.overview.funs.CollectionFuns;
+import cz.etn.overview.repo.FilterCondition;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,10 +19,12 @@ import java.util.stream.Collectors;
 
 /**
  * Maps data entity to database attributes.
- * This is interface, not an abstract class, so the implementation can be an enum.
+ * This is interface, not an abstract class, so the implementation can be an enum or some regular class.
+ * @param <T> type of entity
+ * @param <F> type of filter for filtering according to entity attributes
  * @author Radek Beran
  */
-public interface EntityMapper<T> {
+public interface EntityMapper<T, F extends Filter> {
 
 	/**
 	 * Name of database table/collection that contains entities.
@@ -75,6 +79,15 @@ public interface EntityMapper<T> {
 	 * @return
 	 */
 	T buildEntity(AttributeSource attributeSource, String aliasPrefix);
+
+	/**
+	 * <p>Compose conditions from given filter.
+	 * <p>NOTE: This method is part of entity mapper because of filtering is tightly bound with available entity attributes
+	 * and filter composition with attributes composition.
+	 * @param filter
+	 * @return
+	 */
+	List<FilterCondition> composeFilterConditions(F filter);
 	
 	/**
 	 * Builds new data entity from attribute source.

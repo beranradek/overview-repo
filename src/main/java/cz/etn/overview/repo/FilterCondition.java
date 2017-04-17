@@ -122,6 +122,10 @@ public final class FilterCondition {
 		this.conditionWithPlaceholders = conditionWithPlaceholders;
 		this.values = values;
 	}
+
+	public FilterCondition(String conditionWithPlaceholders) {
+		this(conditionWithPlaceholders, new ArrayList<>());
+	}
 	
 	public String getConditionWithPlaceholders() {
 		return conditionWithPlaceholders;

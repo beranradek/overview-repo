@@ -10,6 +10,8 @@ package cz.etn.overview.mapper;
 
 /**
  * Mapped attribute interface.
+ * @param <E> type of entity
+ * @param <A> type of attribute
  * @author Radek Beran
  */
 public interface Attribute<E, A> {

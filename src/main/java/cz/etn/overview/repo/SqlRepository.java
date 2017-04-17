@@ -14,10 +14,10 @@ public class SqlRepository<T extends Identifiable<K>, K, F extends Filter> exten
 
     private final DataSource dataSource;
 
-    private final EntityMapper<T> entityMapper;
+    private final EntityMapper<T, F> entityMapper;
 
 
-    public SqlRepository(DataSource dataSource, EntityMapper<T> entityMapper) {
+    public SqlRepository(DataSource dataSource, EntityMapper<T, F> entityMapper) {
         this.dataSource = dataSource;
         this.entityMapper = entityMapper;
     }
@@ -29,7 +29,7 @@ public class SqlRepository<T extends Identifiable<K>, K, F extends Filter> exten
     }
 
     @Override
-    protected EntityMapper<T> getEntityMapper() {
+    protected EntityMapper<T, F> getEntityMapper() {
         return entityMapper;
     }
 }

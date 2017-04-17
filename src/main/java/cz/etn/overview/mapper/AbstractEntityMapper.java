@@ -8,6 +8,8 @@
 
 package cz.etn.overview.mapper;
 
+import cz.etn.overview.Filter;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,7 +19,7 @@ import java.util.stream.Collectors;
  * Base interface for implementing entity mappers.
  * @author Radek Beran
  */
-public interface AbstractEntityMapper<T> extends EntityMapper<T> {
+public interface AbstractEntityMapper<T, F extends Filter> extends EntityMapper<T, F> {
 	
 	T createEntity();
 	

@@ -110,33 +110,6 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
         return dataSource;
     }
 
-    @Override
-    public List<FilterCondition> composeFilterConditions(VoucherCustomerFilter filter) {
-        List<FilterCondition> conditions = new ArrayList<>();
-        if (filter != null) {
-            String dataSet = getEntityMapper().getDataSet();
-            if (filter.getId() != null) {
-                conditions.add(FilterCondition.eq(getEntityMapper().id, filter.getId()));
-            }
-            if (filter.getImportFileName() != null) {
-                conditions.add(FilterCondition.eq(getEntityMapper().import_file_name, filter.getImportFileName()));
-            }
-            if (filter.getSoldBy() != null) {
-                conditions.add(FilterCondition.eq(getVoucherMapper().sold_by, filter.getSoldBy()));
-            }
-            if (filter.getCustomerIds() != null) {
-                conditions.add(FilterCondition.in(getEntityMapper().id.getNameFull(), CollectionFuns.toObjectList(filter.getCustomerIds())));
-            }
-            if (filter.getLatestInvoiceOfSeller() != null && filter.getLatestInvoiceOfSeller().booleanValue() && filter.getSoldBy() != null) {
-                String invoiceTimeAttrName = getVoucherMapper().invoice_time.getNameFull();
-                String soldByAttrName = getVoucherMapper().sold_by.getNameFull();
-                conditions.add(new FilterCondition(invoiceTimeAttrName + " IS NOT NULL AND " + invoiceTimeAttrName + "=(SELECT MAX(" + invoiceTimeAttrName + ") FROM " + getVoucherMapper().getDataSet() +
-                    " WHERE " + soldByAttrName + "=" + filter.getSoldBy() + ")", Lists.newArrayList()));
-            }
-        }
-        return conditions;
-    }
-
     private VoucherCustomer customerFromAttributeSource(AttributeSource attributeSource) {
         VoucherCustomer customer = getEntityMapper().buildEntity(attributeSource, getEntityMapper().getAliasPrefix());
         Voucher voucher = getVoucherMapper().buildEntity(attributeSource, getVoucherMapper().getAliasPrefix());

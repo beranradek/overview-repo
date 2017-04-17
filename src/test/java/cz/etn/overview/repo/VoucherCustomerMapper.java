@@ -8,21 +8,24 @@
 
 package cz.etn.overview.repo;
 
-
 import cz.etn.overview.domain.DiscountEmailType;
 import cz.etn.overview.domain.SendingState;
 import cz.etn.overview.domain.VoucherCustomer;
+import cz.etn.overview.domain.VoucherCustomerFilter;
+import cz.etn.overview.funs.CollectionFuns;
 import cz.etn.overview.mapper.AbstractEntityMapper;
 import cz.etn.overview.mapper.Attribute;
 import cz.etn.overview.mapper.AttributeSource;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Mapping of voucher customer attributes to database fields.
  * @author Radek Beran
  */
-public enum VoucherCustomerMapper implements AbstractEntityMapper<VoucherCustomer>, Attribute<VoucherCustomer, Object> {
+public enum VoucherCustomerMapper implements AbstractEntityMapper<VoucherCustomer, VoucherCustomerFilter>, Attribute<VoucherCustomer, Object> {
 	
 	id {
 		@Override
@@ -208,5 +211,20 @@ public enum VoucherCustomerMapper implements AbstractEntityMapper<VoucherCustome
 	@Override
 	public String getName() {
 		return name();
+	}
+
+	@Override
+	public List<FilterCondition> composeFilterConditions(VoucherCustomerFilter filter) {
+		List<FilterCondition> conditions = new ArrayList<>();
+		if (filter.getId() != null) {
+			conditions.add(FilterCondition.eq(id, filter.getId()));
+		}
+		if (filter.getImportFileName() != null) {
+			conditions.add(FilterCondition.eq(import_file_name, filter.getImportFileName()));
+		}
+		if (filter.getCustomerIds() != null) {
+			conditions.add(FilterCondition.in(id, CollectionFuns.toObjectList(filter.getCustomerIds())));
+		}
+		return conditions;
 	}
 }

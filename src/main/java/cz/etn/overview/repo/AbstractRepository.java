@@ -12,6 +12,7 @@ import cz.etn.overview.Filter;
 import cz.etn.overview.Order;
 import cz.etn.overview.Overview;
 import cz.etn.overview.Pagination;
+import cz.etn.overview.common.Pair;
 import cz.etn.overview.domain.Identifiable;
 import cz.etn.overview.funs.CheckedFunction;
 import cz.etn.overview.funs.CollectionFuns;
@@ -36,12 +37,6 @@ import java.util.stream.Collectors;
 public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends Filter> implements Repository<T, K, F> {
 
 	protected static final Logger log = LoggerFactory.getLogger(AbstractRepository.class);
-
-	// for inner implementation only
-	private static class Pair<A, B> {
-		A first;
-		B second;
-	}
 	
 	@Override
 	public T create(T entity, boolean autogenerateKey) {
@@ -58,13 +53,11 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 			
 			K generatedId = create(conn, sql, attributeValues, autogenerateKey);
 			
-			Pair<T, K> p = new Pair<>();
-			p.first = createdEntity;
-			p.second = generatedId;
+			Pair<T, K> p = new Pair<>(createdEntity, generatedId);
 			return p;
 		});
-		T createdEntity = entityAndKeyAfterCommit.first;
-		K generatedKey = entityAndKeyAfterCommit.second; 
+		T createdEntity = entityAndKeyAfterCommit.getFirst();
+		K generatedKey = entityAndKeyAfterCommit.getSecond();
 		if (autogenerateKey) {
 			createdEntity = entityUpdatedWithId(createdEntity, generatedKey);
 		}
@@ -112,7 +105,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 		return withNewConnection(conn -> {
 			String from = getEntityMapper().getDataSet();
 			StringBuilder sqlBuilder = new StringBuilder("DELETE FROM " + from);
-			List<Object> parameters = appendFilter(sqlBuilder, composeFilterConditions(filter));
+			List<Object> parameters = appendFilter(sqlBuilder, getEntityMapper().composeFilterConditions(filter));
 			return update(conn, sqlBuilder.toString(), parameters);
 		});
 	}
@@ -135,12 +128,12 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
         return withNewConnection(conn -> {
             String aggAttributeAlias = attrName + "_agg";
             List<R> results = queryWithOverview(conn,
-                    aggFunction(aggType, attrName) + " AS " + aggAttributeAlias,
-                    from,
-                    composeFilterConditions(filter),
-                    null,
-                    null,
-                    as -> as.get(resultClass, aggAttributeAlias));
+				aggFunction(aggType, attrName) + " AS " + aggAttributeAlias,
+				from,
+				getEntityMapper().composeFilterConditions(filter),
+				null,
+				null,
+				as -> as.get(resultClass, aggAttributeAlias));
             return results != null && !results.isEmpty() ? results.get(0) : null;
         });
     }
@@ -159,21 +152,12 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 	public List<T> findByOverview(final Overview<F> overview) {
 		List<String> attributeNames = getEntityMapper().getAttributeNames();
 		String from = getEntityMapper().getDataSet();
-		return findByOverview(overview, attributeNames, from, rs -> getEntityMapper().buildEntity(rs));
+		return findByOverview(overview, attributeNames, from, as -> getEntityMapper().buildEntity(as));
 	}
 
 	protected abstract DataSource getDataSource();
 
-	protected abstract EntityMapper<T> getEntityMapper();
-
-	/**
-	 * Should be overriden in subclasses to apply filtering updatedEntity in input filter.
-	 * @param filter
-	 * @return
-	 */
-	protected List<FilterCondition> composeFilterConditions(F filter) {
-		return new ArrayList<>();
-	}
+	protected abstract EntityMapper<T, F> getEntityMapper();
 
 	/**
 	 * Composes filter conditions to match primary key attributes.
@@ -229,7 +213,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 		}
 		return ordering;
 	}
-	
+
 	/**
 	 * @param overview
 	 * @param selectedAttributes
@@ -290,12 +274,12 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 	protected List<T> findByFilterConditions(List<FilterCondition> filterConditions, List<Order> ordering) {
 		return withNewConnection(conn -> {
 			return queryWithOverview(conn,
-					getEntityMapper().getAttributeNames(),
-					getEntityMapper().getDataSet(),
-					filterConditions,
-					ordering,
-					null,
-					as -> getEntityMapper().buildEntity(as));
+				getEntityMapper().getAttributeNames(),
+				getEntityMapper().getDataSet(),
+				filterConditions,
+				ordering,
+				null,
+				as -> getEntityMapper().buildEntity(as));
 		});
 	}
 
@@ -388,7 +372,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends
 		return queryWithOverview(conn,
 			selectedAttributes,
 			from,
-			filter != null ? composeFilterConditions(filter) : null,
+			filter != null ? getEntityMapper().composeFilterConditions(filter) : null,
 			ordering,
 			pagination,
 			entityBuilder);

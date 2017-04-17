@@ -27,7 +27,7 @@ public class Overview<T extends Filter> implements Serializable {
     private final Pagination pagination;
     
     public static <F extends Filter> Overview<F> empty() {
-    	return new Overview<>(null, new ArrayList<>(), null);
+    	return new Overview<>(null, null, null);
     }
 
     public Overview(T filter, List<Order> order, Pagination pagination) {

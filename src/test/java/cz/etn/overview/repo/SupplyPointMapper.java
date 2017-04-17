@@ -10,19 +10,22 @@ package cz.etn.overview.repo;
 
 import cz.etn.overview.domain.Address;
 import cz.etn.overview.domain.SupplyPoint;
+import cz.etn.overview.domain.SupplyPointFilter;
+import cz.etn.overview.funs.CollectionFuns;
 import cz.etn.overview.mapper.AbstractEntityMapper;
 import cz.etn.overview.mapper.Attribute;
 import cz.etn.overview.mapper.AttributeSource;
-import cz.etn.overview.mapper.EntityMapper;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Mapping of supply point attributes to database fields.
  * @author Radek Beran
  */
-public enum SupplyPointMapper implements AbstractEntityMapper<SupplyPoint>, Attribute<SupplyPoint, Object> {
+public enum SupplyPointMapper implements AbstractEntityMapper<SupplyPoint, SupplyPointFilter>, Attribute<SupplyPoint, Object> {
 	id {
 		@Override
 		public Object getValue(SupplyPoint instance) {
@@ -215,7 +218,7 @@ public enum SupplyPointMapper implements AbstractEntityMapper<SupplyPoint>, Attr
 	
 	private static final String DB_TABLE_NAME = "voucher_supply_point";
 	
-	public static final EntityMapper<SupplyPoint> INSTANCE = id; // any enum constant will suffice here
+	public static final SupplyPointMapper INSTANCE = id; // any enum constant will suffice here
 	
 	@Override
 	public Attribute<SupplyPoint, Object>[] getAttributes() {
@@ -235,6 +238,21 @@ public enum SupplyPointMapper implements AbstractEntityMapper<SupplyPoint>, Attr
 	@Override
 	public String getName() {
 		return name();
+	}
+
+	@Override
+	public List<FilterCondition> composeFilterConditions(SupplyPointFilter filter) {
+		List<FilterCondition> conditions = new ArrayList<>();
+		if (filter.getId() != null) {
+			conditions.add(FilterCondition.eq(id, filter.getId()));
+		}
+		if (filter.getCustomerId() != null) {
+			conditions.add(FilterCondition.eq(customer_id, filter.getCustomerId()));
+		}
+		if (filter.getCustomerIds() != null) {
+			conditions.add(FilterCondition.in(customer_id, CollectionFuns.toObjectList(filter.getCustomerIds())));
+		}
+		return conditions;
 	}
 	
 	protected void ensureAddressExists(SupplyPoint sp) {
