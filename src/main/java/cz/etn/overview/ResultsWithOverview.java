@@ -14,7 +14,7 @@ import java.util.List;
  * Immutable object if objects in result list are immutable.
  * @author Radek Beran
  */
-public class ResultsWithOverview<T, F extends Filter> {
+public class ResultsWithOverview<T, F> {
 
 	private final List<T> results;
 	

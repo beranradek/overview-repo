@@ -8,7 +8,6 @@
 
 package cz.etn.overview.mapper;
 
-import cz.etn.overview.Filter;
 import cz.etn.overview.funs.CollectionFuns;
 import cz.etn.overview.repo.FilterCondition;
 
@@ -24,7 +23,7 @@ import java.util.stream.Collectors;
  * @param <F> type of filter for filtering according to entity attributes
  * @author Radek Beran
  */
-public interface EntityMapper<T, F extends Filter> {
+public interface EntityMapper<T, F> {
 
 	/**
 	 * Name of database table/collection that contains entities.

@@ -8,7 +8,6 @@
 
 package cz.etn.overview.repo;
 
-import cz.etn.overview.Filter;
 import cz.etn.overview.Order;
 import cz.etn.overview.Overview;
 import cz.etn.overview.ResultsWithOverview;
@@ -22,7 +21,7 @@ import java.util.function.Function;
  * Abstract repository.
  * @author Radek Beran
  */
-public interface Repository<T, K, F extends Filter> {
+public interface Repository<T, K, F> {
 
 	/**
 	 * Creates new entity with given data.

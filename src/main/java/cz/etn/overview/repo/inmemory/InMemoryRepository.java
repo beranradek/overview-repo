@@ -8,13 +8,15 @@
 
 package cz.etn.overview.repo.inmemory;
 
-import cz.etn.overview.Filter;
 import cz.etn.overview.Overview;
 import cz.etn.overview.domain.Identifiable;
 import cz.etn.overview.repo.AggType;
 import cz.etn.overview.repo.Repository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -22,7 +24,7 @@ import java.util.stream.Collectors;
  * In-memory repository implementation intended to use in tests.
  * @author Radek Beran
  */
-public abstract class InMemoryRepository<T extends Identifiable<K>, K, F extends Filter> implements Repository<T, K, F> {
+public abstract class InMemoryRepository<T extends Identifiable<K>, K, F> implements Repository<T, K, F> {
 	
 	protected Set<T> records = ConcurrentHashMap.newKeySet(); // derived concurrent hash set
 	

@@ -7,15 +7,14 @@
  */
 package cz.etn.overview.domain;
 
+import java.io.Serializable;
 import java.util.List;
-
-import cz.etn.overview.Filter;
 
 /**
  * Filter of voucher customers.
  * @author Radek Beran
  */
-public class SupplyPointFilter implements Filter {
+public class SupplyPointFilter implements Serializable {
 	private static final long serialVersionUID = 4590219796927704612L;
 	private Long id;
 	

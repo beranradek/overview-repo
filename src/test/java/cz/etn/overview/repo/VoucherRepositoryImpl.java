@@ -8,7 +8,6 @@
 
 package cz.etn.overview.repo;
 
-import cz.etn.overview.Filter;
 import cz.etn.overview.domain.Voucher;
 import cz.etn.overview.mapper.EntityMapper;
 
@@ -19,7 +18,7 @@ import javax.sql.DataSource;
  * Default implementation of {@link VoucherRepository}. 
  * @author Radek Beran
  */
-public class VoucherRepositoryImpl extends AbstractRepository<Voucher, String, Filter> implements VoucherRepository {
+public class VoucherRepositoryImpl extends AbstractRepository<Voucher, String, Object> implements VoucherRepository {
 	
 	private final DataSource dataSource;
 
@@ -28,7 +27,7 @@ public class VoucherRepositoryImpl extends AbstractRepository<Voucher, String, F
 	}
 
 	@Override
-	protected EntityMapper<Voucher, Filter> getEntityMapper() {
+	protected EntityMapper<Voucher, Object> getEntityMapper() {
 		return VoucherMapper.getInstance();
 	}
 

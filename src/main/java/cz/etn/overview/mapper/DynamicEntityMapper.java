@@ -1,6 +1,5 @@
 package cz.etn.overview.mapper;
 
-import cz.etn.overview.Filter;
 import cz.etn.overview.common.Pair;
 import cz.etn.overview.repo.FilterCondition;
 import cz.etn.overview.repo.join.JoinType;
@@ -16,7 +15,7 @@ import java.util.function.Function;
  * Entity mapper with dynamic registration of attributes.
  * @author Radek Beran
  */
-public abstract class DynamicEntityMapper<T, F extends Filter> implements AbstractEntityMapper<T, F> {
+public abstract class DynamicEntityMapper<T, F> implements AbstractEntityMapper<T, F> {
 
     private final Map<String, Attribute<T, ?>> attributesByNames;
 
@@ -75,7 +74,7 @@ public abstract class DynamicEntityMapper<T, F extends Filter> implements Abstra
      * @param <H> type of resulting entity filter
      * @return mapper for joined entities
      */
-    public <U, G extends Filter, V, H extends Filter> DynamicEntityMapper<V, H> join(DynamicEntityMapper<U, G> secondMapper, List<FilterCondition> onConditions, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter, JoinType join) {
+    public <U, G, V, H> DynamicEntityMapper<V, H> join(DynamicEntityMapper<U, G> secondMapper, List<FilterCondition> onConditions, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter, JoinType join) {
         final DynamicEntityMapper<T, F> firstMapper = this;
         return new DynamicEntityMapper<V, H>() {
             @Override
@@ -111,7 +110,7 @@ public abstract class DynamicEntityMapper<T, F extends Filter> implements Abstra
         };
     }
 
-    public <U, G extends Filter, V, H extends F> DynamicEntityMapper<V, H> innerJoin(DynamicEntityMapper<U, G> secondMapper, List<FilterCondition> onConditions, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter) {
+    public <U, G, V, H> DynamicEntityMapper<V, H> innerJoin(DynamicEntityMapper<U, G> secondMapper, List<FilterCondition> onConditions, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter) {
         return join(secondMapper, onConditions, composeEntity, decomposeFilter, JoinType.INNER);
     }
 

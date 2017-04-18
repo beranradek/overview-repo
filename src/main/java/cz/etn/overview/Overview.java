@@ -15,22 +15,22 @@ import java.util.List;
  * Parameters for overview of domain objects. Immutable class if filter implementation is immutable.
  * @author Radek Beran
  */
-public class Overview<T extends Filter> implements Serializable {
+public class Overview<F> implements Serializable {
 	private static final long serialVersionUID = 6433561386638154113L;
 
 	/** Attributes for filtering. */
-    private final T filter;
+    private final F filter;
     
     /** Order specification. */
     private final List<Order> order;
 
     private final Pagination pagination;
     
-    public static <F extends Filter> Overview<F> empty() {
+    public static <F> Overview<F> empty() {
     	return new Overview<>(null, null, null);
     }
 
-    public Overview(T filter, List<Order> order, Pagination pagination) {
+    public Overview(F filter, List<Order> order, Pagination pagination) {
         this.filter = filter;
         this.order = order;
         this.pagination = pagination;
@@ -41,7 +41,7 @@ public class Overview<T extends Filter> implements Serializable {
      * @param f
      * @return
      */
-    public Overview<T> withFilter(T f) {
+    public Overview<F> withFilter(F f) {
     	return new Overview<>(f, this.order, this.pagination);
     }
     
@@ -50,7 +50,7 @@ public class Overview<T extends Filter> implements Serializable {
      * @param ordering
      * @return
      */
-    public Overview<T> withOrder(List<Order> ordering) {
+    public Overview<F> withOrder(List<Order> ordering) {
     	return new Overview<>(this.filter, ordering, this.pagination);
     }
     
@@ -58,7 +58,7 @@ public class Overview<T extends Filter> implements Serializable {
      * Returns new instance/copy of overview with empty pagination set.
      * @return
      */
-    public Overview<T> withEmptyPagination() {
+    public Overview<F> withEmptyPagination() {
     	return new Overview<>(this.filter, this.order, null);
     }
     
@@ -67,7 +67,7 @@ public class Overview<T extends Filter> implements Serializable {
      * @param pag
      * @return
      */
-    public Overview<T> withPagination(Pagination pag) {
+    public Overview<F> withPagination(Pagination pag) {
     	return new Overview<>(this.filter, this.order, pag);
     }
     
@@ -75,7 +75,7 @@ public class Overview<T extends Filter> implements Serializable {
      * Returns new instance/copy of overview with empty ordering set.
      * @return
      */
-    public Overview<T> withEmptyOrdering() {
+    public Overview<F> withEmptyOrdering() {
     	return new Overview<>(this.filter, new ArrayList<>(), this.pagination);
     }
 
@@ -83,7 +83,7 @@ public class Overview<T extends Filter> implements Serializable {
      * Filter settings.
      * @return
      */
-    public T getFilter() {
+    public F getFilter() {
         return filter;
     }
 

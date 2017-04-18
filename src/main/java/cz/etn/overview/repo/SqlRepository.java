@@ -1,6 +1,5 @@
 package cz.etn.overview.repo;
 
-import cz.etn.overview.Filter;
 import cz.etn.overview.domain.Identifiable;
 import cz.etn.overview.mapper.EntityMapper;
 
@@ -10,7 +9,7 @@ import javax.sql.DataSource;
  * Full implementation of SQL repository using {@link EntityMapper}.
  * @author Radek Beran
  */
-public class SqlRepository<T extends Identifiable<K>, K, F extends Filter> extends AbstractRepository<T, K, F> {
+public class SqlRepository<T extends Identifiable<K>, K, F> extends AbstractRepository<T, K, F> {
 
     private final DataSource dataSource;
 

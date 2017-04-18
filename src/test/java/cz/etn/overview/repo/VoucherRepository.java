@@ -8,13 +8,12 @@
 
 package cz.etn.overview.repo;
 
-import cz.etn.overview.Filter;
 import cz.etn.overview.domain.Voucher;
 
 /**
  * Voucher repository.
  * @author Radek Beran
  */
-public interface VoucherRepository extends Repository<Voucher, String, Filter> {
+public interface VoucherRepository extends Repository<Voucher, String, Object> {
 	// nothing new here
 }

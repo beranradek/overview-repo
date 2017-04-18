@@ -8,7 +8,6 @@
 
 package cz.etn.overview.repo;
 
-import cz.etn.overview.Filter;
 import cz.etn.overview.Order;
 import cz.etn.overview.Overview;
 import cz.etn.overview.Pagination;
@@ -34,7 +33,7 @@ import java.util.stream.Collectors;
  * Basic abstract implementation of {@link Repository}.
  * @author Radek Beran
  */
-public abstract class AbstractRepository<T extends Identifiable<K>, K, F extends Filter> implements Repository<T, K, F> {
+public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implements Repository<T, K, F> {
 
 	protected static final Logger log = LoggerFactory.getLogger(AbstractRepository.class);
 	

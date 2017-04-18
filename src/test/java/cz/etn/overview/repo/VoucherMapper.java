@@ -9,7 +9,6 @@
 package cz.etn.overview.repo;
 
 
-import cz.etn.overview.Filter;
 import cz.etn.overview.domain.Voucher;
 import cz.etn.overview.mapper.Attr;
 import cz.etn.overview.mapper.Attribute;
@@ -24,7 +23,7 @@ import java.util.List;
  * Mapping of voucher attributes to database attributes.
  * @author Radek Beran
  */
-public class VoucherMapper extends DynamicEntityMapper<Voucher, Filter> {
+public class VoucherMapper extends DynamicEntityMapper<Voucher, Object> {
 
 	/** Mapped entity class. */
 	private static final Class<Voucher> cls = Voucher.class;
@@ -78,7 +77,7 @@ public class VoucherMapper extends DynamicEntityMapper<Voucher, Filter> {
 	}
 
 	@Override
-	public List<FilterCondition> composeFilterConditions(Filter filter) {
+	public List<FilterCondition> composeFilterConditions(Object filter) {
 		return new ArrayList<>();
 	}
 }
