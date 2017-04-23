@@ -70,7 +70,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 			String attributeNamesEqToPlaceholders = getEntityMapper().getAttributeNamesEqToPlaceholdersCommaSeparated();
 
 			StringBuilder sqlBuilder = new StringBuilder("UPDATE " + getEntityMapper().getDataSet() + " SET " + attributeNamesEqToPlaceholders);
-			List<Object> primaryKeyParameters = appendFilter(sqlBuilder, composeFilterConditionsForPrimaryKey(entity));
+			List<Object> primaryKeyParameters = appendFilter(sqlBuilder, getEntityMapper().composePrimaryKeyFilterConditions(entity));
 			String sql = sqlBuilder.toString();
 
 			final List<Object> parameterValues = new ArrayList<>();
@@ -90,7 +90,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 		Objects.requireNonNull(id, "id should be specified");
 		return withNewConnection(conn -> {
 			StringBuilder sqlBuilder = new StringBuilder("DELETE FROM " + getEntityMapper().getDataSet());
-			List<Object> primaryKeyParameters = appendFilter(sqlBuilder, composeFilterConditionsForPrimaryKey(id));
+			List<Object> primaryKeyParameters = appendFilter(sqlBuilder, getEntityMapper().composeFilterConditionsForPrimaryKey(id));
 			String sql = sqlBuilder.toString();
 			
 			int updatedCount = update(conn, sql, primaryKeyParameters);
@@ -109,97 +109,68 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 		});
 	}
 
+	/**
+	 * Returns aggregated values of given attribute for given filter.
+	 * @param aggType aggregation type
+	 * @param resultClass
+	 * @param attrName
+	 * @param filter
+	 * @param entityMapper
+	 * @param <R>
+	 * @return
+	 */
+	@Override
+	public <R, T, F> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter, EntityMapper<T, F> entityMapper) {
+		Objects.requireNonNull(aggType, "aggregation type should be specified");
+		Objects.requireNonNull(resultClass, "result class should be specified");
+		Objects.requireNonNull(attrName, "attribute name should be specified");
+
+		return withNewConnection(conn -> {
+			String aggAttributeAlias = attrName + "_agg";
+			List<R> results = queryWithOverview(conn,
+				aggFunction(aggType, attrName) + " AS " + aggAttributeAlias,
+				entityMapper.getDataSet(),
+				entityMapper.composeFilterConditions(filter),
+				null,
+				null,
+				as -> as.get(resultClass, aggAttributeAlias));
+			return results != null && !results.isEmpty() ? results.get(0) : null;
+		});
+	}
+
     /**
      * Returns aggregated values of given attribute for given filter.
      * @param aggType aggregation type
      * @param resultClass
      * @param attrName
      * @param filter
-     * @param from
      * @param <R>
      * @return
      */
-    protected <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter, String from) {
-        Objects.requireNonNull(aggType, "aggregation type should be specified");
-        Objects.requireNonNull(resultClass, "result class should be specified");
-        Objects.requireNonNull(attrName, "attribute name should be specified");
-
-        return withNewConnection(conn -> {
-            String aggAttributeAlias = attrName + "_agg";
-            List<R> results = queryWithOverview(conn,
-				aggFunction(aggType, attrName) + " AS " + aggAttributeAlias,
-				from,
-				getEntityMapper().composeFilterConditions(filter),
-				null,
-				null,
-				as -> as.get(resultClass, aggAttributeAlias));
-            return results != null && !results.isEmpty() ? results.get(0) : null;
-        });
+    @Override
+    public <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter) {
+        return aggByFilter(aggType, resultClass, attrName, filter, getEntityMapper());
     }
 
 	@Override
-	public <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter) {
-		return aggByFilter(aggType, resultClass, attrName, filter, getEntityMapper().getDataSet());
+	public <T, K, F>  Optional<T> findById(K id, EntityMapper<T, F> entityMapper) {
+		return CollectionFuns.headOpt(findByFilterConditions(entityMapper.composeFilterConditionsForPrimaryKey(id), null, entityMapper));
 	}
 
 	@Override
-	public Optional<T> findById(K id) {
-		return CollectionFuns.headOpt(findByFilterConditions(composeFilterConditionsForPrimaryKey(id), null));
+	public <T, F> List<T> findByOverview(final Overview<F> overview, EntityMapper<T, F> entityMappper) {
+		List<String> attributeNames = entityMappper.getAttributeNames();
+		String from = entityMappper.getDataSet();
+		List<Condition> filterConditions = overview.getFilter() != null ? entityMappper.composeFilterConditions(overview.getFilter()) : new ArrayList<>();
+		return findByOverview(filterConditions, overview.getOrder(), overview.getPagination(), attributeNames, from, as -> entityMappper.buildEntity(as));
 	}
 	
 	@Override
 	public List<T> findByOverview(final Overview<F> overview) {
-		List<String> attributeNames = getEntityMapper().getAttributeNames();
-		String from = getEntityMapper().getDataSet();
-		return findByOverview(overview, attributeNames, from, as -> getEntityMapper().buildEntity(as));
+		return findByOverview(overview, getEntityMapper());
 	}
 
 	protected abstract DataSource getDataSource();
-
-	protected abstract EntityMapper<T, F> getEntityMapper();
-
-	/**
-	 * Composes filter conditions to match primary key attributes.
-	 * @param id
-	 * @return
-	 */
-	protected List<FilterCondition> composeFilterConditionsForPrimaryKey(K id) {
-		List<FilterCondition> conditions = new ArrayList<>();
-		List<String> names = getEntityMapper().getPrimaryAttributeNames();
-		if (names.size() == 1) {
-			conditions.add(FilterCondition.eq(names.get(0), id));
-		} else {
-			// composed primary key
-			conditions.addAll(composeFilterConditionsForCompositePrimaryKey(id));
-		}
-		return conditions;
-	}
-
-	/**
-	 * Composes filter conditions to match primary key attributes.
-	 * @param entity
-	 * @return
-	 */
-	protected List<FilterCondition> composeFilterConditionsForPrimaryKey(T entity) {
-		List<FilterCondition> conditions = new ArrayList<>();
-		List<String> names = getEntityMapper().getPrimaryAttributeNames();
-		List<Object> values = getEntityMapper().getPrimaryAttributeValues(entity);
-		for (int i = 0; i < names.size(); i++) {
-			String attrName = names.get(i);
-			Object attrValue = values.get(i);
-			conditions.add(FilterCondition.eq(attrName, attrValue));
-		}
-		return conditions;
-	}
-
-	/**
-	 * Composes filter conditions to match primary key attributes.
-	 * @param id
-	 * @return
-	 */
-	protected List<FilterCondition> composeFilterConditionsForCompositePrimaryKey(K id) {
-		throw new UnsupportedOperationException("Decomposition of composite key to filter conditions is not implemented. Key: " + id);
-	}
 
 	protected List<Order> composeOrderingForPrimaryKey() {
 		List<Order> ordering = new ArrayList<>();
@@ -213,25 +184,25 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 		return ordering;
 	}
 
-	/**
-	 * @param overview
-	 * @param selectedAttributes
-	 * @param from
-	 * @param entityBuilder
-	 * @return
-	 */
-	protected List<T> findByOverview(final Overview<F> overview, List<String> selectedAttributes, String from, Function<AttributeSource, T> entityBuilder) {
-		Objects.requireNonNull(overview, "overview should be specified");
+	protected List<T> findByOverview(Overview<F> overview, List<String> selectedAttributes, String from) {
+		return findByOverview(
+			overview.getFilter() != null ? getEntityMapper().composeFilterConditions(overview.getFilter()) : null,
+			overview.getOrder(),
+			overview.getPagination(),
+			selectedAttributes,
+			from,
+			as -> getEntityMapper().buildEntity(as)
+		);
+	}
+
+	protected <T> List<T> findByOverview(List<Condition> filterConditions, List<Order> ordering, Pagination pagination, List<String> selectedAttributes, String from, Function<AttributeSource, T> entityBuilder) {
 		return withNewConnection(conn -> {
-			
-			final List<Order> ordering = (overview.getOrder() == null || overview.getOrder().isEmpty()) ? createDefaultOrdering() : overview.getOrder();
-			
 			return queryWithOverview(conn, 
 				selectedAttributes, 
 				from,
-				overview.getFilter(),
-				ordering,
-				overview.getPagination(),
+				filterConditions,
+				(ordering == null || ordering.isEmpty()) ? createDefaultOrdering() : ordering,
+				pagination,
 				entityBuilder);
 		});
 	}
@@ -270,15 +241,19 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 		return result;
 	}
 
-	protected List<T> findByFilterConditions(List<FilterCondition> filterConditions, List<Order> ordering) {
+	protected List<T> findByFilterConditions(List<Condition> filterConditions, List<Order> ordering) {
+		return findByFilterConditions(filterConditions, ordering, getEntityMapper());
+	}
+
+	protected <T, F> List<T> findByFilterConditions(List<Condition> filterConditions, List<Order> ordering, EntityMapper<T, F> entityMapper) {
 		return withNewConnection(conn -> {
 			return queryWithOverview(conn,
-				getEntityMapper().getAttributeNames(),
-				getEntityMapper().getDataSet(),
-				filterConditions,
-				ordering,
-				null,
-				as -> getEntityMapper().buildEntity(as));
+					entityMapper.getAttributeNames(),
+					entityMapper.getDataSet(),
+					filterConditions,
+					ordering,
+					null,
+					as -> entityMapper.buildEntity(as));
 		});
 	}
 
@@ -291,8 +266,8 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 	 */
 	protected <U> Optional<T> findByAttributeValue(String attrName, U attrValue) {
 		Objects.requireNonNull(attrValue, attrName + " value should be specified");
-		List<FilterCondition> conditions = new ArrayList<>();
-		conditions.add(FilterCondition.eq(attrName, attrValue));
+		List<Condition> conditions = new ArrayList<>();
+		conditions.add(Condition.eq(attrName, attrValue));
 		return CollectionFuns.headOpt(findByFilterConditions(conditions, createDefaultOrdering()));
 	}
 	
@@ -363,25 +338,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 	protected <T> List<T> queryWithOverview(Connection conn,
 		List<String> selectedAttributes,
 		String from,
-		F filter,
-		List<Order> ordering,
-		Pagination pagination,
-		Function<AttributeSource, T> entityBuilder) {
-
-		return queryWithOverview(conn,
-			selectedAttributes,
-			from,
-			filter != null ? getEntityMapper().composeFilterConditions(filter) : null,
-			ordering,
-			pagination,
-			entityBuilder);
-	}
-
-	// Custom T type is used, this method should be independent on entity type (can be used to load specific attribute type).
-	protected <T> List<T> queryWithOverview(Connection conn,
-		List<String> selectedAttributes,
-		String from,
-		List<FilterCondition> filterConditions,
+		List<Condition> filterConditions,
 		List<Order> ordering,
 		Pagination pagination,
 		Function<AttributeSource, T> entityBuilder) {
@@ -400,7 +357,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 	protected <T> List<T> queryWithOverview(Connection conn,
 		String selection,
 		String from,
-		List<FilterCondition> filterConditions,
+		List<Condition> filterConditions,
 		List<Order> ordering,
 		Pagination pagination,
 		Function<AttributeSource, T> entityBuilder) {
@@ -433,7 +390,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 		return results;
 	}
 
-	protected List<Object> appendFilter(StringBuilder sqlBuilder, List<FilterCondition> filterConditions) {
+	protected List<Object> appendFilter(StringBuilder sqlBuilder, List<Condition> filterConditions) {
 		List<Object> parameters = null;
 		if (filterConditions != null && !filterConditions.isEmpty()) {
 			List<String> whereClause = filterConditions.stream().map(c -> c.getConditionWithPlaceholders()).collect(Collectors.toList());

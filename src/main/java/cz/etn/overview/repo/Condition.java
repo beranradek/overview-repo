@@ -17,10 +17,10 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Condition for SQL WHERE clause.
+ * Condition for SQL WHERE clause or JOIN ON clause.
  * @author Radek Beran
  */
-public final class FilterCondition {
+public final class Condition {
 
 	public static final String CONTAINS_WITH_PLACEHOLDER = "LIKE CONCAT('%', ?, '%')";
 	public static final List<Object> EMPTY_VALUES = Collections.unmodifiableList(new ArrayList<>());
@@ -33,7 +33,7 @@ public final class FilterCondition {
 	 * @param value
 	 * @return
 	 */
-	public static FilterCondition eq(Attribute<?, ?> attribute, Object value) {
+	public static Condition eq(Attribute<?, ?> attribute, Object value) {
 		return eq(attribute.getNameFull(), value);
 	}
 
@@ -43,10 +43,30 @@ public final class FilterCondition {
 	 * @param value
 	 * @return
 	 */
-	public static FilterCondition eq(String attrName, Object value) {
+	public static Condition eq(String attrName, Object value) {
 		List<Object> values = new ArrayList<>();
 		values.add(value);
-		return new FilterCondition(attrName + "=?", values);
+		return new Condition(attrName + "=?", values);
+	}
+
+	/**
+	 * Equals condition for two attributes.
+	 * @param attribute1
+	 * @param attribute2
+	 * @return
+	 */
+	public static Condition eqAttributes(Attribute<?, ?> attribute1, Attribute<?, ?> attribute2) {
+		return eqAttributes(attribute1.getNameFull(), attribute2.getNameFull());
+	}
+
+	/**
+	 * Equals condition for two attributes.
+	 * @param attr1Name
+	 * @param attr2Name
+	 * @return
+	 */
+	public static Condition eqAttributes(String attr1Name, String attr2Name) {
+		return new Condition(attr1Name + "=" + attr2Name, EMPTY_VALUES);
 	}
 
 	/**
@@ -54,7 +74,7 @@ public final class FilterCondition {
 	 * @param attribute
 	 * @return
 	 */
-	public static FilterCondition nullValue(Attribute<?, ?> attribute) {
+	public static Condition nullValue(Attribute<?, ?> attribute) {
 		return nullValue(attribute.getNameFull());
 	}
 
@@ -63,8 +83,8 @@ public final class FilterCondition {
 	 * @param attrName
 	 * @return
 	 */
-	public static FilterCondition nullValue(String attrName) {
-		return new FilterCondition(attrName + " IS NULL", new ArrayList<>());
+	public static Condition nullValue(String attrName) {
+		return new Condition(attrName + " IS NULL", new ArrayList<>());
 	}
 
 	/**
@@ -73,7 +93,7 @@ public final class FilterCondition {
 	 * @param value
 	 * @return
 	 */
-	public static FilterCondition contains(Attribute<?, ?> attribute, Object value) {
+	public static Condition contains(Attribute<?, ?> attribute, Object value) {
 		return contains(attribute.getNameFull(), value);
 	}
 
@@ -83,10 +103,10 @@ public final class FilterCondition {
 	 * @param value
 	 * @return
 	 */
-	public static FilterCondition contains(String attrName, Object value) {
+	public static Condition contains(String attrName, Object value) {
 		List<Object> values = new ArrayList<>();
 		values.add(value);
-		return new FilterCondition(attrName + " " + CONTAINS_WITH_PLACEHOLDER, values);
+		return new Condition(attrName + " " + CONTAINS_WITH_PLACEHOLDER, values);
 	}
 
 	/**
@@ -95,7 +115,7 @@ public final class FilterCondition {
 	 * @param values
 	 * @return
 	 */
-	public static FilterCondition in(Attribute<?, ?> attribute, List<Object> values) {
+	public static Condition in(Attribute<?, ?> attribute, List<Object> values) {
 		return in(attribute.getNameFull(), values);
 	}
 
@@ -105,25 +125,25 @@ public final class FilterCondition {
 	 * @param values
 	 * @return
 	 */
-	public static FilterCondition in(String attrName, List<Object> values) {
-		FilterCondition condition = null;
+	public static Condition in(String attrName, List<Object> values) {
+		Condition condition = null;
 		if (values != null && !values.isEmpty()) {
 			String[] placeholders = new String[values.size()];
 			Arrays.fill(placeholders, "?");
-			condition = new FilterCondition(attrName + " IN (" + CollectionFuns.join(Arrays.asList(placeholders), ", ") + ")", values);
+			condition = new Condition(attrName + " IN (" + CollectionFuns.join(Arrays.asList(placeholders), ", ") + ")", values);
 		} else {
 			// empty values for IN, value of attribute is certainly not among empty values
-			condition = new FilterCondition("1=0", EMPTY_VALUES);
+			condition = new Condition("1=0", EMPTY_VALUES);
 		}
 		return condition;
 	}
 	
-	public FilterCondition(String conditionWithPlaceholders, List<Object> values) {
+	public Condition(String conditionWithPlaceholders, List<Object> values) {
 		this.conditionWithPlaceholders = conditionWithPlaceholders;
 		this.values = values;
 	}
 
-	public FilterCondition(String conditionWithPlaceholders) {
+	public Condition(String conditionWithPlaceholders) {
 		this(conditionWithPlaceholders, new ArrayList<>());
 	}
 	

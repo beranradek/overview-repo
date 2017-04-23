@@ -1,11 +1,5 @@
 package cz.etn.overview.repo.join;
 
-import cz.etn.overview.mapper.EntityMapper;
-import cz.etn.overview.repo.FilterCondition;
-
-import java.util.List;
-import java.util.function.BiFunction;
-
 /**
  * Specification of entity join operation.
  * @type T type of first entity

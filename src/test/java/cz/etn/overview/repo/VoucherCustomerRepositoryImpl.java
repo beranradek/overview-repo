@@ -11,16 +11,19 @@ package cz.etn.overview.repo;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import cz.etn.overview.Overview;
-import cz.etn.overview.domain.*;
+import cz.etn.overview.common.Pair;
+import cz.etn.overview.domain.SendingState;
+import cz.etn.overview.domain.SupplyPoint;
+import cz.etn.overview.domain.VoucherCustomer;
+import cz.etn.overview.domain.VoucherCustomerFilter;
 import cz.etn.overview.funs.CollectionFuns;
-import cz.etn.overview.mapper.AttributeSource;
-import org.apache.commons.lang3.tuple.Pair;
+import cz.etn.overview.mapper.EntityMapper;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Default implementation of {@link VoucherCustomerRepository}.
@@ -38,8 +41,8 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
     }
 
     @Override
-    protected VoucherCustomerMapper getEntityMapper() {
-        return VoucherCustomerMapper.INSTANCE;
+    public VoucherCustomerMapper getEntityMapper() {
+        return VoucherCustomerMapper.getInstance();
     }
 
     @Override
@@ -53,7 +56,7 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
     public Optional<VoucherCustomer> findById(Integer id) {
         VoucherCustomerFilter filter = new VoucherCustomerFilter();
         filter.setId(id);
-        return CollectionFuns.headOpt(findByOverview(new Overview<>(filter, null, null)));
+        return CollectionFuns.headOpt(findByFilter(filter));
     }
 
     /**
@@ -64,16 +67,15 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
         Objects.requireNonNull(overview, "overview should be specified");
         // First load customers joined with (optional) vouchers
         // Resulting records are suitable for directly applying pagination settings
-        Pair<List<String>, String> attrsAndFrom = joinedSelectionAndFrom();
-        List<VoucherCustomer> customers = findByOverview(overview, attrsAndFrom.getLeft(), attrsAndFrom.getRight(), attributeSource -> customerFromAttributeSource(attributeSource));
+        List<VoucherCustomer> customers = findByOverview(overview, getCustomerLeftJoinVoucherMapper());
 
         // Lazy loading of related supply points using one additional query (if they would be joined with customers in one query, it would break pagination limit)
-        List<Integer> customerIds = Lists.newArrayList(Iterables.transform(customers, c -> c.getId()));
+        List<Integer> customerIds = customers.stream().map(c -> c.getId()).collect(Collectors.toList());
         List<SupplyPoint> supplyPoints = supplyPointDao.findByCustomerIds(customerIds);
 
         // Append supply points to customers
         for (VoucherCustomer customer : customers) {
-            Iterable<SupplyPoint> supplyPointsOfCustomer = Iterables.filter(supplyPoints, sp -> sp.getCustomerId() != null && sp.getCustomerId().equals(customer.getId()));
+            Iterable<SupplyPoint> supplyPointsOfCustomer = Iterables.filter(supplyPoints, sp -> customer.getId().equals(sp.getCustomerId()));
             customer.setSupplyPoints(Lists.newArrayList(supplyPointsOfCustomer));
         }
 
@@ -85,24 +87,7 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
      */
     @Override
     public <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, VoucherCustomerFilter filter) {
-        Pair<List<String>, String> attributesAndFrom = joinedSelectionAndFrom();
-        return super.aggByFilter(aggType, resultClass, attrName, filter, attributesAndFrom.getRight());
-    }
-
-    /**
-     * Returns select clause and from clause for joined customer with voucher data.
-     * @return
-     */
-    protected Pair<List<String>, String> joinedSelectionAndFrom() {
-        List<String> dbAttributesJoined = new ArrayList<>();
-        dbAttributesJoined.addAll(getEntityMapper().getAttributeNamesFullAliased());
-        dbAttributesJoined.addAll(getVoucherMapper().getAttributeNamesFullAliased());
-
-        String fromJoined = getEntityMapper().getDataSet() +
-            " LEFT JOIN " + getVoucherMapper().getDataSet() +
-            " ON (" + getEntityMapper().id.getNameFull() + "=" + getVoucherMapper().reserved_by.getNameFull() + ")";
-
-        return Pair.of(dbAttributesJoined, fromJoined);
+        return super.aggByFilter(aggType, resultClass, attrName, filter, getCustomerLeftJoinVoucherMapper());
     }
 
     @Override
@@ -110,15 +95,12 @@ public class VoucherCustomerRepositoryImpl extends AbstractRepository<VoucherCus
         return dataSource;
     }
 
-    private VoucherCustomer customerFromAttributeSource(AttributeSource attributeSource) {
-        VoucherCustomer customer = getEntityMapper().buildEntity(attributeSource, getEntityMapper().getAliasPrefix());
-        Voucher voucher = getVoucherMapper().buildEntity(attributeSource, getVoucherMapper().getAliasPrefix());
-
-        // Join the object representation of customer with voucher
-        if (voucher.getId() != null && !voucher.getId().isEmpty()) {
-            customer.setVoucher(voucher);
-        }
-        return customer;
+    protected EntityMapper<VoucherCustomer, VoucherCustomerFilter> getCustomerLeftJoinVoucherMapper() {
+        return getEntityMapper().leftJoin(getVoucherMapper(),
+            Condition.eqAttributes(getEntityMapper().id, getVoucherMapper().reserved_by), // ON condition
+            (customer, voucher) -> { customer.setVoucher(voucher); return customer; }, // joined entity composition
+            filter -> new Pair<>(filter, filter) // filter decomposition to first and second entity filters
+        );
     }
 
     private VoucherMapper getVoucherMapper() {

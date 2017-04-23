@@ -10,8 +10,10 @@ package cz.etn.overview;
 
 import cz.etn.overview.domain.DiscountEmailType;
 import cz.etn.overview.domain.SupplyPoint;
+import cz.etn.overview.domain.Voucher;
 import cz.etn.overview.domain.VoucherCustomer;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +26,6 @@ public class VoucherCustomerTestData {
 
 	public VoucherCustomer newVoucherCustomer(String email, String firstName, String lastName) {
 		VoucherCustomer voucherCustomer = new VoucherCustomer();
-		voucherCustomer.setId(1);
 		voucherCustomer.setCreationTime(Instant.now());
 		voucherCustomer.setEmail(email);
 		voucherCustomer.setFirstName(firstName);
@@ -38,9 +39,20 @@ public class VoucherCustomerTestData {
 		return voucherCustomer;
 	}
 	
-	private SupplyPoint createSupplyPoint(String code) {
+	public SupplyPoint createSupplyPoint(String code) {
 		SupplyPoint sp = new SupplyPoint();
 		sp.setCode(code);
 		return sp;
+	}
+
+	public Voucher createVoucher(String code, String reservedBy) {
+		Voucher voucher = new Voucher();
+		voucher.setCode(code);
+		Instant creationTime = Instant.now();
+		voucher.setCreationTime(creationTime);
+		voucher.setValidFrom(creationTime);
+		voucher.setValidFrom(creationTime.plus(Duration.ofDays(90)));
+		voucher.setReservedBy(reservedBy);
+		return voucher;
 	}
 }

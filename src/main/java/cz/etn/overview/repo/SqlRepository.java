@@ -28,7 +28,7 @@ public class SqlRepository<T extends Identifiable<K>, K, F> extends AbstractRepo
     }
 
     @Override
-    protected EntityMapper<T, F> getEntityMapper() {
+    public EntityMapper<T, F> getEntityMapper() {
         return entityMapper;
     }
 }

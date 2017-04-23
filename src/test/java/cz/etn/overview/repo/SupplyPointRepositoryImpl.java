@@ -11,7 +11,6 @@ package cz.etn.overview.repo;
 import cz.etn.overview.Order;
 import cz.etn.overview.domain.SupplyPoint;
 import cz.etn.overview.domain.SupplyPointFilter;
-import cz.etn.overview.mapper.EntityMapper;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
@@ -30,8 +29,8 @@ public class SupplyPointRepositoryImpl extends AbstractRepository<SupplyPoint, I
 	}
 	
 	@Override
-	protected EntityMapper<SupplyPoint, SupplyPointFilter> getEntityMapper() {
-		return SupplyPointMapper.INSTANCE;
+	public SupplyPointMapper getEntityMapper() {
+		return SupplyPointMapper.getInstance();
 	}
 
 	@Override
@@ -42,7 +41,7 @@ public class SupplyPointRepositoryImpl extends AbstractRepository<SupplyPoint, I
 	@Override
 	public List<SupplyPoint> findByCustomerIds(List<Integer> customerIds) {
 		List<Order> ordering = new ArrayList<>();
-		ordering.add(new Order(SupplyPointMapper.code.getNameFull(), false));
+		ordering.add(new Order(getEntityMapper().code.getNameFull(), false));
 		SupplyPointFilter filter = new SupplyPointFilter();
 		filter.setCustomerIds(customerIds);
 		return findByFilter(filter, ordering);

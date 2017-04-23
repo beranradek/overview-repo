@@ -41,13 +41,11 @@ public interface Attribute<E, A> {
 
 	/**
 	 * <p>Returns copy of this attribute with given name prefix set.
-	 * <p>This should be overridden by subclasses if prefixes should be supported. Default implementation returns {@code this} attribute.
+	 * <p>This should be overridden by subclasses if prefixes should be supported.
 	 * @param namePrefix
 	 * @return
 	 */
-	default Attribute<E, A> withNamePrefix(String namePrefix) {
-		return this;
-	}
+	Attribute<E, A> withNamePrefix(String namePrefix);
 
 	/**
 	 * Returns instance of entity updated with given attribute.

@@ -1,7 +1,11 @@
 # Changelog
 
-## [1.0.12] - 2017-?-?
+## [1.0.13] - 2017-x-y
+- What is new?
+
+## [1.0.12] - 2017-04-23
 - General agg method in repository.
+- Inner/left/right outer joins implemented as compositions of mappers to allow fetching of related entities as one composed (pageable) entity, with almost no effort (only simple join specification is needed when composing the mappers).
 
 ## [1.0.11] - 2017-04-06
 - Method for partial update.

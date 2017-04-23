@@ -9,7 +9,6 @@
 package cz.etn.overview.mapper;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,14 +17,12 @@ import java.util.stream.Collectors;
  * @author Radek Beran
  */
 public interface AbstractEntityMapper<T, F> extends EntityMapper<T, F> {
-	
-	T createEntity();
-	
-	Attribute<T, ?>[] getAttributes();
+
+	List<Attribute<T, ?>> getAttributes();
 
 	default List<Attribute<T, ?>> getPrimaryAttributes() {
 		List<Attribute<T, ?>> primAttrs = new ArrayList<>();
-		Attribute<T, ?>[] attributes = getAttributes();
+		List<Attribute<T, ?>> attributes = getAttributes();
 		if (attributes != null) {
 			for (Attribute<T, ?> attr : attributes) {
 				if (attr.isPrimary()) {
@@ -48,15 +45,14 @@ public interface AbstractEntityMapper<T, F> extends EntityMapper<T, F> {
 	
 	@Override
 	default List<String> getAttributeNames() {
-		return Arrays.asList(getAttributes()).stream().map(v -> v.getName()).collect(Collectors.toList());
+		return getAttributes().stream().map(v -> v.getName()).collect(Collectors.toList());
 	}
 
 	@Override
 	default List<String> getAttributeNamesFullAliased() {
-		String prefix = getDataSet();
 		String aliasPrefix = getAliasPrefix();
-		return Arrays.asList(getAttributes()).stream()
-			.map(v -> (prefix + "." + v.getName() + (aliasPrefix != null ? (" AS " + aliasPrefix + v.getName()) : "")))
+		return getAttributes().stream()
+			.map(v -> (v.getNameFull() + (aliasPrefix != null ? (" AS " + aliasPrefix + v.getName()) : "")))
 			.collect(Collectors.toList());
 	}
 	
@@ -80,7 +76,8 @@ public interface AbstractEntityMapper<T, F> extends EntityMapper<T, F> {
 				}
 				instance = attr.entityWithAttribute(instance, attributeSource, attr.getName(alias));
 			}
-			return instance;
+			boolean primaryKeyFilled = getPrimaryAttributeValues(instance).stream().anyMatch(v -> v != null);
+			return primaryKeyFilled ? instance : null;
 		} catch (Exception ex) {
 			throw new RuntimeException(ex.getMessage(), ex);
 		}

@@ -11,6 +11,7 @@ package cz.etn.overview.repo;
 import cz.etn.overview.Order;
 import cz.etn.overview.Overview;
 import cz.etn.overview.ResultsWithOverview;
+import cz.etn.overview.mapper.EntityMapper;
 
 import java.util.List;
 import java.util.Objects;
@@ -22,6 +23,8 @@ import java.util.function.Function;
  * @author Radek Beran
  */
 public interface Repository<T, K, F> {
+
+	EntityMapper<T, F> getEntityMapper();
 
 	/**
 	 * Creates new entity with given data.
@@ -67,9 +70,19 @@ public interface Repository<T, K, F> {
 	/**
 	 * Finds entity by given id.
 	 * @param id
+	 * @param entityMapper
 	 * @return
 	 */
-	Optional<T> findById(K id);
+	<T, K, F> Optional<T> findById(K id, EntityMapper<T, F> entityMapper);
+
+	/**
+	 * Finds entity by given id.
+	 * @param id
+	 * @return
+	 */
+	default Optional<T> findById(K id) {
+		return findById(id, getEntityMapper());
+	}
 	
 	/**
 	 * Returns results for given filtering, sorting and pagination settings.
@@ -78,13 +91,44 @@ public interface Repository<T, K, F> {
 	 */
 	List<T> findByOverview(Overview<F> overview);
 
+	<T, F> List<T> findByOverview(final Overview<F> overview, EntityMapper<T, F> entityMapper);
+
+	/**
+	 * Returns all results.
+	 * @return
+	 */
+	default List<T> findAll() {
+		return findAll(getEntityMapper());
+	}
+
+	/**
+	 * Returns all results.
+	 * @param entityMapper
+	 * @param <T>
+	 * @param <F>
+     * @return
+     */
+	default <T, F> List<T> findAll(EntityMapper<T, F> entityMapper) {
+		return findByOverview(new Overview<>(null, null, null), entityMapper);
+	}
+
 	/**
 	 * Returns total count of results for given filter.
 	 * @param filter
 	 * @return
 	 */
 	default int countByFilter(F filter) {
-		return aggByFilter(AggType.COUNT, Integer.class, "*", filter);
+		return countByFilter(filter, getEntityMapper());
+	}
+
+	/**
+	 * Returns total count of results for given filter.
+	 * @param filter
+	 * @param entityMapper
+	 * @return
+	 */
+	default <T, F> int countByFilter(F filter, EntityMapper<T, F> entityMapper) {
+		return aggByFilter(AggType.COUNT, Integer.class, "*", filter, entityMapper);
 	}
 
 	/**
@@ -96,7 +140,21 @@ public interface Repository<T, K, F> {
 	 * @param <R>
 	 * @return
 	 */
-	<R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter);
+	default <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter) {
+		return aggByFilter(aggType, resultClass, attrName, filter, getEntityMapper());
+	}
+
+	/**
+	 * Returns aggregated values of given attribute for given filter.
+	 * @param aggType aggregation type
+	 * @param resultClass
+	 * @param attrName
+	 * @param filter
+	 * @param entityMapper
+	 * @param <R>
+	 * @return
+	 */
+	<R, T, F> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter, EntityMapper<T, F> entityMapper);
 
 	/**
 	 * Returns results for given filtering and sorting settings.
@@ -105,8 +163,19 @@ public interface Repository<T, K, F> {
 	 * @return
 	 */
 	default List<T> findByFilter(F filter, List<Order> ordering) {
+		return findByFilter(filter, ordering, getEntityMapper());
+	}
+
+	/**
+	 * Returns results for given filtering and sorting settings.
+	 * @param filter
+	 * @param ordering
+	 * @param entityMapper
+	 * @return
+	 */
+	default <T, F> List<T> findByFilter(F filter, List<Order> ordering, EntityMapper<T, F> entityMapper) {
 		Overview<F> overview = new Overview<>(filter, ordering, null);
-		return findByOverview(overview);
+		return findByOverview(overview, entityMapper);
 	}
 
 	/**
@@ -125,9 +194,20 @@ public interface Repository<T, K, F> {
 	 * @return
 	 */
 	default ResultsWithOverview<T, F> findResultsWithOverview(Overview<F> overview) {
-		List<T> results = findByOverview(overview);
+		return findResultsWithOverview(overview, getEntityMapper());
+	}
+
+	/**
+	 * Returns results along with overview (filtering, sorting and pagination) settings. Pagination settings is returned filled with total
+	 * count of records - this count is loaded using separate count query.
+	 * @param overview
+	 * @param entityMapper
+	 * @return
+	 */
+	default <T, F> ResultsWithOverview<T, F> findResultsWithOverview(Overview<F> overview, EntityMapper<T, F> entityMapper) {
+		List<T> results = findByOverview(overview, entityMapper);
 		// Total count of records regardless of page limit
-		int totalCount = countByFilter(overview.getFilter());
+		int totalCount = countByFilter(overview.getFilter(), entityMapper);
 		return new ResultsWithOverview<>(results, overview.withPagination(overview.getPagination().withTotalCount(totalCount)));
 	}
 }

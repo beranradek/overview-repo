@@ -3,6 +3,7 @@ package cz.etn.overview.mapper;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -14,9 +15,9 @@ public class MySqlSchemaBuilder {
     private static final String NEW_LINE = System.getProperty("line.separator");
     private static final String UNKNOWN = "UNKNOWN";
 
-    public <E> String composeCreateTableSQL(String tableName, Attribute<E, ?>[] attributes) {
+    public <E> String composeCreateTableSQL(String tableName, List<Attribute<E, ?>> attributes) {
         StringBuilder sb = new StringBuilder();
-        if (attributes != null && attributes.length > 0) {
+        if (attributes != null && attributes.size() > 0) {
             Optional<String> primaryAttrNameOpt = getPrimaryAttributeName(attributes);
             sb.append("CREATE TABLE IF NOT EXISTS `" + tableName + "` (" + NEW_LINE);
             boolean first = true;
@@ -45,7 +46,7 @@ public class MySqlSchemaBuilder {
         return sb.toString();
     }
 
-    protected Optional<String> getPrimaryAttributeName(Attribute<?, ?>[] attributes) {
+    protected <E> Optional<String> getPrimaryAttributeName(List<Attribute<E, ?>> attributes) {
         Optional<String> name = Optional.empty();
         if (attributes != null) {
             for (Attribute<?, ?> attr : attributes) {

@@ -13,9 +13,9 @@ import cz.etn.overview.domain.SendingState;
 import cz.etn.overview.domain.VoucherCustomer;
 import cz.etn.overview.domain.VoucherCustomerFilter;
 import cz.etn.overview.funs.CollectionFuns;
-import cz.etn.overview.mapper.AbstractEntityMapper;
+import cz.etn.overview.mapper.Attr;
 import cz.etn.overview.mapper.Attribute;
-import cz.etn.overview.mapper.AttributeSource;
+import cz.etn.overview.mapper.DynamicEntityMapper;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -25,206 +25,84 @@ import java.util.List;
  * Mapping of voucher customer attributes to database fields.
  * @author Radek Beran
  */
-public enum VoucherCustomerMapper implements AbstractEntityMapper<VoucherCustomer, VoucherCustomerFilter>, Attribute<VoucherCustomer, Object> {
-	
-	id {
-		@Override
-		public Object getValue(VoucherCustomer instance) {
-			return instance.getId();
-		}
+public class VoucherCustomerMapper extends DynamicEntityMapper<VoucherCustomer, VoucherCustomerFilter> {
 
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setId(attributeSource.get(Integer.class, attributeName));
-			return instance;
-		}
-		
-		@Override
-		public boolean isPrimary() {
-			return true;
-		}
-	},
-	creation_time {
-		@Override
-		public Object getValue(VoucherCustomer instance) {
-			return instance.getCreationTime();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setCreationTime(attributeSource.get(Instant.class, attributeName));
-			return instance;
-		}
-	},
-	email {
-		@Override
-		public Object getValue(VoucherCustomer instance) {
-			return instance.getEmail();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setEmail(attributeSource.get(String.class, attributeName));
-			return instance;
-		}
-	},
-	first_name {
-		@Override
-		public Object getValue(VoucherCustomer instance) {
-			return instance.getFirstName();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setFirstName(attributeSource.get(String.class, attributeName));
-			return instance;
-		}
-	},
-	last_name {
-		@Override
-		public Object getValue(VoucherCustomer instance) {
-			return instance.getLastName();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setLastName(attributeSource.get(String.class, attributeName));
-			return instance;
-		}
-	},
-	salutation {
-		@Override
-		public Object getValue(VoucherCustomer instance) {
-			return instance.getSalutation();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setSalutation(attributeSource.get(String.class, attributeName));
-			return instance;
-		}
-	},
-	business_partner_code {
-		@Override
-		public Object getValue(VoucherCustomer instance) {
-			return instance.getBusinessPartnerCode();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setBusinessPartnerCode(attributeSource.get(String.class, attributeName));
-			return instance;
-		}
-	},
-	discount_email_type {
-		@Override
-		public Object getValue(VoucherCustomer instance) {
-			if (instance.getDiscountEmailType() == null) return null;
-			return instance.getDiscountEmailType().name();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			String dbValue = attributeSource.get(String.class, attributeName);
-			DiscountEmailType emailType = null;
-			if (dbValue != null && !dbValue.isEmpty()) {
-				emailType = DiscountEmailType.valueOf(dbValue);
-			}
-			instance.setDiscountEmailType(emailType);
-			return instance;
-		}
-	},
-	email_sent_time {
-		@Override
-		public Object getValue(VoucherCustomer instance) {
-			return instance.getEmailSentTime();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setEmailSentTime(attributeSource.get(Instant.class, attributeName));
-			return instance;
-		}
-	},
-	email_sending_state {
-		@Override
-		public Object getValue(VoucherCustomer instance) {
-			if (instance.getEmailSendingState() == null) return null;
-			return instance.getEmailSendingState().name();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			String dbValue = attributeSource.get(String.class, attributeName);
-			SendingState emailSendingState = null;
-			if (dbValue != null && !dbValue.isEmpty()) {
-				emailSendingState = SendingState.valueOf(dbValue);
-			}
-			instance.setEmailSendingState(emailSendingState);
-			return instance;
-		}
-	},
-	email_text {
-		@Override
-		public Object getValue(VoucherCustomer instance) {
-			return instance.getEmailText();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setEmailText(attributeSource.get(String.class, attributeName));
-			return instance;
-		}
-	},
-	import_file_name {
-		@Override
-		public Object getValue(VoucherCustomer instance) {
-			return instance.getImportFileName();
-		}
-
-		@Override
-		public VoucherCustomer entityWithAttribute(VoucherCustomer instance, AttributeSource attributeSource, String attributeName) {
-			instance.setImportFileName(attributeSource.get(String.class, attributeName));
-			return instance;
-		}
-	};
-	
+	/** Mapped entity class. */
+	private static final Class<VoucherCustomer> cls = VoucherCustomer.class;
 	private static final String DB_TABLE_NAME = "voucher_customer";
-	
-	public static final VoucherCustomerMapper INSTANCE = id; // any enum constant will suffice here
-	
-	@Override
-	public Attribute<VoucherCustomer, Object>[] getAttributes() {
-		return values();
+	private static final VoucherCustomerMapper INSTANCE = new VoucherCustomerMapper();
+
+	public final Attribute<VoucherCustomer, Integer> id;
+	public final Attribute<VoucherCustomer, Instant> creation_time;
+	public final Attribute<VoucherCustomer, String> email;
+	public final Attribute<VoucherCustomer, String> first_name;
+	public final Attribute<VoucherCustomer, String> last_name;
+	public final Attribute<VoucherCustomer, String> salutation;
+	public final Attribute<VoucherCustomer, String> business_partner_code;
+	public final Attribute<VoucherCustomer, String> discount_email_type;
+	public final Attribute<VoucherCustomer, Instant> email_sent_time;
+	public final Attribute<VoucherCustomer, String> email_sending_state;
+	public final Attribute<VoucherCustomer, String> email_text;
+	public final Attribute<VoucherCustomer, String> import_file_name;
+
+	private VoucherCustomerMapper() {
+		id = add(Attr.ofInteger(cls, "id").primary().get(e -> e.getId()).set((e, a) -> e.setId(a)));
+		creation_time = add(Attr.ofInstant(cls, "creation_time").get(e -> e.getCreationTime()).set((e, a) -> e.setCreationTime(a)));
+		email = add(Attr.ofString(cls, "email").get(e -> e.getEmail()).set((e, a) -> e.setEmail(a)));
+		first_name = add(Attr.ofString(cls, "first_name").get(e -> e.getFirstName()).set((e, a) -> e.setFirstName(a)));
+		last_name = add(Attr.ofString(cls, "last_name").get(e -> e.getLastName()).set((e, a) -> e.setLastName(a)));
+		salutation = add(Attr.ofString(cls, "salutation").get(e -> e.getSalutation()).set((e, a) -> e.setSalutation(a)));
+		business_partner_code = add(Attr.ofString(cls, "business_partner_code").get(e -> e.getBusinessPartnerCode()).set((e, a) -> e.setBusinessPartnerCode(a)));
+		discount_email_type = add(Attr.ofString(cls, "discount_email_type")
+			.get(e -> e.getDiscountEmailType() == null ? null : e.getDiscountEmailType().name())
+			.set((e, a) -> {
+				DiscountEmailType emailType = null;
+				if (a != null && !a.isEmpty()) {
+					emailType = DiscountEmailType.valueOf(a);
+				}
+				e.setDiscountEmailType(emailType);
+			}));
+		email_sent_time = add(Attr.ofInstant(cls, "email_sent_time").get(e -> e.getEmailSentTime()).set((e, a) -> e.setEmailSentTime(a)));
+		email_sending_state = add(Attr.ofString(cls, "email_sending_state")
+			.get(e -> e.getEmailSendingState() == null ? null : e.getEmailSendingState().name())
+			.set((e, a) -> {
+				SendingState emailSendingState = null;
+				if (a != null && !a.isEmpty()) {
+					emailSendingState = SendingState.valueOf(a);
+				}
+				e.setEmailSendingState(emailSendingState);
+			}));
+		email_text = add(Attr.ofString(cls, "email_text").get(e -> e.getEmailText()).set((e, a) -> e.setEmailText(a)));
+		import_file_name = add(Attr.ofString(cls, "import_file_name").get(e -> e.getImportFileName()).set((e, a) -> e.setImportFileName(a)));
 	}
-	
+
+	public static VoucherCustomerMapper getInstance() {
+		return INSTANCE;
+	}
+
 	@Override
 	public String getDataSet() {
 		return DB_TABLE_NAME;
 	}
-	
+
+	@Override
+	public List<Condition> composeFilterConditions(VoucherCustomerFilter filter) {
+		List<Condition> conditions = new ArrayList<>();
+		if (filter.getId() != null) {
+			conditions.add(Condition.eq(id, filter.getId()));
+		}
+		if (filter.getImportFileName() != null) {
+			conditions.add(Condition.eq(import_file_name, filter.getImportFileName()));
+		}
+		if (filter.getCustomerIds() != null) {
+			conditions.add(Condition.in(id, CollectionFuns.toObjectList(filter.getCustomerIds())));
+		}
+		return conditions;
+	}
+
 	@Override
 	public VoucherCustomer createEntity() {
 		return new VoucherCustomer();
 	}
-	
-	@Override
-	public String getName() {
-		return name();
-	}
 
-	@Override
-	public List<FilterCondition> composeFilterConditions(VoucherCustomerFilter filter) {
-		List<FilterCondition> conditions = new ArrayList<>();
-		if (filter.getId() != null) {
-			conditions.add(FilterCondition.eq(id, filter.getId()));
-		}
-		if (filter.getImportFileName() != null) {
-			conditions.add(FilterCondition.eq(import_file_name, filter.getImportFileName()));
-		}
-		if (filter.getCustomerIds() != null) {
-			conditions.add(FilterCondition.in(id, CollectionFuns.toObjectList(filter.getCustomerIds())));
-		}
-		return conditions;
-	}
 }

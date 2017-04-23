@@ -27,7 +27,7 @@ public class VoucherRepositoryImpl extends AbstractRepository<Voucher, String, O
 	}
 
 	@Override
-	protected EntityMapper<Voucher, Object> getEntityMapper() {
+	public EntityMapper<Voucher, Object> getEntityMapper() {
 		return VoucherMapper.getInstance();
 	}
 

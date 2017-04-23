@@ -77,7 +77,7 @@ public class VoucherMapper extends DynamicEntityMapper<Voucher, Object> {
 	}
 
 	@Override
-	public List<FilterCondition> composeFilterConditions(Object filter) {
+	public List<Condition> composeFilterConditions(Object filter) {
 		return new ArrayList<>();
 	}
 }
