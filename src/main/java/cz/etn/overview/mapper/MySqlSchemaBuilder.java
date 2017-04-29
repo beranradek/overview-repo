@@ -63,15 +63,16 @@ public class MySqlSchemaBuilder {
         String typeName = UNKNOWN;
         if (attribute instanceof Attr) {
             Attr attr = (Attr)attribute;
+            String maxLength = attribute.getMaxLength().map(l -> "" + l).orElse(UNKNOWN);
             Class<A> attrClass = attr.getAttributeClass();
             if (String.class.isAssignableFrom(attrClass)) {
-                typeName = "VARCHAR(" + UNKNOWN + ")";
+                typeName = "VARCHAR(" + maxLength + ")";
             } else if (Byte.class.isAssignableFrom(attrClass) || Integer.class.isAssignableFrom(attrClass) || Long.class.isAssignableFrom(attrClass)) {
-                typeName = "INT(" + UNKNOWN + ")";
+                typeName = "INT(" + maxLength + ")";
             } else if (Instant.class.isAssignableFrom(attrClass) || Date.class.isAssignableFrom(attrClass)) {
                 typeName = "DATETIME";
             } else if (BigDecimal.class.isAssignableFrom(attrClass)) {
-                typeName = "DECIMAL(" + UNKNOWN + ", " + UNKNOWN + ")";
+                typeName = "DECIMAL(" + maxLength + ", " + UNKNOWN + ")";
             }
         }
         return typeName;

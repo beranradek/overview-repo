@@ -1,7 +1,7 @@
 # Changelog
 
 ## [1.0.13] - 2017-x-y
-- What is new?
+- maxLength property of Attribute, usage in MySqlSchemaBuilder.
 
 ## [1.0.12] - 2017-04-23
 - General agg method in repository.

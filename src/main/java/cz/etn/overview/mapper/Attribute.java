@@ -8,6 +8,8 @@
 
 package cz.etn.overview.mapper;
 
+import java.util.Optional;
+
 /**
  * Mapped attribute interface.
  * @param <E> type of entity
@@ -87,5 +89,13 @@ public interface Attribute<E, A> {
 	 */
 	default boolean isPrimary() {
 		return false;
+	}
+
+	/**
+	 * Length constraint on attribute value (if any is defined).
+	 * @return
+     */
+	default Optional<Integer> getMaxLength() {
+		return Optional.empty();
 	}
 }

@@ -3,6 +3,7 @@ package cz.etn.overview.mapper;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -25,7 +26,8 @@ public class Attr<E, A> implements Attribute<E, A> {
     private final boolean primary;
     private final Function<E, A> fromEntity;
     private final BiFunction<E, A, E> toEntity;
-    private String namePrefix;
+    private final String namePrefix;
+    private final Optional<Integer> maxLength;
 
     public static <E, A> Builder<E, A> of(Class<E> entityClass, Class<A> attributeClass, String name) {
         return new Builder<>(entityClass, attributeClass, name);
@@ -74,14 +76,15 @@ public class Attr<E, A> implements Attribute<E, A> {
     /**
      * Copy constructor.
      */
-    public Attr(Attr source) {
+    public Attr(Attr source, String namePrefix) {
         this.entityClass = source.entityClass;
         this.attributeClass = source.attributeClass;
         this.name = source.name;
         this.primary = source.primary;
         this.fromEntity = source.fromEntity;
         this.toEntity = source.toEntity;
-        this.namePrefix = source.namePrefix;
+        this.namePrefix = namePrefix;
+        this.maxLength = source.maxLength;
     }
 
     public static class Builder<E, A> {
@@ -91,10 +94,11 @@ public class Attr<E, A> implements Attribute<E, A> {
         private final String name;
         private Function<E, A> fromEntity;
         private BiFunction<E, A, E> toEntity;
-        String namePrefix;
+        private String namePrefix;
 
         // Optional parameters - initialized to default values (these are only here in a single location)
         private boolean primary = false;
+        private Optional<Integer> maxLength = Optional.empty();
 
         public Builder(Class<E> entityClass, Class<A> attributeClass, String name) {
             this.entityClass = entityClass;
@@ -104,6 +108,11 @@ public class Attr<E, A> implements Attribute<E, A> {
 
         public Builder<E, A> primary() {
             primary = true;
+            return this;
+        }
+
+        public Builder<E, A> maxLength(Integer length) {
+            maxLength = Optional.ofNullable(length);
             return this;
         }
 
@@ -147,6 +156,7 @@ public class Attr<E, A> implements Attribute<E, A> {
         fromEntity = builder.fromEntity;
         toEntity = builder.toEntity;
         namePrefix = builder.namePrefix;
+        maxLength = builder.maxLength;
     }
 
     public Class<E> getEntityClass() {
@@ -173,8 +183,14 @@ public class Attr<E, A> implements Attribute<E, A> {
         return toEntity.apply(entity, value);
     }
 
+    @Override
     public boolean isPrimary() {
         return primary;
+    }
+
+    @Override
+    public Optional<Integer> getMaxLength() {
+        return maxLength;
     }
 
     public Function<E, A> getFromEntity() {
@@ -192,8 +208,6 @@ public class Attr<E, A> implements Attribute<E, A> {
 
     @Override
     public Attribute<E, A> withNamePrefix(String namePrefix) {
-        Attr attr = new Attr(this);
-        attr.namePrefix = namePrefix;
-        return attr;
+        return new Attr(this, namePrefix);
     }
 }
