@@ -88,25 +88,13 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 	@Override
 	public boolean delete(K id) {
 		Objects.requireNonNull(id, "id should be specified");
-		return withNewConnection(conn -> {
-			StringBuilder sqlBuilder = new StringBuilder("DELETE FROM " + getEntityMapper().getDataSet());
-			List<Object> primaryKeyParameters = appendFilter(sqlBuilder, getEntityMapper().composeFilterConditionsForPrimaryKey(id));
-			String sql = sqlBuilder.toString();
-			
-			int updatedCount = update(conn, sql, primaryKeyParameters);
-			return updatedCount == 1;
-		});
+		return deleteByFilterConditions(getEntityMapper().composeFilterConditionsForPrimaryKey(id)) == 1;
 	}
 
 	@Override
 	public int deleteByFilter(F filter) {
 		Objects.requireNonNull(filter, "filter should be specified");
-		return withNewConnection(conn -> {
-			String from = getEntityMapper().getDataSet();
-			StringBuilder sqlBuilder = new StringBuilder("DELETE FROM " + from);
-			List<Object> parameters = appendFilter(sqlBuilder, getEntityMapper().composeFilterConditions(filter));
-			return update(conn, sqlBuilder.toString(), parameters);
-		});
+		return deleteByFilterConditions(getEntityMapper().composeFilterConditions(filter));
 	}
 
 	/**
@@ -194,18 +182,6 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 			as -> getEntityMapper().buildEntity(as)
 		);
 	}
-
-	protected <T> List<T> findByOverview(List<Condition> filterConditions, List<Order> ordering, Pagination pagination, List<String> selectedAttributes, String from, Function<AttributeSource, T> entityBuilder) {
-		return withNewConnection(conn -> {
-			return queryWithOverview(conn, 
-				selectedAttributes, 
-				from,
-				filterConditions,
-				(ordering == null || ordering.isEmpty()) ? createDefaultOrdering() : ordering,
-				pagination,
-				entityBuilder);
-		});
-	}
 	
 	protected <U> U withNewConnection(CheckedFunction<Connection, U> queryData) {
 		Connection conn = null;
@@ -241,19 +217,38 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 		return result;
 	}
 
+	protected int deleteByFilterConditions(List<Condition> conditions) {
+		return withNewConnection(conn -> {
+			StringBuilder sqlBuilder = new StringBuilder("DELETE FROM " + getEntityMapper().getDataSet());
+			List<Object> parameters = appendFilter(sqlBuilder, conditions);
+			return update(conn, sqlBuilder.toString(), parameters);
+		});
+	}
+
 	protected List<T> findByFilterConditions(List<Condition> filterConditions, List<Order> ordering) {
 		return findByFilterConditions(filterConditions, ordering, getEntityMapper());
 	}
 
 	protected <T, F> List<T> findByFilterConditions(List<Condition> filterConditions, List<Order> ordering, EntityMapper<T, F> entityMapper) {
+		return findByOverview(
+			filterConditions,
+			ordering,
+			null,
+			entityMapper.getAttributeNames(),
+			entityMapper.getDataSet(),
+			as -> entityMapper.buildEntity(as)
+		);
+	}
+
+	protected <T> List<T> findByOverview(List<Condition> filterConditions, List<Order> ordering, Pagination pagination, List<String> selectedAttributes, String from, Function<AttributeSource, T> entityBuilder) {
 		return withNewConnection(conn -> {
 			return queryWithOverview(conn,
-					entityMapper.getAttributeNames(),
-					entityMapper.getDataSet(),
+					selectedAttributes,
+					from,
 					filterConditions,
-					ordering,
-					null,
-					as -> entityMapper.buildEntity(as));
+					(ordering == null || ordering.isEmpty()) ? createDefaultOrdering() : ordering,
+					pagination,
+					entityBuilder);
 		});
 	}
 
