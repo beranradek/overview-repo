@@ -161,7 +161,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 			parameterValues.addAll(updatedAttributeValues);
 		}
 		parameterValues.addAll(appendFilter(sqlBuilder, conditions));
-		return update(sqlBuilder.toString(), parameterValues);
+		return updateAttributeValues(sqlBuilder.toString(), parameterValues);
 	}
 
 	protected List<Order> composeOrderingForPrimaryKey() {
@@ -284,7 +284,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 		});
 	}
 	
-	protected int update(String sql, List<Object> attributeValues) {
+	protected int updateAttributeValues(String sql, List<Object> attributeValues) {
 		return withNewConnection(conn -> {
 			try (PreparedStatement statement = conn.prepareStatement(sql)) {
 				setParameters(statement, attributeValues);
