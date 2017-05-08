@@ -1,6 +1,7 @@
 /bin
 /bin-test
 /build
+/out
 .classpath
 .project
 .gradle
