@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * It implements an {@link EntityMapper} capable to fetch joined entities.
  * @author Radek Beran
  */
-public class JoinEntityMapper<T, F, U, G, V, H> implements AbstractEntityMapper<V, H> {
+public class JoinEntityMapper<T, F, U, G, V, H> implements EntityMapper<V, H> {
 
     private final EntityMapper<T, F> firstMapper;
     private final EntityMapper<U, G> secondMapper;

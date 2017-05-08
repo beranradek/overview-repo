@@ -1,10 +1,13 @@
 package cz.etn.overview.common;
 
+import java.io.Serializable;
+
 /**
  * Pair of values.
  * @author Radek Beran
  */
-public final class Pair<T, U> {
+public final class Pair<T, U> implements Serializable {
+    private static final long serialVersionUID = -1L;
 
     private final T first;
     private final U second;

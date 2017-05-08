@@ -9,7 +9,7 @@ import java.util.Map;
  * Entity mapper with dynamic registration of attributes.
  * @author Radek Beran
  */
-public abstract class DynamicEntityMapper<T, F> implements AbstractEntityMapper<T, F> {
+public abstract class DynamicEntityMapper<T, F> implements EntityMapper<T, F> {
 
     private final Map<String, Attribute<T, ?>> attributesByFullNames;
 

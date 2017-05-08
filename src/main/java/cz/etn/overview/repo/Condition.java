@@ -34,19 +34,9 @@ public final class Condition {
 	 * @return
 	 */
 	public static Condition eq(Attribute<?, ?> attribute, Object value) {
-		return eq(attribute.getNameFull(), value);
-	}
-
-	/**
-	 * Equals condition for one attribute with one value.
-	 * @param attrName
-	 * @param value
-	 * @return
-	 */
-	public static Condition eq(String attrName, Object value) {
 		List<Object> values = new ArrayList<>();
 		values.add(value);
-		return new Condition(attrName + "=?", values);
+		return new Condition(attribute.getNameFull() + "=?", values);
 	}
 
 	/**
@@ -56,17 +46,7 @@ public final class Condition {
 	 * @return
 	 */
 	public static Condition eqAttributes(Attribute<?, ?> attribute1, Attribute<?, ?> attribute2) {
-		return eqAttributes(attribute1.getNameFull(), attribute2.getNameFull());
-	}
-
-	/**
-	 * Equals condition for two attributes.
-	 * @param attr1Name
-	 * @param attr2Name
-	 * @return
-	 */
-	public static Condition eqAttributes(String attr1Name, String attr2Name) {
-		return new Condition(attr1Name + "=" + attr2Name, EMPTY_VALUES);
+		return new Condition(attribute1.getNameFull() + "=" + attribute2.getNameFull(), EMPTY_VALUES);
 	}
 
 	/**
@@ -75,16 +55,7 @@ public final class Condition {
 	 * @return
 	 */
 	public static Condition nullValue(Attribute<?, ?> attribute) {
-		return nullValue(attribute.getNameFull());
-	}
-
-	/**
-	 * Condition on NULL value of attribute.
-	 * @param attrName
-	 * @return
-	 */
-	public static Condition nullValue(String attrName) {
-		return new Condition(attrName + " IS NULL", new ArrayList<>());
+		return new Condition(attribute.getNameFull() + " IS NULL", new ArrayList<>());
 	}
 
 	/**
@@ -94,19 +65,9 @@ public final class Condition {
 	 * @return
 	 */
 	public static Condition contains(Attribute<?, ?> attribute, Object value) {
-		return contains(attribute.getNameFull(), value);
-	}
-
-	/**
-	 * Attribute value contains some given value.
-	 * @param attrName
-	 * @param value
-	 * @return
-	 */
-	public static Condition contains(String attrName, Object value) {
 		List<Object> values = new ArrayList<>();
 		values.add(value);
-		return new Condition(attrName + " " + CONTAINS_WITH_PLACEHOLDER, values);
+		return new Condition(attribute.getNameFull() + " " + CONTAINS_WITH_PLACEHOLDER, values);
 	}
 
 	/**
@@ -116,21 +77,11 @@ public final class Condition {
 	 * @return
 	 */
 	public static Condition in(Attribute<?, ?> attribute, List<Object> values) {
-		return in(attribute.getNameFull(), values);
-	}
-
-	/**
-	 * Attribute value is contained in given values.
-	 * @param attrName
-	 * @param values
-	 * @return
-	 */
-	public static Condition in(String attrName, List<Object> values) {
 		Condition condition = null;
 		if (values != null && !values.isEmpty()) {
 			String[] placeholders = new String[values.size()];
 			Arrays.fill(placeholders, "?");
-			condition = new Condition(attrName + " IN (" + CollectionFuns.join(Arrays.asList(placeholders), ", ") + ")", values);
+			condition = new Condition(attribute.getNameFull() + " IN (" + CollectionFuns.join(Arrays.asList(placeholders), ", ") + ")", values);
 		} else {
 			// empty values for IN, value of attribute is certainly not among empty values
 			condition = new Condition("1=0", EMPTY_VALUES);

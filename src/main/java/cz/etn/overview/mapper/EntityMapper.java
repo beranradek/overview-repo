@@ -9,12 +9,10 @@
 package cz.etn.overview.mapper;
 
 import cz.etn.overview.common.Pair;
-import cz.etn.overview.funs.CollectionFuns;
 import cz.etn.overview.repo.Condition;
 import cz.etn.overview.repo.join.JoinType;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -29,61 +27,23 @@ import java.util.stream.Collectors;
  */
 public interface EntityMapper<T, F> {
 
-	T createEntity();
-
 	/**
 	 * Name of database table/collection that contains entities.
 	 * @return
-     */
+	 */
 	String getDataSet();
-	
-	/**
-	 * Returns string that can be used to prefix all database attribute names for mapped entity to gain unique aliases.
-	 * @return
-	 */
-	default String getAliasPrefix() {
-		return getDataSet() + "_";
-	}
-	
-	/**
-	 * Returns names of database attributes that represents primary key.
-	 * @return
-	 */
-	List<String> getPrimaryAttributeNames();
 
 	/**
-	 * Extracts values of primary key attributes.
-	 * @param instance
-	 * @return
-	 */
-	List<Object> getPrimaryAttributeValues(T instance);
-	
-	/**
-	 * Returns names of database attributes.
-	 * @return
-	 */
-	List<String> getAttributeNames();
-	
-	/**
-	 * Extracts values for database attributes from given entity instance.
-	 * @param instance
-	 * @return
-	 */
-	List<Object> getAttributeValues(T instance);
-
-	/**
-	 * Returns full attribute names with aliases that can be used to extract attribute values from {@link AttributeSource}.
+	 * Creates new instance of entity.
 	 * @return
      */
-	List<String> getAttributeNamesFullAliased();
-	
+	T createEntity();
+
 	/**
-	 * Builds new data entity from attribute source.
-	 * @param attributeSource
-	 * @param aliasPrefix alias prefix for all database fields 
+	 * Returns definition of entity attributes.
 	 * @return
 	 */
-	T buildEntity(AttributeSource attributeSource, String aliasPrefix);
+	List<Attribute<T, ?>> getAttributes();
 
 	/**
 	 * <p>Compose conditions from given filter.
@@ -93,6 +53,155 @@ public interface EntityMapper<T, F> {
 	 * @return
 	 */
 	List<Condition> composeFilterConditions(F filter);
+
+	/**
+	 * Composes filter conditions to match primary key attributes.
+	 * @param id
+	 * @return
+	 */
+	default <K> List<Condition> composeFilterConditionsForPrimaryKey(K id) {
+		List<Condition> conditions = new ArrayList<>();
+		List<Attribute<T, ?>> pkAttributes = getPrimaryAttributes();
+		if (pkAttributes.size() == 1) {
+			conditions.add(Condition.eq(pkAttributes.get(0), id));
+		} else {
+			// composed primary key
+			conditions.addAll(composeFilterConditionsForCompositePrimaryKey(id));
+		}
+		return conditions;
+	}
+
+	/**
+	 * Composes filter conditions to match primary key attributes.
+	 * @param entity
+	 * @return
+	 */
+	default <K> List<Condition> composeFilterConditionsForPrimaryKeyOfEntity(T entity) {
+		List<Condition> conditions = new ArrayList<>();
+		for (Attribute<T, ?> attr : getPrimaryAttributes()) {
+			conditions.add(Condition.eq(attr, attr.getValue(entity)));
+		}
+		return conditions;
+	}
+
+	/**
+	 * Composes filter conditions to match primary key attributes.
+	 * @param key
+	 * @return
+	 */
+	default <K> List<Condition> composeFilterConditionsForCompositePrimaryKey(K key) {
+		List<Condition> conditions = new ArrayList<>();
+		List<Pair<Attribute<T, ?>, Object>> attributesToValues = decomposePrimaryKey(key);
+		if (attributesToValues != null) {
+			for (Pair<Attribute<T, ?>, Object> p : attributesToValues) {
+				Attribute<T, ?> attr = p.getFirst();
+				Object value = p.getSecond();
+				conditions.add(Condition.eq(attr, value));
+			}
+		}
+		return conditions;
+	}
+
+	default <K> List<Pair<Attribute<T, ?>, Object>> decomposePrimaryKey(K key) {
+		List<Pair<Attribute<T, ?>, Object>> attributesToValues = new ArrayList<>();
+		List<Attribute<T, ?>> pkAttributes = getPrimaryAttributes();
+		if (pkAttributes.size() == 1) {
+			attributesToValues.add(new Pair<>(pkAttributes.get(0), key));
+		} else {
+			// composed primary key
+			throw new UnsupportedOperationException("Decomposition of composite key to pairs: attribute to value is not implemented. Key: " + key);
+		}
+		return attributesToValues;
+	}
+	
+	/**
+	 * Returns string that can be used to prefix all database attribute names for mapped entity to gain unique aliases.
+	 * @return
+	 */
+	default String getAliasPrefix() {
+		return getDataSet() + "_";
+	}
+
+	default List<Attribute<T, ?>> getPrimaryAttributes() {
+		List<Attribute<T, ?>> primAttrs = new ArrayList<>();
+		List<Attribute<T, ?>> attributes = getAttributes();
+		if (attributes != null) {
+			for (Attribute<T, ?> attr : attributes) {
+				if (attr.isPrimary()) {
+					primAttrs.add(attr);
+				}
+			}
+		}
+		return primAttrs;
+	}
+	
+	/**
+	 * Returns names of database attributes that represent primary key.
+	 * @return
+	 */
+	default List<String> getPrimaryAttributeNames() {
+		return getPrimaryAttributes().stream().map(attr -> attr.getName()).collect(Collectors.toList());
+	}
+
+	/**
+	 * Extracts values of primary key attributes.
+	 * @param entity
+	 * @return
+	 */
+	default List<Object> getPrimaryAttributeValues(T entity) {
+		return getPrimaryAttributes().stream().map(attr -> attr.getValue(entity)).collect(Collectors.toList());
+	}
+	
+	/**
+	 * Returns names of database attributes.
+	 * @return
+	 */
+	default List<String> getAttributeNames() {
+		return getAttributes().stream().map(v -> v.getName()).collect(Collectors.toList());
+	}
+	
+	/**
+	 * Extracts values for database attributes from given entity instance.
+	 * @param instance
+	 * @return
+	 */
+	default List<Object> getAttributeValues(T instance) {
+		List<Object> attrValues = new ArrayList<>();
+		for (Attribute<T, ?> fld : getAttributes()) {
+			attrValues.add(fld.getValue(instance));
+		}
+		return attrValues;
+	}
+
+	/**
+	 * Returns full attribute names with aliases that can be used to extract attribute values from {@link AttributeSource}.
+	 * @return
+     */
+	default List<String> getAttributeNamesFullAliased() {
+		String aliasPrefix = getAliasPrefix();
+		return getAttributes().stream()
+			.map(v -> (v.getNameFull() + (aliasPrefix != null ? (" AS " + aliasPrefix + v.getName()) : "")))
+			.collect(Collectors.toList());
+	}
+	
+	/**
+	 * Builds new data entity from attribute source.
+	 * @param attributeSource
+	 * @param aliasPrefix alias prefix for all database fields 
+	 * @return
+	 */
+	default T buildEntity(AttributeSource attributeSource, String aliasPrefix) {
+		T instance = createEntity();
+		for (Attribute<T, ?> attr : getAttributes()) {
+			String alias = null;
+			if (aliasPrefix != null) {
+				alias = aliasPrefix + attr.getName();
+			}
+			instance = attr.entityWithAttribute(instance, attributeSource, attr.getName(alias));
+		}
+		boolean primaryKeyFilled = getPrimaryAttributeValues(instance).stream().anyMatch(v -> v != null);
+		return primaryKeyFilled ? instance : null;
+	}
 	
 	/**
 	 * Builds new data entity from attribute source.
@@ -101,21 +210,6 @@ public interface EntityMapper<T, F> {
 	 */
 	default T buildEntity(AttributeSource attributeSource) {
 		return buildEntity(attributeSource, null);
-	}
-	
-	default String getAttributeNamesCommaSeparated() {
-		return CollectionFuns.join(getAttributeNames(), ",");
-	}
-	
-	/** Returns string with comma-separated question marks, one for each database column name. */
-	default String getPlaceholdersCommaSeparated() {
-		List<String> questionMarks = new ArrayList<>(Collections.nCopies(getAttributeNames().size(), "?"));
-		return CollectionFuns.join(questionMarks, ",");
-	}
-	
-	/** Returns string with comma-separated database attribute names with placeholder values in form suitable for SQL update: column1=?,column2=?,... */
-	default String getAttributeNamesEqToPlaceholdersCommaSeparated() {
-		return CollectionFuns.join(getAttributeNames().stream().map(attrName -> attrName + "=?").collect(Collectors.toList()), ",");
 	}
 
 	/**
@@ -163,48 +257,5 @@ public interface EntityMapper<T, F> {
 		List<Condition> onConditions = new ArrayList<>();
 		onConditions.add(onCondition);
 		return rightJoin(secondMapper, onConditions, composeEntity, decomposeFilter);
-	}
-
-	/**
-	 * Composes filter conditions to match primary key attributes.
-	 * @param id
-	 * @return
-	 */
-	default <K> List<Condition> composeFilterConditionsForPrimaryKey(K id) {
-		List<Condition> conditions = new ArrayList<>();
-		List<String> names = getPrimaryAttributeNames();
-		if (names.size() == 1) {
-			conditions.add(Condition.eq(names.get(0), id));
-		} else {
-			// composed primary key
-			conditions.addAll(composeFilterConditionsForCompositePrimaryKey(id));
-		}
-		return conditions;
-	}
-
-	/**
-	 * Composes filter conditions to match primary key attributes.
-	 * @param entity
-	 * @return
-	 */
-	default <K> List<Condition> composePrimaryKeyFilterConditions(T entity) {
-		List<Condition> conditions = new ArrayList<>();
-		List<String> names = getPrimaryAttributeNames();
-		List<Object> values = getPrimaryAttributeValues(entity);
-		for (int i = 0; i < names.size(); i++) {
-			String attrName = names.get(i);
-			Object attrValue = values.get(i);
-			conditions.add(Condition.eq(attrName, attrValue));
-		}
-		return conditions;
-	}
-
-	/**
-	 * Composes filter conditions to match primary key attributes.
-	 * @param id
-	 * @return
-	 */
-	default <K> List<Condition> composeFilterConditionsForCompositePrimaryKey(K id) {
-		throw new UnsupportedOperationException("Decomposition of composite key to filter conditions is not implemented. Key: " + id);
 	}
 }

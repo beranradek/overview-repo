@@ -46,11 +46,5 @@ public class SupplyPointRepositoryImpl extends AbstractRepository<SupplyPoint, I
 		filter.setCustomerIds(customerIds);
 		return findByFilter(filter, ordering);
 	}
-	
-	@Override
-	protected SupplyPoint entityUpdatedWithId(SupplyPoint entity, Integer id) {
-		entity.setId(id);
-		return entity;
-	}
 
 }
