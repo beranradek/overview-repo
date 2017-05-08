@@ -8,6 +8,8 @@
 
 package cz.etn.overview.mapper;
 
+import cz.etn.overview.repo.RepositoryException;
+
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -61,7 +63,7 @@ public class ResultSetAttributeSource implements AttributeSource {
 		try {
 			return resultSet.getLong(attributeName);
 		} catch (SQLException ex) {
-			throw new RuntimeException(ex.getMessage(), ex);
+			throw new RepositoryException(ex.getMessage(), ex);
 		}
 	}
 
@@ -69,7 +71,7 @@ public class ResultSetAttributeSource implements AttributeSource {
 		try {
 			return resultSet.getInt(attributeName);
 		} catch (SQLException ex) {
-			throw new RuntimeException(ex.getMessage(), ex);
+			throw new RepositoryException(ex.getMessage(), ex);
 		}
 	}
 
@@ -77,7 +79,7 @@ public class ResultSetAttributeSource implements AttributeSource {
 		try {
 			return resultSet.getString(attributeName);
 		} catch (SQLException ex) {
-			throw new RuntimeException(ex.getMessage(), ex);
+			throw new RepositoryException(ex.getMessage(), ex);
 		}
 	}
 
@@ -85,7 +87,7 @@ public class ResultSetAttributeSource implements AttributeSource {
 		try {
 			return sqlTimestampToInstant(resultSet.getTimestamp(attributeName));
 		} catch (SQLException ex) {
-			throw new RuntimeException(ex.getMessage(), ex);
+			throw new RepositoryException(ex.getMessage(), ex);
 		}
 	}
 
@@ -93,7 +95,7 @@ public class ResultSetAttributeSource implements AttributeSource {
 		try {
 			return resultSet.getBigDecimal(attributeName);
 		} catch (SQLException ex) {
-			throw new RuntimeException(ex.getMessage(), ex);
+			throw new RepositoryException(ex.getMessage(), ex);
 		}
 	}
 
@@ -101,7 +103,7 @@ public class ResultSetAttributeSource implements AttributeSource {
 		try {
 			return resultSet.getBoolean(attributeName);
 		} catch (SQLException ex) {
-			throw new RuntimeException(ex.getMessage(), ex);
+			throw new RepositoryException(ex.getMessage(), ex);
 		}
 	}
 
@@ -109,7 +111,7 @@ public class ResultSetAttributeSource implements AttributeSource {
 		try {
 			return resultSet.getByte(attributeName);
 		} catch (SQLException ex) {
-			throw new RuntimeException(ex.getMessage(), ex);
+			throw new RepositoryException(ex.getMessage(), ex);
 		}
 	}
 
@@ -117,7 +119,7 @@ public class ResultSetAttributeSource implements AttributeSource {
 		try {
 			return sqlDateToDate(resultSet.getDate(attributeName));
 		} catch (SQLException ex) {
-			throw new RuntimeException(ex.getMessage(), ex);
+			throw new RepositoryException(ex.getMessage(), ex);
 		}
 	}
 
@@ -125,7 +127,7 @@ public class ResultSetAttributeSource implements AttributeSource {
 		try {
 			return resultSet.getFloat(attributeName);
 		} catch (SQLException ex) {
-			throw new RuntimeException(ex.getMessage(), ex);
+			throw new RepositoryException(ex.getMessage(), ex);
 		}
 	}
 
@@ -133,7 +135,7 @@ public class ResultSetAttributeSource implements AttributeSource {
 		try {
 			return resultSet.getDouble(attributeName);
 		} catch (SQLException ex) {
-			throw new RuntimeException(ex.getMessage(), ex);
+			throw new RepositoryException(ex.getMessage(), ex);
 		}
 	}
 	

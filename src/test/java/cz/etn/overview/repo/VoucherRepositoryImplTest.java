@@ -11,13 +11,17 @@ package cz.etn.overview.repo;
 
 import cz.etn.overview.VoucherTestData;
 import cz.etn.overview.VoucherTestDb;
+import cz.etn.overview.common.Pair;
 import cz.etn.overview.domain.Voucher;
+import cz.etn.overview.mapper.Attribute;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.Test;
 
 import javax.sql.DataSource;
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
@@ -30,16 +34,17 @@ public class VoucherRepositoryImplTest {
 	
 	private final DataSource dataSource;
 	private final VoucherTestData testData;
+	private final VoucherRepository repo;
 	
 	public VoucherRepositoryImplTest() {
 		VoucherTestDb testDb = new VoucherTestDb();
 		this.dataSource = testDb.createDataSource();
 		this.testData = new VoucherTestData();
+		this.repo = new VoucherRepositoryImpl(dataSource);
 	}
 
 	@Test
 	public void createFindDeleteVoucher() {
-		VoucherRepository repo = new VoucherRepositoryImpl(dataSource);
 		Voucher voucher = testData.newVoucher("ABCD");
 
 		Voucher voucherCreated = repo.create(voucher, false);
@@ -56,7 +61,6 @@ public class VoucherRepositoryImplTest {
 	
 	@Test
 	public void updateVoucher() {
-		VoucherRepository repo = new VoucherRepositoryImpl(dataSource);
 		Voucher voucher = testData.newVoucher("QWERTY");
 
 		Voucher voucherCreated = repo.create(voucher, false);
@@ -71,6 +75,25 @@ public class VoucherRepositoryImplTest {
 		
 		Optional<Voucher> foundVoucherOpt = repo.findById(voucher.getId());
 		assertTrue("Found voucher " + foundVoucherOpt.get() + " is equal to voucher to update " + voucherToUpdate, EqualsBuilder.reflectionEquals(foundVoucherOpt.get(), voucherToUpdate));
+	}
+
+	@Test
+	public void updateSelectedAttributes() {
+		Voucher voucher = testData.newVoucher("HGTDFKL");
+		VoucherMapper mapper = VoucherMapper.getInstance();
+		BigDecimal newDiscountPrice = BigDecimal.valueOf(200000, 2);
+		String newInvoiceNote = "Updated invoice note";
+
+		repo.create(voucher, false);
+		int updatedCnt = repo.update(voucher.getId(), Arrays.asList(new Pair[] {
+			new Pair<>(mapper.discount_price, newDiscountPrice),
+			new Pair<>(mapper.invoice_note, newInvoiceNote)
+		}));
+
+		assertEquals(1, updatedCnt);
+		Voucher updatedVoucher = repo.findById(voucher.getId()).get();
+		assertEquals(newDiscountPrice, updatedVoucher.getDiscountPrice());
+		assertEquals(newInvoiceNote, updatedVoucher.getInvoiceNote());
 	}
 
 }

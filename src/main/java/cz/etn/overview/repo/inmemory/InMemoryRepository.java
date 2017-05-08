@@ -12,6 +12,7 @@ import cz.etn.overview.Overview;
 import cz.etn.overview.domain.Identifiable;
 import cz.etn.overview.repo.AggType;
 import cz.etn.overview.repo.Repository;
+import cz.etn.overview.repo.RepositoryException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +35,7 @@ public abstract class InMemoryRepository<T extends Identifiable<K>, K, F> implem
 	public T create(T entity, boolean autogerateKey) {
 		Optional<T> ent = findById(entity.getId());
 		if (ent.isPresent()) {
-			throw new RuntimeException("Duplicate key " + entity.getId());
+			throw new RepositoryException("Duplicate key " + entity.getId());
 		}
 		if (autogerateKey) {
 			entity = entityUpdatedWithId(entity, generateId());

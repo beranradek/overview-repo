@@ -11,6 +11,8 @@ package cz.etn.overview.repo;
 import cz.etn.overview.Order;
 import cz.etn.overview.Overview;
 import cz.etn.overview.ResultsWithOverview;
+import cz.etn.overview.common.Pair;
+import cz.etn.overview.mapper.Attribute;
 import cz.etn.overview.mapper.EntityMapper;
 
 import java.util.List;
@@ -42,7 +44,18 @@ public interface Repository<T, K, F> {
 	Optional<T> update(T entity);
 
 	/**
+	 * Updates specified attributes of entity with given values.
+	 * @param id primary key of entity
+	 * @param attributesWithValues attributes to update with their new values
+     * @return number of updated records
+     */
+	int update(K id, List<Pair<Attribute<T, ?>, Object>> attributesWithValues);
+
+	/**
 	 * Updates entity with given transformation function. Returns updated entity if entity was successfully updated, or empty result if entity was not found.
+	 * Note that this method first loads the entity and then applies given update function to it and calls database update.
+	 * Use {@link #update(Object, List)} to update more effectively selected attributes.
+	 * @param id primary key of entity
 	 * @param partialUpdate transformation function
 	 * @return data of entity after update
 	 */

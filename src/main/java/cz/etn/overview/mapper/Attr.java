@@ -107,7 +107,11 @@ public class Attr<E, A> implements Attribute<E, A> {
         }
 
         public Builder<E, A> primary() {
-            primary = true;
+            return primary(true);
+        }
+
+        public Builder<E, A> primary(boolean primaryAttribute) {
+            primary = primaryAttribute;
             return this;
         }
 

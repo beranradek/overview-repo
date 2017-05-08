@@ -41,7 +41,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 		String tableName = getEntityMapper().getDataSet();
 		String attributeNamesCommaSeparated = CollectionFuns.join(getEntityMapper().getAttributeNames(), ",");
 		String questionMarks = getPlaceholdersCommaSeparated(getEntityMapper().getAttributeNames().size());
-		List<Object> attributeValues = getDbSupportedAttributeValues(entity);
+		List<Object> attributeValues = getDbSupportedAttributeValues(getEntityMapper().getAttributeValues(entity));
 
 		String sql = "INSERT INTO " + tableName + " (" + attributeNamesCommaSeparated + ") VALUES (" + questionMarks + ")";
 
@@ -57,12 +57,27 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 	@Override
 	public Optional<T> update(T entity) {
 		Objects.requireNonNull(entity, "Entity should be specified");
-		String attributeNamesEqToPlaceholders = getAttributeNamesEqToPlaceholdersCommaSeparated();
-		int updatedCount = updateByFilterConditions("UPDATE " + getEntityMapper().getDataSet() + " SET " + attributeNamesEqToPlaceholders, getEntityMapper().composeFilterConditionsForPrimaryKeyOfEntity(entity), getDbSupportedAttributeValues(entity));
+		String attributeNamesEqToPlaceholders = getAttributeNamesEqToPlaceholdersCommaSeparated(getEntityMapper().getAttributeNames());
+		int updatedCount = updateByFilterConditions(
+			"UPDATE " + getEntityMapper().getDataSet() + " SET " + attributeNamesEqToPlaceholders,
+			getEntityMapper().composeFilterConditionsForPrimaryKeyOfEntity(entity),
+			getDbSupportedAttributeValues(getEntityMapper().getAttributeValues(entity)));
 		if (updatedCount == 1) {
 			return Optional.<T>of(entity);
 		}
 		return Optional.<T>empty();
+	}
+
+	@Override
+	public int update(K id, List<Pair<Attribute<T, ?>, Object>> attributesWithValues) {
+		Objects.requireNonNull(id, "id should be specified");
+		List<String> attributeNames = attributesWithValues.stream().map(p -> p.getFirst().getName()).collect(Collectors.toList());
+		String attributeNamesEqToPlaceholders = getAttributeNamesEqToPlaceholdersCommaSeparated(attributeNames);
+		List<Object> attributeValues = attributesWithValues.stream().map(p -> p.getSecond()).collect(Collectors.toList());
+		return updateByFilterConditions(
+			"UPDATE " + getEntityMapper().getDataSet() + " SET " + attributeNamesEqToPlaceholders,
+			getEntityMapper().composeFilterConditionsForPrimaryKey(id),
+			getDbSupportedAttributeValues(attributeValues));
 	}
 
 	@Override
@@ -264,7 +279,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 				logSqlWithParameters(statement.toString(), attributeValues);
 				return generatedKey;
 			} catch (Exception ex) {
-				throw new RuntimeException(ex.getMessage(), ex);
+				throw new RepositoryException(ex.getMessage(), ex);
 			}
 		});
 	}
@@ -277,7 +292,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 				logSqlWithParameters(statement.toString(), attributeValues);
 				return updatedCount;
 			} catch (Exception ex) {
-				throw new RuntimeException(ex.getMessage(), ex);
+				throw new RepositoryException(ex.getMessage(), ex);
 			}
 		});
 	}
@@ -332,7 +347,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 
 				logSqlWithParameters(sql, parameters);
 			} catch (Exception ex) {
-				throw new RuntimeException(ex.getMessage(), ex);
+				throw new RepositoryException(ex.getMessage(), ex);
 			}
 			return results;
 		});
@@ -388,8 +403,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
         }
 	}
 
-	protected List<Object> getDbSupportedAttributeValues(T entity) {
-		List<Object> attributeValues = getEntityMapper().getAttributeValues(entity);
+	protected List<Object> getDbSupportedAttributeValues(List<Object> attributeValues) {
 		List<Object> result = new ArrayList<>();
 		if (attributeValues != null) {
 			for (Object v : attributeValues) {
@@ -437,7 +451,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 			result = queryData.apply(conn);
 			success = true;
 		} catch (Exception ex) {
-			throw new RuntimeException(ex.getMessage(), ex);
+			throw new RepositoryException(ex.getMessage(), ex);
 		} finally {
 			if (conn != null) {
 				try {
@@ -449,12 +463,12 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 						}
 					}
 				} catch (SQLException ex) {
-					throw new RuntimeException(ex.getMessage(), ex);
+					throw new RepositoryException(ex.getMessage(), ex);
 				} finally {
 					try {
 						conn.close();
 					} catch (SQLException e) {
-						throw new RuntimeException(e.getMessage(), e);
+						throw new RepositoryException(e.getMessage(), e);
 					}
 				}
 			}
@@ -468,7 +482,7 @@ public abstract class AbstractRepository<T extends Identifiable<K>, K, F> implem
 	}
 
 	/** Returns string with comma-separated database attribute names with placeholder values in form suitable for SQL update: column1=?,column2=?,... */
-	protected String getAttributeNamesEqToPlaceholdersCommaSeparated() {
-		return CollectionFuns.join(getEntityMapper().getAttributeNames().stream().map(attrName -> attrName + "=?").collect(Collectors.toList()), ",");
+	protected String getAttributeNamesEqToPlaceholdersCommaSeparated(List<String> attributeNames) {
+		return CollectionFuns.join(attributeNames.stream().map(attrName -> attrName + "=?").collect(Collectors.toList()), ",");
 	}
 }

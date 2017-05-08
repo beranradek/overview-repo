@@ -10,9 +10,10 @@ based on this metadata. Entity mappers can possibly be used also for other trans
 
 ## Implemented features
  * Inner/left/right outer joins implemented as compositions of mappers to allow fetching of related entities as one composed (pageable) entity, with almost no effort (only simple join specification is needed when composing the mappers).
- * Partial update only of some subset of attributes (update defined using a passed lambda).
+ * Partial update only of some subset of attributes (defined using specified attributes with values or using an update lambda).
  * Support for composite primary keys.
  * "CREATE TABLE" SQL string generated from an entity mapper as an useful start to write DB schema (for now, MySQL only).
+ * Optional maximum length property on attributes.
 
 ## Quick start example
 
@@ -24,9 +25,9 @@ For now, just see:
  * Just add attributes and implement composeFilterConditions method in your entity mapper.
 
 ## Planned features
- * Optional maximum length property on attributes.
- * Storage of new immutable versions of entity instead of updates, using version flag on an attribute.
+ * Storage of new immutable versions of entity instead of updates, using supported version flag on an attribute (for now, this can be implemented in a custom way using for e.g. (entityId, version) composite key).
  * Minimal fetch levels configurable on attributes so not every attribute must be loaded (e.g. info, detail).
+ * Derived library for Mongo DB with the same repository interface.
  * Cooperation with another data processing libraries that can leverage general, yet simple definition of attributes (generated forms, CSV/XLS exports from database, ...).
 
 ## Running tests
