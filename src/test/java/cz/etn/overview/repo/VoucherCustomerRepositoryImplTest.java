@@ -1,11 +1,19 @@
 /*
- * Created on 9. 2. 2017
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- * Copyright (c) 2017 Etnetera, a.s. All rights reserved.
- * Intended for internal use only.
- * http://www.etnetera.cz
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package cz.etn.overview.repo;
 
 import cz.etn.overview.Overview;
@@ -42,7 +50,7 @@ public class VoucherCustomerRepositoryImplTest {
 	@Test
 	public void createFindDeleteCustomer() {
 		VoucherCustomerRepository repo = createVoucherCustomerRepository();
-		VoucherCustomer customer = testData.newVoucherCustomer("jan.novak@etnetera.cz", "Jan", "Novak");
+		VoucherCustomer customer = testData.newVoucherCustomer("jan.novak@gmail.com", "Jan", "Novak");
 		customer.setSupplyPoints(null); // Supply points from test data are not loaded by findById
 		customer.setVoucher(null); // Voucher from test data are now not loaded by findById
 
@@ -65,7 +73,7 @@ public class VoucherCustomerRepositoryImplTest {
 		VoucherRepositoryImpl voucherRepo = createVoucherRepository();
 
 		// Customer has at most one generated voucher
-		VoucherCustomer jan = testData.newVoucherCustomer("jan.novak@etnetera.cz", "Jan", "Novak");
+		VoucherCustomer jan = testData.newVoucherCustomer("jan.novak@gmail.com", "Jan", "Novak");
 		jan = customerRepo.create(jan, true);
 
 		Voucher janVoucher = testData.createVoucher("XCVB", "" + jan.getId());
@@ -73,7 +81,7 @@ public class VoucherCustomerRepositoryImplTest {
 		jan.setVoucher(janVoucher);
 		jan.setSupplyPoints(new ArrayList<>());
 
-		VoucherCustomer martina = testData.newVoucherCustomer("martina.vesela@etnetera.cz", "Martina", "Vesela");
+		VoucherCustomer martina = testData.newVoucherCustomer("martina.vesela@gmail.com", "Martina", "Vesela");
 		martina = customerRepo.create(martina, true);
 		martina.setSupplyPoints(new ArrayList<>());
 		// without voucher

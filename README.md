@@ -18,10 +18,10 @@ based on this metadata. Entity mappers can possibly be used also for other trans
 ## Quick start example
 
 For now, just see:
- * [VoucherMapper](https://git.etnetera.cz/etn-libs/overview-repository/blob/master/src/test/java/cz/etn/overview/repo/VoucherMapper.java)
- * [VoucherRepository](https://git.etnetera.cz/etn-libs/overview-repository/blob/master/src/test/java/cz/etn/overview/repo/VoucherRepository.java)
- * [VoucherRepositoryImpl](https://git.etnetera.cz/etn-libs/overview-repository/blob/master/src/test/java/cz/etn/overview/repo/VoucherRepositoryImpl.java)
- * Methods in repository that you will gain implemented (repo interface): [Repository](https://git.etnetera.cz/etn-libs/overview-repository/blob/master/src/main/java/cz/etn/overview/repo/Repository.java)
+ * [VoucherMapper](blob/master/src/test/java/cz/etn/overview/repo/VoucherMapper.java)
+ * [VoucherRepository](blob/master/src/test/java/cz/etn/overview/repo/VoucherRepository.java)
+ * [VoucherRepositoryImpl](blob/master/src/test/java/cz/etn/overview/repo/VoucherRepositoryImpl.java)
+ * Methods in repository that you will gain implemented (repo interface): [Repository](blob/master/src/main/java/cz/etn/overview/repo/Repository.java)
  * Just add attributes and implement composeFilterConditions method in your entity mapper.
 
 ## Planned features
