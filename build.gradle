@@ -16,7 +16,7 @@ apply plugin: 'idea'
 apply plugin: 'etn-lib'
 
 sourceCompatibility = 1.8
-targetCompatibility = 1.7
+targetCompatibility = 1.8
 
 repositories {
   // 

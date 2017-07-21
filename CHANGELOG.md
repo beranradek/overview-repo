@@ -1,10 +1,7 @@
 # Changelog
 
-## [1.0.16] - 2017-?-?
+## [1.0.15] - 2017-?-?
 - What is new?
-
-## [1.0.15] - 2017-07-21
-- targetCompatibility = 1.7
 
 ## [1.0.14] - 2017-07-21
 - Removed Identifiable interface and AbstractEntity, so entities can be POJOs (getId() is not required anymore). 
