@@ -25,6 +25,7 @@ import cz.etn.overview.domain.SupplyPoint;
 import cz.etn.overview.domain.VoucherCustomer;
 import cz.etn.overview.domain.VoucherCustomerFilter;
 import cz.etn.overview.common.funs.CollectionFuns;
+import cz.etn.overview.mapper.Condition;
 import cz.etn.overview.mapper.EntityMapper;
 
 import javax.sql.DataSource;

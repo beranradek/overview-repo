@@ -17,7 +17,6 @@
 package cz.etn.overview.mapper;
 
 import cz.etn.overview.common.Pair;
-import cz.etn.overview.repo.Condition;
 
 import java.util.ArrayList;
 import java.util.List;

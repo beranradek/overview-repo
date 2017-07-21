@@ -22,6 +22,7 @@ import cz.etn.overview.domain.SupplyPointFilter;
 import cz.etn.overview.common.funs.CollectionFuns;
 import cz.etn.overview.mapper.Attr;
 import cz.etn.overview.mapper.Attribute;
+import cz.etn.overview.mapper.Condition;
 import cz.etn.overview.mapper.DynamicEntityMapper;
 
 import java.util.ArrayList;

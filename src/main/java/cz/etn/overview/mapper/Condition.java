@@ -14,10 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cz.etn.overview.repo;
+package cz.etn.overview.mapper;
 
 import cz.etn.overview.common.funs.CollectionFuns;
-import cz.etn.overview.mapper.Attribute;
 
 import java.util.ArrayList;
 import java.util.Arrays;

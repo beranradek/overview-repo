@@ -20,6 +20,7 @@ package cz.etn.overview.repo;
 import cz.etn.overview.domain.Voucher;
 import cz.etn.overview.mapper.Attr;
 import cz.etn.overview.mapper.Attribute;
+import cz.etn.overview.mapper.Condition;
 import cz.etn.overview.mapper.DynamicEntityMapper;
 
 import java.math.BigDecimal;
