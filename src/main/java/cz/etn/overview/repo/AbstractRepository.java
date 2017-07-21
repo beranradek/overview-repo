@@ -20,8 +20,8 @@ import cz.etn.overview.Order;
 import cz.etn.overview.Overview;
 import cz.etn.overview.Pagination;
 import cz.etn.overview.common.Pair;
-import cz.etn.overview.funs.CheckedFunction;
-import cz.etn.overview.funs.CollectionFuns;
+import cz.etn.overview.common.funs.CheckedFunction;
+import cz.etn.overview.common.funs.CollectionFuns;
 import cz.etn.overview.mapper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +36,9 @@ import java.util.stream.Collectors;
 
 /**
  * Basic abstract implementation of {@link Repository}.
+ * @param <T> type of entity
+ * @param <K> type of entity key (composed keys are supported)
+ * @param <F> type of filter
  * @author Radek Beran
  */
 public abstract class AbstractRepository<T, K, F> implements Repository<T, K, F> {

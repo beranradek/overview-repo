@@ -20,7 +20,7 @@ import cz.etn.overview.domain.DiscountEmailType;
 import cz.etn.overview.domain.SendingState;
 import cz.etn.overview.domain.VoucherCustomer;
 import cz.etn.overview.domain.VoucherCustomerFilter;
-import cz.etn.overview.funs.CollectionFuns;
+import cz.etn.overview.common.funs.CollectionFuns;
 import cz.etn.overview.mapper.Attr;
 import cz.etn.overview.mapper.Attribute;
 import cz.etn.overview.mapper.DynamicEntityMapper;

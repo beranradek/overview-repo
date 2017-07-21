@@ -19,7 +19,7 @@ package cz.etn.overview.repo;
 import cz.etn.overview.domain.Address;
 import cz.etn.overview.domain.SupplyPoint;
 import cz.etn.overview.domain.SupplyPointFilter;
-import cz.etn.overview.funs.CollectionFuns;
+import cz.etn.overview.common.funs.CollectionFuns;
 import cz.etn.overview.mapper.Attr;
 import cz.etn.overview.mapper.Attribute;
 import cz.etn.overview.mapper.DynamicEntityMapper;

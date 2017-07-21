@@ -16,7 +16,7 @@
  */
 package cz.etn.overview.repo;
 
-import cz.etn.overview.funs.CollectionFuns;
+import cz.etn.overview.common.funs.CollectionFuns;
 import cz.etn.overview.mapper.Attribute;
 
 import java.util.ArrayList;

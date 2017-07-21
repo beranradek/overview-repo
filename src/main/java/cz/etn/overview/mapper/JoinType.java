@@ -1,4 +1,4 @@
-package cz.etn.overview.repo.join;
+package cz.etn.overview.mapper;
 
 /**
  * Type of join operation.

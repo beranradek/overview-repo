@@ -21,7 +21,10 @@ import cz.etn.overview.mapper.EntityMapper;
 import javax.sql.DataSource;
 
 /**
- * Full implementation of SQL repository using {@link EntityMapper}.
+ * Full implementation of SQL repository using an {@link EntityMapper}.
+ * @param <T> type of entity
+ * @param <K> type of entity key (composed keys are supported)
+ * @param <F> type of filter
  * @author Radek Beran
  */
 public class SqlRepository<T, K, F> extends AbstractRepository<T, K, F> {

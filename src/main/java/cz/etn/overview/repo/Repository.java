@@ -29,8 +29,11 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * Abstract repository.
+ * Repository interface.
  * @author Radek Beran
+ * @param <T> type of entity
+ * @param <K> type of entity key (composed keys are supported)
+ * @param <F> type of filter
  */
 public interface Repository<T, K, F> {
 

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cz.etn.overview.funs;
+package cz.etn.overview.common.funs;
 
 /**
  * Function whose application can throw an checked exception.
