@@ -24,8 +24,13 @@ import java.time.Instant;
  * Voucher.
  * @author Radek Beran
  */
-public class Voucher extends AbstractEntity<String> implements Serializable {
+public class Voucher implements Serializable {
 	private static final long serialVersionUID = 1810293320512995607L;
+
+	/**
+	 * Time when the entity was created.
+	 */
+	private Instant creationTime;
 
 	/**
 	 * Unique voucher discount code.
@@ -91,15 +96,6 @@ public class Voucher extends AbstractEntity<String> implements Serializable {
 	 * Note about invoicing the discount.
 	 */
 	private String invoiceNote;
-
-	@Override
-	public String getId() {
-		return getCode();
-	}
-	
-	public void setId(String id) {
-		setCode(id);
-	}
 
 	public String getCode() {
 		return code;
@@ -244,6 +240,17 @@ public class Voucher extends AbstractEntity<String> implements Serializable {
 		return redemptionTime != null;
 	}
 
+	public void setCreationTime(Instant creationTime) {
+		this.creationTime = creationTime;
+	}
+
+	/**
+	 * Time when the entity was created.
+	 */
+	public Instant getCreationTime() {
+		return creationTime;
+	}
+
 	@Override
 	public String toString() {
 		return "Voucher [code=" + code + ", discountPrice=" + discountPrice + ", creationTime=" + getCreationTime() + 
@@ -252,7 +259,22 @@ public class Voucher extends AbstractEntity<String> implements Serializable {
 				", reservedBy=" + reservedBy +
 				", soldBy=" + soldBy + ", invoiceTime=" + invoiceTime + ", invoiceNote=" + invoiceNote + "]";
 	}
-	
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		Voucher voucher = (Voucher) o;
+
+		return code != null ? code.equals(voucher.code) : voucher.code == null;
+	}
+
+	@Override
+	public int hashCode() {
+		return code != null ? code.hashCode() : 0;
+	}
+
 	/**
 	 * Normalizes voucher code to uppercase without leading and trailing spaces.
 	 * @param voucherCode

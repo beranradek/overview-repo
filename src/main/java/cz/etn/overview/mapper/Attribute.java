@@ -40,6 +40,12 @@ public interface Attribute<E, A> {
 	String getName();
 
 	/**
+	 * Class of attribute.
+	 * @return
+	 */
+	Class<A> getAttributeClass();
+
+	/**
 	 * <p>Name prefix for attribute derived from an entity so that full attribute name including entity qualification
 	 * can be constructed.
 	 * <p>This should be overridden by subclasses if prefixes should be supported. Default implementation returns {@code null}.

@@ -183,6 +183,7 @@ public class Attr<E, A> implements Attribute<E, A> {
         return entityClass;
     }
 
+    @Override
     public Class<A> getAttributeClass() {
         return attributeClass;
     }

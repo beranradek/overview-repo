@@ -58,12 +58,12 @@ public class VoucherRepositoryImplTest {
 		Voucher voucherCreated = repo.create(voucher, false);
 		assertTrue("Created voucher equals voucher to store", EqualsBuilder.reflectionEquals(voucher, voucherCreated));
 		
-		assertEquals(voucher.getCode(), voucher.getId());
-		Optional<Voucher> foundVoucherOpt = repo.findById(voucher.getId());
+		assertEquals(voucher.getCode(), voucher.getCode());
+		Optional<Voucher> foundVoucherOpt = repo.findById(voucher.getCode());
 		assertTrue("Found voucher " + foundVoucherOpt.get() + " equals voucher to store " + voucher, EqualsBuilder.reflectionEquals(voucher, foundVoucherOpt.get()));
 		
-		repo.delete(voucher.getId());
-		Optional<Voucher> foundVoucherAfterDeleteOpt = repo.findById(voucher.getId());
+		repo.delete(voucher.getCode());
+		Optional<Voucher> foundVoucherAfterDeleteOpt = repo.findById(voucher.getCode());
 		assertFalse("Voucher should not be present in database after deletion", foundVoucherAfterDeleteOpt.isPresent());
 	}
 	
@@ -81,7 +81,7 @@ public class VoucherRepositoryImplTest {
 		Optional<Voucher> voucherUpdatedOpt = repo.update(voucherToUpdate);
 		assertTrue("Updated voucher " + voucherUpdatedOpt.get() + " equals voucher to update " + voucherToUpdate, EqualsBuilder.reflectionEquals(voucherUpdatedOpt.get(), voucherToUpdate));
 		
-		Optional<Voucher> foundVoucherOpt = repo.findById(voucher.getId());
+		Optional<Voucher> foundVoucherOpt = repo.findById(voucher.getCode());
 		assertTrue("Found voucher " + foundVoucherOpt.get() + " is equal to voucher to update " + voucherToUpdate, EqualsBuilder.reflectionEquals(foundVoucherOpt.get(), voucherToUpdate));
 	}
 
@@ -93,13 +93,13 @@ public class VoucherRepositoryImplTest {
 		String newInvoiceNote = "Updated invoice note";
 
 		repo.create(voucher, false);
-		int updatedCnt = repo.update(voucher.getId(), Arrays.asList(new Pair[] {
+		int updatedCnt = repo.update(voucher.getCode(), Arrays.asList(new Pair[] {
 			new Pair<>(mapper.discount_price, newDiscountPrice),
 			new Pair<>(mapper.invoice_note, newInvoiceNote)
 		}));
 
 		assertEquals(1, updatedCnt);
-		Voucher updatedVoucher = repo.findById(voucher.getId()).get();
+		Voucher updatedVoucher = repo.findById(voucher.getCode()).get();
 		assertEquals(newDiscountPrice, updatedVoucher.getDiscountPrice());
 		assertEquals(newInvoiceNote, updatedVoucher.getInvoiceNote());
 	}

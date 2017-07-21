@@ -17,12 +17,18 @@
 package cz.etn.overview.domain;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 /**
  * Supply point ("odberne misto" - OM).
  * @author Radek Beran
  */
-public final class SupplyPoint extends AbstractEntity<Integer> {
+public final class SupplyPoint {
+
+	/**
+	 * Time when the entity was created.
+	 */
+	private Instant creationTime;
 	
 	private Integer id;
 	
@@ -71,8 +77,7 @@ public final class SupplyPoint extends AbstractEntity<Integer> {
 	
 	public SupplyPoint() {
 	}
-	
-	@Override
+
 	public Integer getId() {
 		return id;
 	}
@@ -172,6 +177,17 @@ public final class SupplyPoint extends AbstractEntity<Integer> {
 	public void setBenefitYears(Integer benefitYears) {
 		this.benefitYears = benefitYears;
 	}
+
+	public void setCreationTime(Instant creationTime) {
+		this.creationTime = creationTime;
+	}
+
+	/**
+	 * Time when the entity was created.
+	 */
+	public Instant getCreationTime() {
+		return creationTime;
+	}
 	
 	public boolean hasDiscount() {
 		return getVoucherDiscount() != null && getVoucherDiscount().compareTo(BigDecimal.ZERO) > 0;
@@ -180,5 +196,20 @@ public final class SupplyPoint extends AbstractEntity<Integer> {
 	@Override
 	public String toString() {
 		return "SupplyPoint [id=" + id + ", code=" + code + "]";
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		SupplyPoint that = (SupplyPoint) o;
+
+		return id != null ? id.equals(that.id) : that.id == null;
+	}
+
+	@Override
+	public int hashCode() {
+		return id != null ? id.hashCode() : 0;
 	}
 }

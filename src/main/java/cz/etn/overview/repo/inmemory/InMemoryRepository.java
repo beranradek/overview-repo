@@ -17,7 +17,6 @@
 package cz.etn.overview.repo.inmemory;
 
 import cz.etn.overview.Overview;
-import cz.etn.overview.domain.Identifiable;
 import cz.etn.overview.repo.AggType;
 import cz.etn.overview.repo.Repository;
 import cz.etn.overview.repo.RepositoryException;
@@ -33,7 +32,7 @@ import java.util.stream.Collectors;
  * In-memory repository implementation intended to use in tests.
  * @author Radek Beran
  */
-public abstract class InMemoryRepository<T extends Identifiable<K>, K, F> implements Repository<T, K, F> {
+public abstract class InMemoryRepository<T, K, F> implements Repository<T, K, F> {
 	
 	protected Set<T> records = ConcurrentHashMap.newKeySet(); // derived concurrent hash set
 	
@@ -41,9 +40,9 @@ public abstract class InMemoryRepository<T extends Identifiable<K>, K, F> implem
 
 	@Override
 	public T create(T entity, boolean autogerateKey) {
-		Optional<T> ent = findById(entity.getId());
+		Optional<T> ent = findById(getEntityId(entity));
 		if (ent.isPresent()) {
-			throw new RepositoryException("Duplicate key " + entity.getId());
+			throw new RepositoryException("Duplicate key " + getEntityId(entity));
 		}
 		if (autogerateKey) {
 			entity = entityUpdatedWithId(entity, generateId());
@@ -54,7 +53,7 @@ public abstract class InMemoryRepository<T extends Identifiable<K>, K, F> implem
 
 	@Override
 	public Optional<T> update(T entity) {
-		if (delete(entity.getId())) {
+		if (delete(getEntityId(entity))) {
 			records.add(entity); // add updated entity
 			return Optional.of(entity);
 		}
@@ -64,7 +63,7 @@ public abstract class InMemoryRepository<T extends Identifiable<K>, K, F> implem
 	@Override
 	public boolean delete(K id) {
 		if (id == null) return false;
-		return records.removeIf(r -> id.equals(r.getId()));
+		return records.removeIf(r -> id.equals(getEntityId(r)));
 	}
 
 	@Override
@@ -75,7 +74,7 @@ public abstract class InMemoryRepository<T extends Identifiable<K>, K, F> implem
 	@Override
 	public Optional<T> findById(K id) {
 		if (id == null) return Optional.empty();
-		return records.stream().filter(r -> id.equals(r.getId())).findFirst();
+		return records.stream().filter(r -> id.equals(getEntityId(r))).findFirst();
 	}
 
 	@Override
@@ -105,5 +104,7 @@ public abstract class InMemoryRepository<T extends Identifiable<K>, K, F> implem
 	}
 
 	abstract protected T entityUpdatedWithId(T entity, K id);
+
+	abstract protected K getEntityId(T entity);
 	
 }

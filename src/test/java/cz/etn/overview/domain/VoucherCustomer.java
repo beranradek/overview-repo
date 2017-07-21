@@ -24,7 +24,12 @@ import java.util.List;
  * Record about EON customer with his bonus points that can be applied in loyalty program.
  * @author Radek Beran
  */
-public class VoucherCustomer extends AbstractEntity<Integer> {
+public class VoucherCustomer {
+
+	/**
+	 * Time when the entity was created.
+	 */
+	private Instant creationTime;
 
 	private Integer id;
 	
@@ -63,8 +68,7 @@ public class VoucherCustomer extends AbstractEntity<Integer> {
 	 * Name of import file. 
 	 */
 	private String importFileName;
-	
-	@Override
+
 	public Integer getId() {
 		return id;
 	}
@@ -169,6 +173,17 @@ public class VoucherCustomer extends AbstractEntity<Integer> {
 		this.importFileName = importFileName;
 	}
 
+	public void setCreationTime(Instant creationTime) {
+		this.creationTime = creationTime;
+	}
+
+	/**
+	 * Time when the entity was created.
+	 */
+	public Instant getCreationTime() {
+		return creationTime;
+	}
+
 	public DiscountEmailType resolveDiscountEmailType(List<SupplyPoint> sp) {
 		DiscountEmailType emailType = DiscountEmailType.NO_DISCOUNT;
 		if (hasPositiveVoucherDiscount() && sp != null && !sp.isEmpty()) {
@@ -207,5 +222,19 @@ public class VoucherCustomer extends AbstractEntity<Integer> {
 		return "VoucherCustomer [id=" + id + ", email=" + email + ", firstName=" + firstName + ", lastName=" + lastName + ", salutation=" + salutation + ", businessPartnerCode=" + businessPartnerCode + ", supplyPoints=" + supplyPoints + ", voucher="
 			+ voucher + ", discountEmailType=" + discountEmailType + ", emailSentTime=" + emailSentTime + ", emailSendingState=" + emailSendingState + ", importFileName=" + importFileName + "]";
 	}
-	
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		VoucherCustomer that = (VoucherCustomer) o;
+
+		return id != null ? id.equals(that.id) : that.id == null;
+	}
+
+	@Override
+	public int hashCode() {
+		return id != null ? id.hashCode() : 0;
+	}
 }
