@@ -52,8 +52,16 @@ public class VoucherRepositoryImplTest {
 	}
 
 	@Test
-	public void createFindDeleteVoucher() {
+	public void create() {
 		Voucher voucher = testData.newVoucher("ABCD");
+
+		Voucher voucherCreated = repo.create(voucher, false);
+		assertTrue("Created voucher equals voucher to store", EqualsBuilder.reflectionEquals(voucher, voucherCreated));
+	}
+
+	@Test
+	public void createFindDeleteVoucher() {
+		Voucher voucher = testData.newVoucher("EFGH");
 
 		Voucher voucherCreated = repo.create(voucher, false);
 		assertTrue("Created voucher equals voucher to store", EqualsBuilder.reflectionEquals(voucher, voucherCreated));
