@@ -427,6 +427,6 @@ You can discover a little extended example that is part of the library's tests f
 
 ## Library maintenance
 
-Running tests: gradlew clean test
-Publishing artifact: gradlew clean uploadArchives
-Releasing artifact: gradlew clean release; Increase version in gradle.properties to next version
+ * Running tests: gradlew clean test
+ * Publishing artifact: gradlew clean uploadArchives
+ * Releasing artifact: gradlew clean release; Increase version in gradle.properties to next version
