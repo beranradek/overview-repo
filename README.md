@@ -21,7 +21,7 @@ We will create simple database with customers and their vouchers. Each voucher c
 taken on one ore more supply points of the customer. Customer can have at most one voucher assigned.
 There can be customers without any discount - without any voucher.
 
-### Voucher repository
+### Voucher entity and repository
 
 So let's create a voucher entity:
 
@@ -31,54 +31,15 @@ So let's create a voucher entity:
  */
 public class Voucher {
 
-	/**
-	 * Time when the voucher was created.
-	 */
 	private Instant creationTime;
-
-	/**
-	 * Unique voucher discount code.
-	 */
 	private String code;
-
-	/**
-	 * Discount price.
-	 */
 	private BigDecimal discountPrice;
-
-	/**
-	 * Time from which the voucher is valid.
-	 */
 	private Instant validFrom;
-
-	/**
-	 * Time to which the voucher is valid.
-	 */
 	private Instant validTo;
-
-	/**
-	 * Time when the voucher was redeemed.
-	 */
 	private Instant redemptionTime;
-
-	/**
-	 * Time when the voucher was invalidated.
-	 */
 	private Instant invalidationTime;
-	
-	/**
-	 * Reason of voucher invalidation.
-	 */
 	private String invalidationNote;
-
-	/**
-	 * Identifier of customer who has redeemed the voucher.
-	 */
 	private String redeemedBy;
-	
-	/**
-	 * Identifier of customer who has reserved the voucher.
-	 */
 	private String reservedBy;
 
 	public String getCode() {
@@ -153,54 +114,14 @@ public class Voucher {
 		this.reservedBy = reservedBy;
 	}
 
-	public boolean isValid() {
-		Instant now = Instant.now();
-		return (validFrom == null || !now.isBefore(validFrom)) && 
-		(validTo == null || !now.isAfter(validTo)) && 
-		!isInvalidated();
-	}
-	
-	public boolean isUsed() {
-		return redemptionTime != null;
-	}
-	
-	public boolean isInvalidated() {
-		return invalidationTime != null;
-	}
-	
-	public boolean canBeInvalidated() {
-		boolean res = isValid() && !isUsed();
-		return res;
-	}
-	
-	/**
-	 * Whether this voucher is free for redemption.
-	 * @return
-	 */
-	public boolean isFreeToUse() {
-		return isValid() && !isUsed();
-	}
-	
-	public boolean isRedeemed() {
-		return redemptionTime != null;
-	}
-
 	public void setCreationTime(Instant creationTime) {
 		this.creationTime = creationTime;
 	}
 
-	/**
-	 * Time when the entity was created.
-	 */
 	public Instant getCreationTime() {
 		return creationTime;
 	}
-
-	/**
-	 * Normalizes voucher code to uppercase without leading and trailing spaces.
-	 * @param voucherCode
-	 * @return
-	 */
+	
 	private String normalizedVoucherCode(String voucherCode) {
 		if (voucherCode == null) return null;
 		return voucherCode.trim().toUpperCase();
