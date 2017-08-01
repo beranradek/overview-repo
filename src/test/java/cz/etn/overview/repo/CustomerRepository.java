@@ -16,13 +16,13 @@
  */
 package cz.etn.overview.repo;
 
-import cz.etn.overview.domain.VoucherCustomer;
-import cz.etn.overview.domain.VoucherCustomerFilter;
+import cz.etn.overview.domain.Customer;
+import cz.etn.overview.domain.CustomerFilter;
 
 /**
  * Voucher customer repository.
  * @author Radek Beran
  */
-public interface VoucherCustomerRepository extends Repository<VoucherCustomer, Integer, VoucherCustomerFilter> {
+public interface CustomerRepository extends Repository<Customer, Integer, CustomerFilter> {
     // nothing new here
 }

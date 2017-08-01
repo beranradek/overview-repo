@@ -18,8 +18,8 @@ package cz.etn.overview.repo;
 
 import cz.etn.overview.domain.DiscountEmailType;
 import cz.etn.overview.domain.SendingState;
-import cz.etn.overview.domain.VoucherCustomer;
-import cz.etn.overview.domain.VoucherCustomerFilter;
+import cz.etn.overview.domain.Customer;
+import cz.etn.overview.domain.CustomerFilter;
 import cz.etn.overview.common.funs.CollectionFuns;
 import cz.etn.overview.mapper.Attr;
 import cz.etn.overview.mapper.Attribute;
@@ -34,27 +34,27 @@ import java.util.List;
  * Mapping of voucher customer attributes to database fields.
  * @author Radek Beran
  */
-public class VoucherCustomerMapper extends DynamicEntityMapper<VoucherCustomer, VoucherCustomerFilter> {
+public class CustomerMapper extends DynamicEntityMapper<Customer, CustomerFilter> {
 
 	/** Mapped entity class. */
-	private static final Class<VoucherCustomer> cls = VoucherCustomer.class;
+	private static final Class<Customer> cls = Customer.class;
 	private static final String DB_TABLE_NAME = "voucher_customer";
-	private static final VoucherCustomerMapper INSTANCE = new VoucherCustomerMapper();
+	private static final CustomerMapper INSTANCE = new CustomerMapper();
 
-	public final Attribute<VoucherCustomer, Integer> id;
-	public final Attribute<VoucherCustomer, Instant> creation_time;
-	public final Attribute<VoucherCustomer, String> email;
-	public final Attribute<VoucherCustomer, String> first_name;
-	public final Attribute<VoucherCustomer, String> last_name;
-	public final Attribute<VoucherCustomer, String> salutation;
-	public final Attribute<VoucherCustomer, String> business_partner_code;
-	public final Attribute<VoucherCustomer, String> discount_email_type;
-	public final Attribute<VoucherCustomer, Instant> email_sent_time;
-	public final Attribute<VoucherCustomer, String> email_sending_state;
-	public final Attribute<VoucherCustomer, String> email_text;
-	public final Attribute<VoucherCustomer, String> import_file_name;
+	public final Attribute<Customer, Integer> id;
+	public final Attribute<Customer, Instant> creation_time;
+	public final Attribute<Customer, String> email;
+	public final Attribute<Customer, String> first_name;
+	public final Attribute<Customer, String> last_name;
+	public final Attribute<Customer, String> salutation;
+	public final Attribute<Customer, String> business_partner_code;
+	public final Attribute<Customer, String> discount_email_type;
+	public final Attribute<Customer, Instant> email_sent_time;
+	public final Attribute<Customer, String> email_sending_state;
+	public final Attribute<Customer, String> email_text;
+	public final Attribute<Customer, String> import_file_name;
 
-	private VoucherCustomerMapper() {
+	private CustomerMapper() {
 		id = add(Attr.ofInteger(cls, "id").primary().get(e -> e.getId()).set((e, a) -> e.setId(a)));
 		creation_time = add(Attr.ofInstant(cls, "creation_time").get(e -> e.getCreationTime()).set((e, a) -> e.setCreationTime(a)));
 		email = add(Attr.ofString(cls, "email").get(e -> e.getEmail()).set((e, a) -> e.setEmail(a)));
@@ -85,7 +85,7 @@ public class VoucherCustomerMapper extends DynamicEntityMapper<VoucherCustomer, 
 		import_file_name = add(Attr.ofString(cls, "import_file_name").get(e -> e.getImportFileName()).set((e, a) -> e.setImportFileName(a)));
 	}
 
-	public static VoucherCustomerMapper getInstance() {
+	public static CustomerMapper getInstance() {
 		return INSTANCE;
 	}
 
@@ -95,7 +95,7 @@ public class VoucherCustomerMapper extends DynamicEntityMapper<VoucherCustomer, 
 	}
 
 	@Override
-	public List<Condition> composeFilterConditions(VoucherCustomerFilter filter) {
+	public List<Condition> composeFilterConditions(CustomerFilter filter) {
 		List<Condition> conditions = new ArrayList<>();
 		if (filter.getId() != null) {
 			conditions.add(Condition.eq(id, filter.getId()));
@@ -110,8 +110,8 @@ public class VoucherCustomerMapper extends DynamicEntityMapper<VoucherCustomer, 
 	}
 
 	@Override
-	public VoucherCustomer createEntity() {
-		return new VoucherCustomer();
+	public Customer createEntity() {
+		return new Customer();
 	}
 
 }

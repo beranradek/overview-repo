@@ -19,7 +19,7 @@ package cz.etn.overview;
 import cz.etn.overview.domain.DiscountEmailType;
 import cz.etn.overview.domain.SupplyPoint;
 import cz.etn.overview.domain.Voucher;
-import cz.etn.overview.domain.VoucherCustomer;
+import cz.etn.overview.domain.Customer;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -30,21 +30,21 @@ import java.util.List;
  * Voucher customer data for use in tests.
  * @author Radek Beran
  */
-public class VoucherCustomerTestData {
+public class CustomerTestData {
 
-	public VoucherCustomer newVoucherCustomer(String email, String firstName, String lastName) {
-		VoucherCustomer voucherCustomer = new VoucherCustomer();
-		voucherCustomer.setCreationTime(Instant.now());
-		voucherCustomer.setEmail(email);
-		voucherCustomer.setFirstName(firstName);
-		voucherCustomer.setLastName(lastName);
+	public Customer newVoucherCustomer(String email, String firstName, String lastName) {
+		Customer customer = new Customer();
+		customer.setCreationTime(Instant.now());
+		customer.setEmail(email);
+		customer.setFirstName(firstName);
+		customer.setLastName(lastName);
 		List<SupplyPoint> supplyPoints = new ArrayList<>();
 		supplyPoints.add(createSupplyPoint("4100272309"));
 		supplyPoints.add(createSupplyPoint("4100272310"));
-		voucherCustomer.setSupplyPoints(supplyPoints);
-		voucherCustomer.setDiscountEmailType(DiscountEmailType.MORE_SUPPLY_POINTS_DISCOUNT);
-		voucherCustomer.setImportFileName("body_Benefit_body_rijen_31102016.xlsx");
-		return voucherCustomer;
+		customer.setSupplyPoints(supplyPoints);
+		customer.setDiscountEmailType(DiscountEmailType.MORE_SUPPLY_POINTS_DISCOUNT);
+		customer.setImportFileName("body_Benefit_body_rijen_31102016.xlsx");
+		return customer;
 	}
 	
 	public SupplyPoint createSupplyPoint(String code) {

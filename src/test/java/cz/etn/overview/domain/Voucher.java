@@ -16,7 +16,6 @@
  */
 package cz.etn.overview.domain;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
 
@@ -24,8 +23,7 @@ import java.time.Instant;
  * Voucher.
  * @author Radek Beran
  */
-public class Voucher implements Serializable {
-	private static final long serialVersionUID = 1810293320512995607L;
+public class Voucher {
 
 	/**
 	 * Time when the entity was created.

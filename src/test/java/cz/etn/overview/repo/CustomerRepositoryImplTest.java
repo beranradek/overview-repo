@@ -17,11 +17,10 @@
 package cz.etn.overview.repo;
 
 import cz.etn.overview.Overview;
-import cz.etn.overview.VoucherCustomerTestData;
+import cz.etn.overview.CustomerTestData;
 import cz.etn.overview.VoucherTestDb;
 import cz.etn.overview.domain.Voucher;
-import cz.etn.overview.domain.VoucherCustomer;
-import cz.etn.overview.domain.VoucherCustomerFilter;
+import cz.etn.overview.domain.Customer;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.Test;
 
@@ -33,47 +32,47 @@ import java.util.Optional;
 import static org.junit.Assert.*;
 
 /**
- * Tests for {@link VoucherCustomerRepositoryImpl}.
+ * Tests for {@link CustomerRepositoryImpl}.
  * @author Radek Beran
  */
-public class VoucherCustomerRepositoryImplTest {
+public class CustomerRepositoryImplTest {
 
 	private final DataSource dataSource;
-	private final VoucherCustomerTestData testData;
+	private final CustomerTestData testData;
 	
-	public VoucherCustomerRepositoryImplTest() {
+	public CustomerRepositoryImplTest() {
 		VoucherTestDb testDb = new VoucherTestDb();
 		this.dataSource = testDb.createDataSource();
-		this.testData = new VoucherCustomerTestData();
+		this.testData = new CustomerTestData();
 	}
 
 	@Test
 	public void createFindDeleteCustomer() {
-		VoucherCustomerRepository repo = createVoucherCustomerRepository();
-		VoucherCustomer customer = testData.newVoucherCustomer("jan.novak@gmail.com", "Jan", "Novak");
+		CustomerRepository repo = createVoucherCustomerRepository();
+		Customer customer = testData.newVoucherCustomer("jan.novak@gmail.com", "Jan", "Novak");
 		customer.setSupplyPoints(null); // Supply points from test data are not loaded by findById
 		customer.setVoucher(null); // Voucher from test data are now not loaded by findById
 
-		VoucherCustomer customerCreated = repo.create(customer, true);
+		Customer customerCreated = repo.create(customer, true);
 		assertTrue("Created customer has id assigned", customerCreated.getId() != null);
 		customer.setId(customerCreated.getId()); // so the entities are now equal
 		assertTrue("Created customer " + customerCreated + " equals customer to store " + customer, EqualsBuilder.reflectionEquals(customer, customerCreated));
 
-		Optional<VoucherCustomer> foundCustomerOpt = repo.findById(customer.getId());
+		Optional<Customer> foundCustomerOpt = repo.findById(customer.getId());
 		assertTrue("Found customer " + foundCustomerOpt.get() + " was not equal to customer to store " + customer, EqualsBuilder.reflectionEquals(customer, foundCustomerOpt.get()));
 		
 		repo.delete(customer.getId());
-		Optional<VoucherCustomer> foundCustomerAfterDeleteOpt = repo.findById(customer.getId());
+		Optional<Customer> foundCustomerAfterDeleteOpt = repo.findById(customer.getId());
 		assertFalse("Customer should not be present in database after deletion", foundCustomerAfterDeleteOpt.isPresent());
 	}
 
 	@Test
 	public void findCustomerLeftJoinVoucher() {
-		VoucherCustomerRepositoryImpl customerRepo = createVoucherCustomerRepository();
+		CustomerRepositoryImpl customerRepo = createVoucherCustomerRepository();
 		VoucherRepositoryImpl voucherRepo = createVoucherRepository();
 
 		// Customer has at most one generated voucher
-		VoucherCustomer jan = testData.newVoucherCustomer("jan.novak@gmail.com", "Jan", "Novak");
+		Customer jan = testData.newVoucherCustomer("jan.novak@gmail.com", "Jan", "Novak");
 		jan = customerRepo.create(jan, true);
 
 		Voucher janVoucher = testData.createVoucher("XCVB", "" + jan.getId());
@@ -81,17 +80,17 @@ public class VoucherCustomerRepositoryImplTest {
 		jan.setVoucher(janVoucher);
 		jan.setSupplyPoints(new ArrayList<>());
 
-		VoucherCustomer martina = testData.newVoucherCustomer("martina.vesela@gmail.com", "Martina", "Vesela");
+		Customer martina = testData.newVoucherCustomer("martina.vesela@gmail.com", "Martina", "Vesela");
 		martina = customerRepo.create(martina, true);
 		martina.setSupplyPoints(new ArrayList<>());
 		// without voucher
 
-		List<VoucherCustomer> customers = customerRepo.findByOverview(new Overview<>(null, null, null));
+		List<Customer> customers = customerRepo.findByOverview(new Overview<>(null, null, null));
 		// Customers are sorted by their id (default ordering)
 		assertEquals(2, customers.size());
-		VoucherCustomer janLoaded = customers.get(0);
+		Customer janLoaded = customers.get(0);
 		assertEquals(jan.getEmail(), janLoaded.getEmail());
-		VoucherCustomer martinaLoaded = customers.get(1);
+		Customer martinaLoaded = customers.get(1);
 		assertEquals(martina.getEmail(), martinaLoaded.getEmail());
 
 		assertTrue("Jan has one voucher", janLoaded.getVoucher() != null && janLoaded.getVoucher().getCode() != null);
@@ -102,8 +101,8 @@ public class VoucherCustomerRepositoryImplTest {
 		assertTrue(martinaLoaded + " equals " + martina, EqualsBuilder.reflectionEquals(martinaLoaded, martina));
 	}
 
-	protected VoucherCustomerRepositoryImpl createVoucherCustomerRepository() {
-		return new VoucherCustomerRepositoryImpl(dataSource, new SupplyPointRepositoryImpl(dataSource));
+	protected CustomerRepositoryImpl createVoucherCustomerRepository() {
+		return new CustomerRepositoryImpl(dataSource, new SupplyPointRepositoryImpl(dataSource));
 	}
 
 	protected VoucherRepositoryImpl createVoucherRepository() {

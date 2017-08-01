@@ -30,7 +30,7 @@ public enum DiscountEmailType {
 	
 	private final String notificationCode;
 	
-	private DiscountEmailType(String notificationCode) {
+	DiscountEmailType(String notificationCode) {
 		this.notificationCode = notificationCode;
 	}
 	

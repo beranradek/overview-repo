@@ -23,7 +23,7 @@ import java.util.List;
  * Filter of voucher customers.
  * @author Radek Beran
  */
-public class VoucherCustomerFilter implements Serializable {
+public class CustomerFilter implements Serializable {
 	private static final long serialVersionUID = 4590219796927704612L;
 	private Integer id;
 	

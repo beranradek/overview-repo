@@ -21,10 +21,10 @@ import java.time.Instant;
 import java.util.List;
 
 /**
- * Record about EON customer with his bonus points that can be applied in loyalty program.
+ * Customer which can gain a generated discount voucher for services taken on customer's supply points.
  * @author Radek Beran
  */
-public class VoucherCustomer {
+public class Customer {
 
 	/**
 	 * Time when the entity was created.
@@ -228,7 +228,7 @@ public class VoucherCustomer {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 
-		VoucherCustomer that = (VoucherCustomer) o;
+		Customer that = (Customer) o;
 
 		return id != null ? id.equals(that.id) : that.id == null;
 	}
