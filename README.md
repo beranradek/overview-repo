@@ -15,7 +15,6 @@ Look at the modules for further documentation and quick start examples. Do not r
 There is plenty of methods already implemented for you: Create, update/partial update, delete, delete by filter, find by id, find by filtering and ordering and pagination settings (overview settings), find all, find by filter only (for convenience), count by filter, aggregate (count, sum, min, max, avg) by filter.
 
 ## Generally implemented features
- * Partial update only of some subset of attributes (defined using specified attributes with values or using an update lambda).
  * Support for composite primary keys.
  * Optional maximum length property on attributes.
 
