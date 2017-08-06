@@ -11,7 +11,8 @@ Library has no dependencies except a database-type-specific client API and loggi
  * **[Mongo](mongo/README.md) - Mongo DB implementation**. Still work in progress, does not yet support nested documents and arrays of documents.
 
 
-Look at the modules for further documentation and quick start examples.
+Look at the modules for further documentation and quick start examples. Do not repeat implementations of repositories! Allow yourself to concentrate on your business logic.
+There is plenty of methods already implemented for you: Create, update/partial update, delete, delete by filter, find by id, find by filtering and ordering and pagination settings (overview settings), find all, find by filter only (for convenience), count by filter, aggregate (count, sum, min, max, avg) by filter.
 
 ## Generally implemented features
  * Partial update only of some subset of attributes (defined using specified attributes with values or using an update lambda).
