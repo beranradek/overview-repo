@@ -215,7 +215,7 @@ public interface VoucherRepository extends Repository<Voucher, String, VoucherFi
 /**
  * Default implementation of {@link VoucherRepository}. 
  */
-public class VoucherRepositoryImpl extends AbstractRepository<Voucher, String, VoucherFilter> implements VoucherRepository {
+public class VoucherRepositoryImpl extends AbstractSqlRepository<Voucher, String, VoucherFilter> implements VoucherRepository {
 	
 	private final DataSource dataSource;
 
@@ -237,9 +237,9 @@ public class VoucherRepositoryImpl extends AbstractRepository<Voucher, String, V
 ```
 
 Repository is connected to a database via standard javax.sql.DataSource and it's implementation 
-that is extended from AbstractRepository requires also instance of entity mapper we have created
+that is extended from AbstractSqlRepository requires also instance of entity mapper we have created
 before. Now we can extend a repository little bit and create some methods for storing and accessing database entities.
-But wait, what we can gain from Repository/AbstractRepository we have extended?
+But wait, what we can gain from Repository/AbstractSqlRepository we have extended?
 
 There is already plenty of methods that are already fully implemented: create, update/partial update, delete, delete by filter,
 find by id, find by filtering and ordering and pagination settings (overview settings), find all, find by filter only (for convenience),
@@ -248,8 +248,7 @@ So you could add some specific query methods to your repository, but our impleme
 than sufficient. Let's hope this will be really easily maintainable and refactorable code for you!
 There is not so much to maintain at all :-) Mainly the mapper implementation. But note you can leverage
 it probably as general attribute source also for some other business logic (e.g. exports, generic forms). If you have 
-some special requirements, you can implement additional queries using many protected methods in 
-AbstractRepository.
+some special requirements, you can implement additional queries using many protected methods present in abstract implementation.
 
 ### One-to-one and one-to-many joins
 
