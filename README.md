@@ -6,8 +6,10 @@ based on this metadata. Entity mappers can possibly be used also for other trans
 
 Library has no dependencies except a database-type-specific client API and logging API. Various repository implementations can be introduced. For now, these implementations (modules) are available:
 
- * [SQL](sql/README.md) - production ready JDBC implementation of full-featured generic repository
- * [Mongo](mongo/README.md) - still work in progress, does not yet support nested Mongo documents and arrays
+
+ * **[SQL](sql/README.md) - production ready JDBC implementation** of full-featured generic repository.
+ * **[Mongo](mongo/README.md) - Mongo DB implementation**. Still work in progress, does not yet support nested documents and arrays of documents.
+
 
 Look at the modules for further documentation and quick start examples.
 
@@ -20,4 +22,3 @@ Look at the modules for further documentation and quick start examples.
  * Storage of new immutable versions of entity instead of updates, using supported version flag on an attribute (for now, this can be implemented in a custom way using for e.g. (entityId, version) composite key).
  * Minimal fetch levels configurable on attributes so not every attribute must be loaded (e.g. info, detail).
  * Cooperation with another data processing libraries that can leverage general, yet simple definition of attributes (generated forms, CSV/XLS exports from database, ...).
- 
