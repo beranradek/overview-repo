@@ -7,8 +7,8 @@ based on this metadata. Entity mappers can possibly be used also for other trans
 Library has no dependencies except a database-type-specific client API and logging API. Various repository implementations that share the same repository interface can be introduced. For now, these implementations (modules) are available:
 
 
- * **[SQL](sql/README.md) - production ready JDBC implementation** of full-featured generic repository.
- * **[Mongo](mongo/README.md) - Mongo DB implementation**. Still work in progress, does not yet support nested documents and arrays of documents.
+ * **[SQL](overview-repo-sql/README.md) - production ready JDBC implementation** of full-featured generic repository.
+ * **[Mongo](overview-repo-mongo/README.md) - Mongo DB implementation**. Still work in progress, does not yet support nested documents and arrays of documents.
 
 
 Look at the modules for further documentation and quick start examples. Do not repeat implementations of repositories! Allow yourself to concentrate on your business logic.

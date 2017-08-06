@@ -1,2 +1,2 @@
 rootProject.name = "overview-repo"
-include "sql", "mongo"
+include "overview-repo-sql", "overview-repo-mongo"

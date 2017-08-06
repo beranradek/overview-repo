@@ -1,3 +1,2 @@
 // See http://doc.etnetera.cz/developers/buildovani/gradle/etn_pluginy/EtnPlugin for uploadArchives, release tasks etc.
 apply plugin: 'etn-lib' // applies plugin java, defines common repositories
-archivesBaseName = "overview-repo-sql"

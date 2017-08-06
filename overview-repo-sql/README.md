@@ -332,6 +332,6 @@ You can discover a little extended example that is part of the library's tests f
 
 ## Library maintenance
 
- * Running tests: gradlew :sql:clean :sql:test
- * Publishing artifact: gradlew :sql:clean :sql:uploadArchives
- * Releasing artifact: gradlew :sql:clean :sql:release; Increase version in gradle.properties of subproject to next version
+ * Running tests: gradlew :overview-repo-sql:clean :overview-repo-sql:test
+ * Publishing artifact: gradlew :overview-repo-sql:clean :overview-repo-sql:uploadArchives
+ * Releasing artifact: gradlew :overview-repo-sql:clean :overview-repo-sql:release; Increase version in gradle.properties of subproject to next version
