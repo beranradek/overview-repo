@@ -4,7 +4,7 @@ This library provides **full-featured repository implementation with overview (f
 Entity mappers provide metadata about attributes of stored entities, so the repository is able to construct all the queries
 based on this metadata. Entity mappers can possibly be used also for other transformations of data objects, outside the scope of this library.
 
-Library has no dependencies except a database-type-specific client API and logging API. Various repository implementations can be introduced. For now, these implementations (modules) are available:
+Library has no dependencies except a database-type-specific client API and logging API. Various repository implementations that share the same repository interface can be introduced. For now, these implementations (modules) are available:
 
 
  * **[SQL](sql/README.md) - production ready JDBC implementation** of full-featured generic repository.
