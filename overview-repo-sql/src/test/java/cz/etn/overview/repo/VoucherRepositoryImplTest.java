@@ -21,7 +21,7 @@ import cz.etn.overview.VoucherTestData;
 import cz.etn.overview.VoucherTestDb;
 import cz.etn.overview.common.Pair;
 import cz.etn.overview.domain.Voucher;
-import cz.etn.overview.mapper.Attribute;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.Test;
 
@@ -60,7 +60,7 @@ public class VoucherRepositoryImplTest {
 	}
 
 	@Test
-	public void createFindDeleteVoucher() {
+	public void createFindDelete() {
 		Voucher voucher = testData.newVoucher("EFGH");
 
 		Voucher voucherCreated = repo.create(voucher, false);
@@ -76,7 +76,7 @@ public class VoucherRepositoryImplTest {
 	}
 	
 	@Test
-	public void updateVoucher() {
+	public void update() {
 		Voucher voucher = testData.newVoucher("QWERTY");
 
 		Voucher voucherCreated = repo.create(voucher, false);
@@ -97,11 +97,14 @@ public class VoucherRepositoryImplTest {
 	public void updateSelectedAttributes() {
 		Voucher voucher = testData.newVoucher("HGTDFKL");
 		VoucherMapper mapper = VoucherMapper.getInstance();
-		BigDecimal newDiscountPrice = BigDecimal.valueOf(200000, 2);
-		String newInvoiceNote = "Updated invoice note";
 
 		repo.create(voucher, false);
-		int updatedCnt = repo.update(voucher.getCode(), Arrays.asList(new Pair[] {
+
+		Voucher voucherToUpdate = SerializationUtils.clone(voucher);
+		voucherToUpdate.setInvalidationNote("Something changed but not stored");
+		BigDecimal newDiscountPrice = BigDecimal.valueOf(200000, 2);
+		String newInvoiceNote = "Updated invoice note";
+		int updatedCnt = repo.update(voucherToUpdate.getCode(), Arrays.asList(new Pair[] {
 			new Pair<>(mapper.discount_price, newDiscountPrice),
 			new Pair<>(mapper.invoice_note, newInvoiceNote)
 		}));
@@ -110,6 +113,52 @@ public class VoucherRepositoryImplTest {
 		Voucher updatedVoucher = repo.findById(voucher.getCode()).get();
 		assertEquals(newDiscountPrice, updatedVoucher.getDiscountPrice());
 		assertEquals(newInvoiceNote, updatedVoucher.getInvoiceNote());
+		assertEquals(voucher.getInvalidationNote(), updatedVoucher.getInvalidationNote());
+	}
+
+	@Test
+	public void updateWithFunction() {
+		Voucher voucher = testData.newVoucher("IJKLM");
+		VoucherMapper mapper = VoucherMapper.getInstance();
+
+		repo.create(voucher, false);
+
+		Voucher voucherToUpdate = SerializationUtils.clone(voucher);
+		voucherToUpdate.setInvalidationNote("Something changed but not stored");
+
+		BigDecimal newDiscountPrice = BigDecimal.valueOf(200000, 2);
+		String newInvoiceNote = "Updated invoice note";
+
+		Optional<Voucher> updatedVoucherOpt = repo.update(voucherToUpdate.getCode(), v -> {
+			v.setDiscountPrice(newDiscountPrice);
+			v.setInvoiceNote(newInvoiceNote);
+			return v;
+		});
+		assertTrue("Updated voucher is returned", updatedVoucherOpt.isPresent());
+		assertEquals(voucher.getCode(), updatedVoucherOpt.get().getCode());
+		assertEquals(newDiscountPrice, updatedVoucherOpt.get().getDiscountPrice());
+		assertEquals(newInvoiceNote, updatedVoucherOpt.get().getInvoiceNote());
+		assertEquals(voucher.getInvalidationNote(), updatedVoucherOpt.get().getInvalidationNote());
+	}
+
+	@Test
+	public void delete() {
+		String code = "HCHKR";
+		Voucher voucher = testData.newVoucher(code);
+		repo.create(voucher, false);
+		assertTrue("Voucher is available in DB", repo.findById(code).isPresent());
+		repo.delete(code);
+		assertFalse("After deletion, voucher is not available in DB", repo.findById(code).isPresent());
+	}
+
+	@Test
+	public void findById() {
+		String code = "ASDFG";
+		Voucher voucher = testData.newVoucher(code);
+		repo.create(voucher, false);
+		Optional<Voucher> foundVoucherOpt = repo.findById(code);
+		assertTrue("Voucher is available in DB", foundVoucherOpt.isPresent());
+		assertTrue("Found voucher equals voucher to store", EqualsBuilder.reflectionEquals(voucher, foundVoucherOpt.get()));
 	}
 
 }
