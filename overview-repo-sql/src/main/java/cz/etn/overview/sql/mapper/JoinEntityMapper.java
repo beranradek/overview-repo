@@ -128,6 +128,7 @@ public class JoinEntityMapper<T, F, U, G, V, H> implements EntityMapper<V, H> {
 
     @Override
     public List<Attribute<V, ?>> getAttributes() {
+        // TODO RBe: Throw throw new UnsupportedOperationException("Not supported by " + getClass().getSimpleName()); ?
         return new ArrayList<>(); // join mapper has not its own attributes, it composes attributes of first and second joined mapper
     }
 

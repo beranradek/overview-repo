@@ -20,6 +20,7 @@ import cz.etn.overview.common.Pair;
 import cz.etn.overview.filter.Condition;
 import cz.etn.overview.repo.Conditions;
 import cz.etn.overview.sql.mapper.JoinEntityMapper;
+import cz.etn.overview.sql.mapper.JoinWithManyEntityMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -282,5 +283,9 @@ public interface EntityMapper<T, F> {
 		List<Condition> onConditions = new ArrayList<>();
 		onConditions.add(onCondition);
 		return rightJoin(secondMapper, onConditions, composeEntity, decomposeFilter);
+	}
+
+	default <U, G, V, H> EntityMapper<V, H> joinWithMany(EntityMapper<U, G> secondMapper, List<Condition> onConditions, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter) {
+		return new JoinWithManyEntityMapper(this, secondMapper, onConditions, composeEntity, decomposeFilter);
 	}
 }
