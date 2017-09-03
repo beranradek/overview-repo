@@ -6,22 +6,22 @@ import cz.etn.overview.mapper.Attribute;
  * Attribute equals to value. Value can be {@code null} to create condition on null value.
  * @author Radek Beran
  */
-public final class EqCondition implements Condition {
+public final class EqCondition<T, A> implements Condition {
 
-    private final Attribute<?, ?> attribute;
+    private final Attribute<T, A> attribute;
 
-    private final Object value;
+    private final A value;
 
-    public EqCondition(Attribute<?, ?> attribute, Object value) {
+    public EqCondition(Attribute<T, A> attribute, A value) {
         this.attribute = attribute;
         this.value = value;
     }
 
-    public Attribute<?, ?> getAttribute() {
+    public Attribute<T, A> getAttribute() {
         return attribute;
     }
 
-    public Object getValue() {
+    public A getValue() {
         return value;
     }
 }

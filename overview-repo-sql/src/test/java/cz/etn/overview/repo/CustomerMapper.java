@@ -104,7 +104,7 @@ public class CustomerMapper extends DynamicEntityMapper<Customer, CustomerFilter
 			conditions.add(Conditions.eq(import_file_name, filter.getImportFileName()));
 		}
 		if (filter.getCustomerIds() != null) {
-			conditions.add(Conditions.in(id, CollectionFuns.toObjectList(filter.getCustomerIds())));
+			conditions.add(Conditions.in(id, filter.getCustomerIds()));
 		}
 		return conditions;
 	}

@@ -29,7 +29,7 @@ public class CustomerFilter implements Serializable {
 	
 	private String importFileName;
 	
-	private List<Long> customerIds;
+	private List<Integer> customerIds;
 	
 	private String soldBy;
 	
@@ -59,11 +59,11 @@ public class CustomerFilter implements Serializable {
 		this.soldBy = soldBy;
 	}
 
-	public List<Long> getCustomerIds() {
+	public List<Integer> getCustomerIds() {
 		return customerIds;
 	}
 
-	public void setCustomerIds(List<Long> customerIds) {
+	public void setCustomerIds(List<Integer> customerIds) {
 		this.customerIds = customerIds;
 	}
 

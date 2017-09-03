@@ -25,6 +25,7 @@ import java.io.Serializable;
 public final class Order implements Serializable {
 	private static final long serialVersionUID = -8270735262783017159L;
 
+	// TODO RBe: Change this to typed attribute object?
 	private final String attribute;
 
 	private final boolean desc;

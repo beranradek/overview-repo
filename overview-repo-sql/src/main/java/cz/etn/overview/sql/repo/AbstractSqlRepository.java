@@ -23,6 +23,7 @@ import cz.etn.overview.common.Pair;
 import cz.etn.overview.common.funs.CheckedFunction;
 import cz.etn.overview.common.funs.CollectionFuns;
 import cz.etn.overview.filter.Condition;
+import cz.etn.overview.filter.EqAttributesCondition;
 import cz.etn.overview.sql.filter.SqlCondition;
 import cz.etn.overview.sql.filter.SqlConditionBuilder;
 import cz.etn.overview.mapper.*;
@@ -30,6 +31,7 @@ import cz.etn.overview.repo.AggType;
 import cz.etn.overview.repo.Conditions;
 import cz.etn.overview.repo.Repository;
 import cz.etn.overview.repo.RepositoryException;
+import cz.etn.overview.sql.mapper.JoinWithManyEntityMapper;
 import cz.etn.overview.sql.mapper.ResultSetAttributeSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,6 +125,8 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 	 */
 	@Override
 	public <R, T, F> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter, EntityMapper<T, F> entityMapper) {
+		// TODO RBe: Count/aggreation with JoinWithManyEntityMapper
+
 		Objects.requireNonNull(aggType, "aggregation type should be specified");
 		Objects.requireNonNull(resultClass, "result class should be specified");
 		Objects.requireNonNull(attrName, "attribute name should be specified");
@@ -159,10 +163,17 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 
 	@Override
 	public <T, F> List<T> findByOverview(final Overview<F> overview, EntityMapper<T, F> entityMappper) {
-		List<String> attributeNames = entityMappper.getAttributeNames();
-		String from = entityMappper.getDataSet();
-		List<Condition> filterConditions = overview.getFilter() != null ? entityMappper.composeFilterConditions(overview.getFilter()) : new ArrayList<>();
-		return queryWithOverview(attributeNames, from, filterConditions, overview.getOrder(), overview.getPagination(), as -> entityMappper.buildEntity(as));
+		List<T> objects;
+    	// TODO RBe: Perform JOIN for JoinWithManyEntityMapper on database level if pagination is not set
+		if (entityMappper instanceof JoinWithManyEntityMapper) {
+			objects = findJoinedWithMany(overview, (JoinWithManyEntityMapper)entityMappper);
+		} else {
+			List<String> attributeNames = entityMappper.getAttributeNames();
+			String from = entityMappper.getDataSet();
+			List<Condition> filterConditions = overview.getFilter() != null ? entityMappper.composeFilterConditions(overview.getFilter()) : new ArrayList<>();
+			objects = queryWithOverview(attributeNames, from, filterConditions, overview.getOrder(), overview.getPagination(), as -> entityMappper.buildEntity(as));
+		}
+		return objects;
 	}
 	
 	@Override
@@ -171,6 +182,45 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 	}
 
 	protected abstract DataSource getDataSource();
+
+    protected <T, F, U, G, V, H, O> List<V> findJoinedWithMany(final Overview<H> overview, JoinWithManyEntityMapper<T, F, U, G, V, H, O> joinedEntityMapper) {
+		// Filters for first and second joined entity types
+    	Pair<F, G> decomposedFilter = joinedEntityMapper.getDecomposeFilter().apply(overview.getFilter());
+    	F firstEntityFilter = decomposedFilter.getFirst();
+		G secondEntityFilter = decomposedFilter.getSecond();
+
+		// Ordering for first and second joined entity types
+		Pair<List<Order>, List<Order>> orders = joinedEntityMapper.getDecomposeOrder().apply(overview.getOrder());
+		List<Order> firstEntityOrder = orders.getFirst();
+		List<Order> secondEntityOrder = orders.getSecond();
+
+    	// First load all entities on the left side (entities of first type)
+		Overview<F> firstEntityOverview = new Overview<>(firstEntityFilter, firstEntityOrder, overview.getPagination());
+		List<T> firstEntities = findByOverview(firstEntityOverview, joinedEntityMapper.getFirstMapper());
+
+		// Lazy loading of related right-side entities using one additional query (if they would be joined with left entities in one query, it could break pagination limit)
+		EqAttributesCondition<T, U, O, O> eqAttrCondition = joinedEntityMapper.getJoinWithManyCondition();
+		Attribute<T, O> firstEntityJoinAttr = eqAttrCondition.getFirstAttribute();
+		Attribute<U, O> secondEntityJoinAttr = eqAttrCondition.getSecondAttribute();
+		// Get all identifiers of first (=left) entities
+		List<O> firstEntitiesIds = firstEntities.stream().map(e -> firstEntityJoinAttr.getValue(e)).collect(Collectors.toList());
+		// Find second entities by these identifiers of first entities, with applying conditions from the second filter and ordering.
+		// Pagination is not applied for the entities on the right (many) side.
+		List<Condition> secondEntitiesConditions = new ArrayList<>();
+		secondEntitiesConditions.add(Conditions.in(secondEntityJoinAttr, firstEntitiesIds));
+		secondEntitiesConditions.addAll(joinedEntityMapper.getSecondMapper().composeFilterConditions(secondEntityFilter));
+		List<U> secondEntities = findByFilterConditions(secondEntitiesConditions, secondEntityOrder, joinedEntityMapper.getSecondMapper());
+
+		// Attach second (many-side) entities to first entities
+		List<V> firstEntitiesWithJoinedSecondEntities = new ArrayList<>();
+		for (T firstEntity : firstEntities) {
+			O firstEntityJoinValue = firstEntityJoinAttr.getValue(firstEntity);
+			List<U> secondEntitiesForFirstEntity = secondEntities.stream().filter(secondEntity -> firstEntityJoinValue != null && firstEntityJoinValue.equals(secondEntityJoinAttr.getValue(secondEntity))).collect(Collectors.toList());
+			V firstEntityWithJoinedSecondEntities = joinedEntityMapper.getComposeEntityWithMany().apply(firstEntity, secondEntitiesForFirstEntity);
+			firstEntitiesWithJoinedSecondEntities.add(firstEntityWithJoinedSecondEntities);
+		}
+		return firstEntitiesWithJoinedSecondEntities;
+	}
 
 	protected int updateByFilterConditions(String cmdWithoutConditions, List<Condition> conditions, List<Object> updatedAttributeValues) {
 		StringBuilder sqlBuilder = new StringBuilder(cmdWithoutConditions);
@@ -228,7 +278,7 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 	 * @param <U>
 	 * @return
 	 */
-	protected <U> Optional<T> findByAttribute(Attribute<T, ?> attribute, U attrValue) {
+	protected <U> Optional<T> findByAttribute(Attribute<T, U> attribute, U attrValue) {
 		Objects.requireNonNull(attribute, "attribute should be specified");
 		List<Condition> conditions = new ArrayList<>();
 		conditions.add(Conditions.eq(attribute, attrValue));

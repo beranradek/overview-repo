@@ -40,6 +40,12 @@ public interface Attribute<E, A> {
 	String getName();
 
 	/**
+	 * Class of entity.
+	 * @return
+	 */
+	Class<E> getEntityClass();
+
+	/**
 	 * Class of attribute.
 	 * @return
 	 */

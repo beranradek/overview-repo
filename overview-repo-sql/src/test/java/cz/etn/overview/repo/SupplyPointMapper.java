@@ -41,7 +41,7 @@ public class SupplyPointMapper extends DynamicEntityMapper<SupplyPoint, SupplyPo
 
 	public final Attribute<SupplyPoint, Integer> id;
 	public final Attribute<SupplyPoint, String> code;
-	public final Attribute<SupplyPoint, Long> customer_id;
+	public final Attribute<SupplyPoint, Integer> customer_id;
 
 	private SupplyPointMapper() {
 		id = add(Attr.ofInteger(cls, "id").primary().get(e -> e.getId()).set((e, a) -> e.setId(a)));
@@ -70,7 +70,7 @@ public class SupplyPointMapper extends DynamicEntityMapper<SupplyPoint, SupplyPo
 				e.getAddress().setPostalCode(a);
 			}
 		}));
-		customer_id = add(Attr.ofLong(cls, "customer_id").get(e -> e.getCustomerId()).set((e, a) -> e.setCustomerId(a)));
+		customer_id = add(Attr.ofInteger(cls, "customer_id").get(e -> e.getCustomerId()).set((e, a) -> e.setCustomerId(a)));
 		add(Attr.ofInstant(cls, "creation_time").get(e -> e.getCreationTime()).set((e, a) -> e.setCreationTime(a)));
 		add(Attr.ofInteger(cls, "bonus_points").get(e -> e.getBonusPoints()).set((e, a) -> e.setBonusPoints(a)));
 		add(Attr.ofBigDecimal(cls, "previous_year_consumption").get(e -> e.getPreviousYearConsumption()).set((e, a) -> e.setPreviousYearConsumption(a)));
@@ -103,7 +103,7 @@ public class SupplyPointMapper extends DynamicEntityMapper<SupplyPoint, SupplyPo
 			conditions.add(Conditions.eq(customer_id, filter.getCustomerId()));
 		}
 		if (filter.getCustomerIds() != null) {
-			conditions.add(Conditions.in(customer_id, CollectionFuns.toObjectList(filter.getCustomerIds())));
+			conditions.add(Conditions.in(customer_id, filter.getCustomerIds()));
 		}
 		return conditions;
 	}

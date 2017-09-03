@@ -38,6 +38,12 @@ import java.util.stream.Collectors;
  * Entity mapper that is result of join operation between the first and second joined mapper.
  * It implements an {@link EntityMapper} capable to fetch joined entities.
  * @author Radek Beran
+ * @param <T> type of first joined entity
+ * @param <F> type of filter for first entity
+ * @param <U> type of second joined entity
+ * @param <G> type of filter for second entity
+ * @param <V> type of resulting entity
+ * @param <H> type of filter for resulting entity
  */
 public class JoinEntityMapper<T, F, U, G, V, H> implements EntityMapper<V, H> {
 
@@ -147,7 +153,23 @@ public class JoinEntityMapper<T, F, U, G, V, H> implements EntityMapper<V, H> {
         throw new UnsupportedOperationException("Unsupported operation in joined mapper");
     }
 
-    protected SqlConditionBuilder getConditionBuilder() {
+    public List<Condition> getOnConditions() {
+        return onConditions;
+    }
+
+    public BiFunction<T, U, V> getComposeEntity() {
+        return composeEntity;
+    }
+
+    public Function<H, Pair<F, G>> getDecomposeFilter() {
+        return decomposeFilter;
+    }
+
+    public JoinType getJoinType() {
+        return joinType;
+    }
+
+    public SqlConditionBuilder getConditionBuilder() {
         return sqlConditionBuilder;
     }
 

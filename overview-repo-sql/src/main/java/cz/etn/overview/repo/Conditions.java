@@ -33,7 +33,7 @@ public class Conditions {
 	 * @param value
 	 * @return
 	 */
-	public static Condition eq(Attribute<?, ?> attribute, Object value) {
+	public static <T, A> EqCondition<T, A> eq(Attribute<T, A> attribute, A value) {
 		return new EqCondition(attribute, value);
 	}
 
@@ -43,7 +43,7 @@ public class Conditions {
 	 * @param attribute2
 	 * @return
 	 */
-	public static Condition eqAttributes(Attribute<?, ?> attribute1, Attribute<?, ?> attribute2) {
+	public static <T, U, A, B> EqAttributesCondition<T, U, A, B> eqAttributes(Attribute<T, A> attribute1, Attribute<U, B> attribute2) {
 		return new EqAttributesCondition(attribute1, attribute2);
 	}
 
@@ -53,7 +53,7 @@ public class Conditions {
 	 * @param value
 	 * @return
 	 */
-	public static Condition contains(Attribute<?, ?> attribute, Object value) {
+	public static <T, A> ContainsCondition<T, A> contains(Attribute<T, A> attribute, A value) {
 		return new ContainsCondition(attribute, value);
 	}
 
@@ -63,7 +63,7 @@ public class Conditions {
 	 * @param values
 	 * @return
 	 */
-	public static Condition in(Attribute<?, ?> attribute, List<Object> values) {
+	public static <T, A> InCondition<T, A> in(Attribute<T, A> attribute, List<A> values) {
 		return new InCondition(attribute, values);
 	}
 

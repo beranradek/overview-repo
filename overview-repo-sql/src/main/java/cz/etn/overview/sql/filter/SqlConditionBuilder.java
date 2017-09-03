@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Builds SQL conditions from various condition types.
@@ -41,7 +42,10 @@ public class SqlConditionBuilder {
             if (c.getValues() != null && !c.getValues().isEmpty()) {
                 String[] placeholders = new String[c.getValues().size()];
                 Arrays.fill(placeholders, "?");
-                sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + " IN (" + CollectionFuns.join(Arrays.asList(placeholders), ", ") + ")", c.getValues().stream().map(v -> valueToDbSupportedValue.apply(v)).collect(Collectors.toList()));
+                String commaSeparatedPlaceholders = CollectionFuns.join(Arrays.asList(placeholders), ", ");
+                Stream<Object> valuesStream = c.getValues().stream().map(v -> valueToDbSupportedValue.apply(v));
+                List<Object> valuesForPlaceholders = valuesStream.collect(Collectors.toList());
+                sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + " IN (" + commaSeparatedPlaceholders + ")", valuesForPlaceholders);
             } else {
                 // empty values for IN, value of attribute is certainly not among empty values
                 sqlCondition = new SqlCondition("1=0", CollectionFuns.EMPTY_OBJECT_LIST);

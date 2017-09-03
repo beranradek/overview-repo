@@ -6,22 +6,22 @@ import cz.etn.overview.mapper.Attribute;
  * Attribute equals to another attribute.
  * @author Radek Beran
  */
-public final class EqAttributesCondition implements Condition {
+public final class EqAttributesCondition<T, U, A, B> implements Condition {
 
-    private final Attribute<?, ?> firstAttribute;
+    private final Attribute<T, A> firstAttribute;
 
-    private final Attribute<?, ?> secondAttribute;
+    private final Attribute<U, B> secondAttribute;
 
-    public EqAttributesCondition(Attribute<?, ?> firstAttribute, Attribute<?, ?> secondAttribute) {
+    public EqAttributesCondition(Attribute<T, A> firstAttribute, Attribute<U, B> secondAttribute) {
         this.firstAttribute = firstAttribute;
         this.secondAttribute = secondAttribute;
     }
 
-    public Attribute<?, ?> getFirstAttribute() {
+    public Attribute<T, A> getFirstAttribute() {
         return firstAttribute;
     }
 
-    public Attribute<?, ?> getSecondAttribute() {
+    public Attribute<U, B> getSecondAttribute() {
         return secondAttribute;
     }
 }

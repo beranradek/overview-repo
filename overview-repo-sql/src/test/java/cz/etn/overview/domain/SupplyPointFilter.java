@@ -25,25 +25,25 @@ import java.util.List;
  */
 public class SupplyPointFilter implements Serializable {
 	private static final long serialVersionUID = 4590219796927704612L;
-	private Long id;
+	private Integer id;
 	
-	private Long customerId;
+	private Integer customerId;
 	
 	private List<Integer> customerIds;
 
-	public Long getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
-	public Long getCustomerId() {
+	public Integer getCustomerId() {
 		return customerId;
 	}
 
-	public void setCustomerId(Long customerId) {
+	public void setCustomerId(Integer customerId) {
 		this.customerId = customerId;
 	}
 

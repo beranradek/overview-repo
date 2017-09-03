@@ -218,7 +218,7 @@ public abstract class AbstractMongoRepository<T, K, F> implements Repository<T, 
      * @param <U>
      * @return
      */
-    protected <U> Optional<T> findByAttribute(Attribute<T, ?> attribute, U attrValue) {
+    protected <U> Optional<T> findByAttribute(Attribute<T, U> attribute, U attrValue) {
         Objects.requireNonNull(attribute, "attribute should be specified");
         List<Condition> conditions = new ArrayList<>();
         conditions.add(Conditions.eq(attribute, attrValue));

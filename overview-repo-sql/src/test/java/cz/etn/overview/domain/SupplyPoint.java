@@ -40,7 +40,7 @@ public final class SupplyPoint {
 	/**
 	 * Customer owning this supply point.
 	 */
-	private Long customerId;
+	private Integer customerId;
 	
 	private Address address;
 	
@@ -94,11 +94,11 @@ public final class SupplyPoint {
 		this.code = code;
 	}
 	
-	public Long getCustomerId() {
+	public Integer getCustomerId() {
 		return customerId;
 	}
 	
-	public void setCustomerId(Long customerId) {
+	public void setCustomerId(Integer customerId) {
 		this.customerId = customerId;
 	}
 	

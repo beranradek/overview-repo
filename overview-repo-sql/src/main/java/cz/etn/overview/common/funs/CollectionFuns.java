@@ -88,9 +88,23 @@ public class CollectionFuns {
      * @param value
      * @return
      */
-    public static List<Object> singleValueList(Object value) {
-        List<Object> objects = new ArrayList<>();
+    public static <T> List<T> singleValueList(T value) {
+        List<T> objects = new ArrayList<>();
         objects.add(value);
         return objects;
+    }
+
+    /**
+     * Returns new list with given element prepended.
+     * @param list
+     * @param elem
+     * @param <T>
+     * @return
+     */
+    public static <T> List<T> listWithPrepended(List<T> list, T elem) {
+        List<T> result = new ArrayList<>();
+        result.add(elem);
+        result.addAll(list);
+        return result;
     }
 }

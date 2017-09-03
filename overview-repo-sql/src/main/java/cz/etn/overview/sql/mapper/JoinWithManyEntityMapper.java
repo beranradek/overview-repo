@@ -16,11 +16,13 @@
  */
 package cz.etn.overview.sql.mapper;
 
+import cz.etn.overview.Order;
 import cz.etn.overview.common.Pair;
+import cz.etn.overview.common.funs.CollectionFuns;
 import cz.etn.overview.filter.Condition;
-import cz.etn.overview.mapper.Attribute;
-import cz.etn.overview.mapper.AttributeSource;
+import cz.etn.overview.filter.EqAttributesCondition;
 import cz.etn.overview.mapper.EntityMapper;
+import cz.etn.overview.mapper.JoinType;
 
 import java.util.List;
 import java.util.function.BiFunction;
@@ -31,85 +33,44 @@ import java.util.function.Function;
  * Second mapper is used to fetch many entities that are bound to the corresponding one entity fetched by first mapper.
  * It implements an {@link EntityMapper} capable to fetch joined entities (in 1:n cardinality).
  * @author Radek Beran
+ * @param <T> type of first joined entity
+ * @param <F> type of filter for first entity
+ * @param <U> type of second joined entity
+ * @param <G> type of filter for second entity
+ * @param <V> type of resulting entity
+ * @param <H> type of filter for resulting entity
+ * @param <O> type of attribute of first and second entity in join condition
  */
-// TODO RBe: Should this class still implement EntityMapper interface?
-public class JoinWithManyEntityMapper<T, F, U, G, V, H> implements EntityMapper<V, H> {
+public class JoinWithManyEntityMapper<T, F, U, G, V, H, O> extends JoinEntityMapper<T, F, U, G, V, H> {
 
-    private final EntityMapper<T, F> firstMapper;
-    private final EntityMapper<U, G> secondMapper;
-    private final List<Condition> onConditions;
-    private final BiFunction<T, List<U>, V> composeEntities;
-    // TODO RBe: remove decomposeFilter if not used
-    private final Function<H, Pair<F, G>> decomposeFilter;
+    private final EqAttributesCondition<T, U, O, O> joinWithManyCondition;
+    private final BiFunction<T, List<U>, V> composeEntityWithMany;
+    private final Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder;
 
-    public JoinWithManyEntityMapper(EntityMapper<T, F> firstMapper, EntityMapper<U, G> secondMapper, List<Condition> onConditions, BiFunction<T, List<U>, V> composeEntities, Function<H, Pair<F, G>> decomposeFilter) {
-        this.firstMapper = firstMapper;
-        this.secondMapper = secondMapper;
-        this.onConditions = onConditions;
-        this.composeEntities = composeEntities;
-        this.decomposeFilter = decomposeFilter;
+    public JoinWithManyEntityMapper(EntityMapper<T, F> firstMapper, EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinWithManyCondition, List<Condition> additionalOnConditions, BiFunction<T, List<U>, V> composeEntityWithMany, Function<H, Pair<F, G>> decomposeFilter, Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder) {
+        super(firstMapper, secondMapper,
+            CollectionFuns.listWithPrepended(additionalOnConditions, joinWithManyCondition),
+            createComposeEntityFun(composeEntityWithMany),
+            decomposeFilter,
+            JoinType.LEFT);
+        this.joinWithManyCondition = joinWithManyCondition;
+        this.composeEntityWithMany = composeEntityWithMany;
+        this.decomposeOrder = decomposeOrder;
     }
 
-    public EntityMapper<T, F> getFirstMapper() {
-        return firstMapper;
+    protected static <T, U, V> BiFunction<T, U, V> createComposeEntityFun(BiFunction<T, List<U>, V> composeEntityWithMany) {
+        return (e1, e2) -> composeEntityWithMany.apply(e1, CollectionFuns.singleValueList(e2));
     }
 
-    public EntityMapper<U, G> getSecondMapper() {
-        return secondMapper;
+    public BiFunction<T, List<U>, V> getComposeEntityWithMany() {
+        return composeEntityWithMany;
     }
 
-    @Override
-    public V createEntity() {
-        throw new UnsupportedOperationException("Create entity not supported by " + getClass().getSimpleName());
+    public EqAttributesCondition<T, U, O, O> getJoinWithManyCondition() {
+        return joinWithManyCondition;
     }
 
-    @Override
-    public V buildEntity(AttributeSource attributeSource, String ignored) {
-        throw new UnsupportedOperationException("Build entity not supported by " + getClass().getSimpleName());
-    }
-
-    @Override
-    public String getDataSet() {
-        throw new UnsupportedOperationException("Not supported by " + getClass().getSimpleName());
-    }
-
-    @Override
-    public List<Condition> composeFilterConditions(H filter) {
-        throw new UnsupportedOperationException("Compose filter conditions not supported by " + getClass().getSimpleName());
-    }
-
-    @Override
-    public List<String> getAttributeNames() {
-        throw new UnsupportedOperationException("Not supported by " + getClass().getSimpleName());
-    }
-
-    @Override
-    public List<String> getAttributeNamesFullAliased() {
-        throw new UnsupportedOperationException("Not supported by " + getClass().getSimpleName());
-    }
-
-    @Override
-    public String getAliasPrefix() {
-        throw new UnsupportedOperationException("Not supported by " + getClass().getSimpleName());
-    }
-
-    @Override
-    public List<Attribute<V, ?>> getAttributes() {
-        throw new UnsupportedOperationException("Not supported by " + getClass().getSimpleName());
-    }
-
-    @Override
-    public List<String> getPrimaryAttributeNames() {
-        throw new UnsupportedOperationException("Unsupported operation in joined mapper");
-    }
-
-    @Override
-    public List<Object> getPrimaryAttributeValues(V entity) {
-        throw new UnsupportedOperationException("Unsupported operation in joined mapper");
-    }
-
-    @Override
-    public List<Object> getAttributeValues(V instance) {
-        throw new UnsupportedOperationException("Unsupported operation in joined mapper");
+    public Function<List<Order>, Pair<List<Order>, List<Order>>> getDecomposeOrder() {
+        return decomposeOrder;
     }
 }

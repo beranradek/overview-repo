@@ -179,6 +179,7 @@ public class Attr<E, A> implements Attribute<E, A> {
         maxLength = builder.maxLength;
     }
 
+    @Override
     public Class<E> getEntityClass() {
         return entityClass;
     }

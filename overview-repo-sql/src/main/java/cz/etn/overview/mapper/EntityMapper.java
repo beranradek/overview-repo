@@ -16,8 +16,10 @@
  */
 package cz.etn.overview.mapper;
 
+import cz.etn.overview.Order;
 import cz.etn.overview.common.Pair;
 import cz.etn.overview.filter.Condition;
+import cz.etn.overview.filter.EqAttributesCondition;
 import cz.etn.overview.repo.Conditions;
 import cz.etn.overview.sql.mapper.JoinEntityMapper;
 import cz.etn.overview.sql.mapper.JoinWithManyEntityMapper;
@@ -73,7 +75,7 @@ public interface EntityMapper<T, F> {
 		List<Condition> conditions = new ArrayList<>();
 		List<Attribute<T, ?>> pkAttributes = getPrimaryAttributes();
 		if (pkAttributes.size() == 1) {
-			conditions.add(Conditions.eq(pkAttributes.get(0), id));
+			conditions.add(Conditions.eq((Attribute<T, K>)pkAttributes.get(0), id));
 		} else {
 			// composed primary key
 			conditions.addAll(composeFilterConditionsForCompositePrimaryKey(id));
@@ -89,7 +91,7 @@ public interface EntityMapper<T, F> {
 	default <K> List<Condition> composeFilterConditionsForPrimaryKeyOfEntity(T entity) {
 		List<Condition> conditions = new ArrayList<>();
 		for (Attribute<T, ?> attr : getPrimaryAttributes()) {
-			conditions.add(Conditions.eq(attr, attr.getValue(entity)));
+			conditions.add(Conditions.eq((Attribute<T, Object>)attr, attr.getValue(entity)));
 		}
 		return conditions;
 	}
@@ -106,7 +108,7 @@ public interface EntityMapper<T, F> {
 			for (Pair<Attribute<T, ?>, Object> p : attributesToValues) {
 				Attribute<T, ?> attr = p.getFirst();
 				Object value = p.getSecond();
-				conditions.add(Conditions.eq(attr, value));
+				conditions.add(Conditions.eq((Attribute<T, Object>)attr, value));
 			}
 		}
 		return conditions;
@@ -285,7 +287,7 @@ public interface EntityMapper<T, F> {
 		return rightJoin(secondMapper, onConditions, composeEntity, decomposeFilter);
 	}
 
-	default <U, G, V, H> EntityMapper<V, H> joinWithMany(EntityMapper<U, G> secondMapper, List<Condition> onConditions, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter) {
-		return new JoinWithManyEntityMapper(this, secondMapper, onConditions, composeEntity, decomposeFilter);
+	default <U, G, V, H, O> JoinWithManyEntityMapper<T, F, U, G, V, H, O> joinWithMany(EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinWithManyCondition, List<Condition> additionalOnConditions, BiFunction<T, List<U>, V> composeEntityWithMany, Function<H, Pair<F, G>> decomposeFilter, Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder) {
+		return new JoinWithManyEntityMapper(this, secondMapper, joinWithManyCondition, additionalOnConditions, composeEntityWithMany, decomposeFilter, decomposeOrder);
 	}
 }
