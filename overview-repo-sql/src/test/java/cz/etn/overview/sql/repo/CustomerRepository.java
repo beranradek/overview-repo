@@ -14,35 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cz.etn.overview.repo;
+package cz.etn.overview.sql.repo;
 
-import cz.etn.overview.domain.Voucher;
-import cz.etn.overview.mapper.EntityMapper;
-import cz.etn.overview.sql.repo.AbstractSqlRepository;
-
-import javax.sql.DataSource;
-
+import cz.etn.overview.domain.Customer;
+import cz.etn.overview.domain.CustomerFilter;
+import cz.etn.overview.repo.Repository;
 
 /**
- * Default implementation of {@link VoucherRepository}. 
+ * Voucher customer repository.
  * @author Radek Beran
  */
-public class VoucherRepositoryImpl extends AbstractSqlRepository<Voucher, String, Object> implements VoucherRepository {
-	
-	private final DataSource dataSource;
-
-	public VoucherRepositoryImpl(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
-
-	@Override
-	public EntityMapper<Voucher, Object> getEntityMapper() {
-		return VoucherMapper.getInstance();
-	}
-
-	@Override
-	protected DataSource getDataSource() {
-		return dataSource;
-	}
-
+public interface CustomerRepository extends Repository<Customer, Integer, CustomerFilter> {
+    // nothing new here
 }

@@ -14,14 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cz.etn.overview.repo;
+package cz.etn.overview.data;
 
-import cz.etn.overview.domain.Voucher;
+import cz.etn.overview.domain.SupplyPoint;
+
+import java.time.Instant;
 
 /**
- * Voucher repository.
+ * Supply point data for use in tests.
  * @author Radek Beran
  */
-public interface VoucherRepository extends Repository<Voucher, String, Object> {
-	// nothing new here
+public class SupplyPointTestData {
+
+    public SupplyPoint createSupplyPoint(String code) {
+        SupplyPoint sp = new SupplyPoint();
+        sp.setCreationTime(Instant.now());
+        sp.setCode(code);
+        sp.setBenefitYears(Integer.valueOf(3));
+        return sp;
+    }
 }

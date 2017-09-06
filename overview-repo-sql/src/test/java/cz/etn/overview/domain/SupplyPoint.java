@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 /**
- * Supply point ("odberne misto" - OM).
+ * Supply point.
  * @author Radek Beran
  */
 public final class SupplyPoint {
@@ -121,10 +121,6 @@ public final class SupplyPoint {
 	public BigDecimal getPreviousYearConsumption() {
 		return previousYearConsumption;
 	}
-	
-	public String getPreviousYearConsumptionAsString() {
-		return previousYearConsumption != null ? previousYearConsumption.setScale(3).toPlainString() : null;
-	}
 
 	public void setPreviousYearConsumption(BigDecimal previousYearConsumption) {
 		this.previousYearConsumption = previousYearConsumption;
@@ -132,10 +128,6 @@ public final class SupplyPoint {
 
 	public BigDecimal getCurrentYearConsumption() {
 		return currentYearConsumption;
-	}
-	
-	public String getCurrentYearConsumptionAsString() {
-		return currentYearConsumption != null ? currentYearConsumption.setScale(3).toPlainString() : null;
 	}
 
 	public void setCurrentYearConsumption(BigDecimal currentYearConsumption) {
@@ -145,14 +137,6 @@ public final class SupplyPoint {
 	public BigDecimal getConsumptionDiff() {
 		return consumptionDiff;
 	}
-	
-	public String getConsumptionDiffAsString() {
-		return consumptionDiff != null ? consumptionDiff.setScale(3).toPlainString() : null; 
-	}
-	
-	public String getConsumptionDiffKWhAsString() {
-		return consumptionDiff != null ? consumptionDiff.multiply(BigDecimal.valueOf(1000L)).setScale(0).toPlainString() : null; 
-	}
 
 	public void setConsumptionDiff(BigDecimal consumptionDiff) {
 		this.consumptionDiff = consumptionDiff;
@@ -160,10 +144,6 @@ public final class SupplyPoint {
 
 	public BigDecimal getVoucherDiscount() {
 		return voucherDiscount != null ? voucherDiscount : BigDecimal.ZERO;
-	}
-	
-	public String getVoucherDiscountAsString() {
-		return voucherDiscount != null ? voucherDiscount.setScale(0).toPlainString() : null;
 	}
 
 	public void setVoucherDiscount(BigDecimal voucherDiscount) {

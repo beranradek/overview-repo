@@ -14,12 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cz.etn.overview.repo;
+package cz.etn.overview.sql.repo;
 
 import cz.etn.overview.Order;
 import cz.etn.overview.domain.SupplyPoint;
 import cz.etn.overview.domain.SupplyPointFilter;
-import cz.etn.overview.sql.repo.AbstractSqlRepository;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;

@@ -14,14 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cz.etn.overview;
+package cz.etn.overview.data;
 
+import cz.etn.overview.domain.Customer;
 import cz.etn.overview.domain.DiscountEmailType;
 import cz.etn.overview.domain.SupplyPoint;
-import cz.etn.overview.domain.Voucher;
-import cz.etn.overview.domain.Customer;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,35 +30,20 @@ import java.util.List;
  */
 public class CustomerTestData {
 
-	public Customer newVoucherCustomer(String email, String firstName, String lastName) {
+	private final SupplyPointTestData supplyPointTestData = new SupplyPointTestData();
+
+	public Customer createCustomer(String email, String firstName, String lastName) {
 		Customer customer = new Customer();
 		customer.setCreationTime(Instant.now());
 		customer.setEmail(email);
 		customer.setFirstName(firstName);
 		customer.setLastName(lastName);
 		List<SupplyPoint> supplyPoints = new ArrayList<>();
-		supplyPoints.add(createSupplyPoint("4100272309"));
-		supplyPoints.add(createSupplyPoint("4100272310"));
+		supplyPoints.add(supplyPointTestData.createSupplyPoint("4100272309"));
+		supplyPoints.add(supplyPointTestData.createSupplyPoint("4100272310"));
 		customer.setSupplyPoints(supplyPoints);
 		customer.setDiscountEmailType(DiscountEmailType.MORE_SUPPLY_POINTS_DISCOUNT);
 		customer.setImportFileName("body_Benefit_body_rijen_31102016.xlsx");
 		return customer;
-	}
-	
-	public SupplyPoint createSupplyPoint(String code) {
-		SupplyPoint sp = new SupplyPoint();
-		sp.setCode(code);
-		return sp;
-	}
-
-	public Voucher createVoucher(String code, String reservedBy) {
-		Voucher voucher = new Voucher();
-		voucher.setCode(code);
-		Instant creationTime = Instant.now();
-		voucher.setCreationTime(creationTime);
-		voucher.setValidFrom(creationTime);
-		voucher.setValidFrom(creationTime.plus(Duration.ofDays(90)));
-		voucher.setReservedBy(reservedBy);
-		return voucher;
 	}
 }

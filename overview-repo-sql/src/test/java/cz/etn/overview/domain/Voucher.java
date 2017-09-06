@@ -109,10 +109,6 @@ public class Voucher implements Serializable {
 		return discountPrice;
 	}
 
-	public String getDiscountPriceAsString() {
-		return discountPrice != null ? discountPrice.setScale(0).toPlainString() : null;
-	}
-
 	public void setDiscountPrice(BigDecimal discountPrice) {
 		this.discountPrice = discountPrice;
 	}

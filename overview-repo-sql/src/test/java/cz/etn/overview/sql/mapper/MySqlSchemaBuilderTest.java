@@ -1,7 +1,6 @@
-package cz.etn.overview.mapper;
+package cz.etn.overview.sql.mapper;
 
-import cz.etn.overview.repo.VoucherMapper;
-import cz.etn.overview.sql.mapper.MySqlSchemaBuilder;
+import cz.etn.overview.sql.repo.VoucherMapper;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

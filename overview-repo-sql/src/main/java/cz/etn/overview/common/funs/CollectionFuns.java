@@ -30,7 +30,11 @@ public class CollectionFuns {
     /**
      * Empty unmodifiable list of objects.
      */
-    public static List<Object> EMPTY_OBJECT_LIST = Collections.unmodifiableList(new ArrayList<>());
+    public static List<Object> EMPTY_OBJECT_LIST = Collections.unmodifiableList(empty());
+
+    public static <T> List<T> empty() {
+        return new ArrayList<>();
+    }
 
     /**
      * Returns optional first element of collection.

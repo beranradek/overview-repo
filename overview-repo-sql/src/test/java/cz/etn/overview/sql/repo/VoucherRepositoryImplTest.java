@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cz.etn.overview.repo;
+package cz.etn.overview.sql.repo;
 
 
-import cz.etn.overview.VoucherTestData;
+import cz.etn.overview.data.VoucherTestData;
 import cz.etn.overview.VoucherTestDb;
 import cz.etn.overview.common.Pair;
 import cz.etn.overview.domain.Voucher;
@@ -53,7 +53,7 @@ public class VoucherRepositoryImplTest {
 
 	@Test
 	public void create() {
-		Voucher voucher = testData.newVoucher("ABCD");
+		Voucher voucher = testData.createVoucher("ABCD");
 
 		Voucher voucherCreated = repo.create(voucher, false);
 		assertTrue("Created voucher equals voucher to store", EqualsBuilder.reflectionEquals(voucher, voucherCreated));
@@ -61,7 +61,7 @@ public class VoucherRepositoryImplTest {
 
 	@Test
 	public void createFindDelete() {
-		Voucher voucher = testData.newVoucher("EFGH");
+		Voucher voucher = testData.createVoucher("EFGH");
 
 		Voucher voucherCreated = repo.create(voucher, false);
 		assertTrue("Created voucher equals voucher to store", EqualsBuilder.reflectionEquals(voucher, voucherCreated));
@@ -77,7 +77,7 @@ public class VoucherRepositoryImplTest {
 	
 	@Test
 	public void update() {
-		Voucher voucher = testData.newVoucher("QWERTY");
+		Voucher voucher = testData.createVoucher("QWERTY");
 
 		Voucher voucherCreated = repo.create(voucher, false);
 		
@@ -95,7 +95,7 @@ public class VoucherRepositoryImplTest {
 
 	@Test
 	public void updateSelectedAttributes() {
-		Voucher voucher = testData.newVoucher("HGTDFKL");
+		Voucher voucher = testData.createVoucher("HGTDFKL");
 		VoucherMapper mapper = VoucherMapper.getInstance();
 
 		repo.create(voucher, false);
@@ -118,7 +118,7 @@ public class VoucherRepositoryImplTest {
 
 	@Test
 	public void updateWithFunction() {
-		Voucher voucher = testData.newVoucher("IJKLM");
+		Voucher voucher = testData.createVoucher("IJKLM");
 		VoucherMapper mapper = VoucherMapper.getInstance();
 
 		repo.create(voucher, false);
@@ -144,7 +144,7 @@ public class VoucherRepositoryImplTest {
 	@Test
 	public void delete() {
 		String code = "HCHKR";
-		Voucher voucher = testData.newVoucher(code);
+		Voucher voucher = testData.createVoucher(code);
 		repo.create(voucher, false);
 		assertTrue("Voucher is available in DB", repo.findById(code).isPresent());
 		repo.delete(code);
@@ -154,7 +154,7 @@ public class VoucherRepositoryImplTest {
 	@Test
 	public void findById() {
 		String code = "ASDFG";
-		Voucher voucher = testData.newVoucher(code);
+		Voucher voucher = testData.createVoucher(code);
 		repo.create(voucher, false);
 		Optional<Voucher> foundVoucherOpt = repo.findById(code);
 		assertTrue("Voucher is available in DB", foundVoucherOpt.isPresent());

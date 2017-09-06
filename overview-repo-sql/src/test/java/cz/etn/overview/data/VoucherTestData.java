@@ -14,11 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cz.etn.overview;
+package cz.etn.overview.data;
 
 import cz.etn.overview.domain.Voucher;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.Instant;
 
 /**
@@ -27,7 +28,18 @@ import java.time.Instant;
  */
 public class VoucherTestData {
 
-	public Voucher newVoucher(String code) {
+	public Voucher createVoucher(String code, String reservedBy) {
+		Voucher voucher = new Voucher();
+		voucher.setCode(code);
+		Instant creationTime = Instant.now();
+		voucher.setCreationTime(creationTime);
+		voucher.setValidFrom(creationTime);
+		voucher.setValidFrom(creationTime.plus(Duration.ofDays(90)));
+		voucher.setReservedBy(reservedBy);
+		return voucher;
+	}
+
+	public Voucher createVoucher(String code) {
 		Voucher voucher = new Voucher();
 		voucher.setCode(code);
 		voucher.setCreationTime(Instant.now());

@@ -14,16 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cz.etn.overview.repo;
+package cz.etn.overview.sql.repo;
 
 import cz.etn.overview.domain.Address;
 import cz.etn.overview.domain.SupplyPoint;
 import cz.etn.overview.domain.SupplyPointFilter;
-import cz.etn.overview.common.funs.CollectionFuns;
 import cz.etn.overview.filter.Condition;
 import cz.etn.overview.mapper.Attr;
 import cz.etn.overview.mapper.Attribute;
 import cz.etn.overview.mapper.DynamicEntityMapper;
+import cz.etn.overview.repo.Conditions;
 
 import java.util.ArrayList;
 import java.util.List;

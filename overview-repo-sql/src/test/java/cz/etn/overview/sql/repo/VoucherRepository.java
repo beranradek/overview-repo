@@ -14,15 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cz.etn.overview.repo;
+package cz.etn.overview.sql.repo;
 
-import cz.etn.overview.domain.Customer;
-import cz.etn.overview.domain.CustomerFilter;
+import cz.etn.overview.domain.Voucher;
+import cz.etn.overview.repo.Repository;
 
 /**
- * Voucher customer repository.
+ * Voucher repository.
  * @author Radek Beran
  */
-public interface CustomerRepository extends Repository<Customer, Integer, CustomerFilter> {
-    // nothing new here
+public interface VoucherRepository extends Repository<Voucher, String, Object> {
+	// nothing new here
 }

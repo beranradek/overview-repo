@@ -14,18 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cz.etn.overview.repo;
+package cz.etn.overview.sql.repo;
 
-import cz.etn.overview.domain.SupplyPoint;
-import cz.etn.overview.domain.SupplyPointFilter;
+import cz.etn.overview.domain.Voucher;
+import cz.etn.overview.mapper.EntityMapper;
 
-import java.util.List;
+import javax.sql.DataSource;
+
 
 /**
- * Repository for supply points.
+ * Default implementation of {@link VoucherRepository}. 
  * @author Radek Beran
  */
-public interface SupplyPointRepository extends Repository<SupplyPoint, Integer, SupplyPointFilter> {
+public class VoucherRepositoryImpl extends AbstractSqlRepository<Voucher, String, Object> implements VoucherRepository {
+	
+	private final DataSource dataSource;
 
-	List<SupplyPoint> findByCustomerIds(List<Integer> customerIds);
+	public VoucherRepositoryImpl(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+
+	@Override
+	public EntityMapper<Voucher, Object> getEntityMapper() {
+		return VoucherMapper.getInstance();
+	}
+
+	@Override
+	protected DataSource getDataSource() {
+		return dataSource;
+	}
+
 }
