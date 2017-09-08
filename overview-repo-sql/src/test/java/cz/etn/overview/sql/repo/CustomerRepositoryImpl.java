@@ -41,6 +41,27 @@ public class CustomerRepositoryImpl extends AbstractSqlRepository<Customer, Inte
 
     private final SupplyPointRepository supplyPointDao;
 
+    final EntityMapper<Customer, CustomerFilter> joinSupplyPointsMapper = getEntityMapper().joinWithMany(getSupplyPointMapper(),
+        Conditions.eqAttributes(getEntityMapper().id, getSupplyPointMapper().customer_id),
+        new ArrayList<Condition>(), // additional ON condition
+        (customer, supplyPoints) -> { customer.setSupplyPoints(supplyPoints); return customer; }, // joined entity composition with many records
+        filter -> new Pair<>(filter, new SupplyPointFilter()), // filter decomposition to first and second entity filters
+        ordering -> new Pair<>(ordering, CollectionFuns.empty())
+    );
+
+    final EntityMapper<Customer, CustomerFilter> joinVoucherMapper = getEntityMapper().leftJoin(getVoucherMapper(),
+        Conditions.eqAttributes(getEntityMapper().id, getVoucherMapper().reserved_by), // ON condition
+        (customer, voucher) -> { customer.setVoucher(voucher); return customer; }, // joined entity composition
+        filter -> new Pair<>(filter, filter) // filter decomposition to first and second entity filters
+    );
+
+    final EntityMapper<Customer, CustomerFilter> joinVoucherJoinSupplyPointsMapper = joinVoucherMapper.joinWithMany(getSupplyPointMapper(),
+        Conditions.eqAttributes(getEntityMapper().id, getSupplyPointMapper().customer_id),
+        (customer, supplyPoints) -> { customer.setSupplyPoints(supplyPoints); return customer; }, // joined entity composition with many records
+        filter -> new Pair<>(filter, new SupplyPointFilter()), // filter decomposition to first and second entity filters
+        ordering -> new Pair<>(ordering, CollectionFuns.empty())
+    );
+
     public CustomerRepositoryImpl(DataSource dataSource, SupplyPointRepository supplyPointDao) {
         this.dataSource = dataSource;
         this.supplyPointDao = supplyPointDao;
@@ -65,7 +86,7 @@ public class CustomerRepositoryImpl extends AbstractSqlRepository<Customer, Inte
     @Override
     public List<Customer> findByOverview(Overview<CustomerFilter> overview) {
         Objects.requireNonNull(overview, "overview should be specified");
-        return findByOverview(overview, getCustomerLeftJoinVoucherLeftJoinSupplyPointsMapper());
+        return findByOverview(overview, joinVoucherJoinSupplyPointsMapper);
     }
 
     /**
@@ -73,40 +94,12 @@ public class CustomerRepositoryImpl extends AbstractSqlRepository<Customer, Inte
      */
     @Override
     public <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, CustomerFilter filter) {
-        return super.aggByFilter(aggType, resultClass, attrName, filter, getCustomerLeftJoinVoucherMapper());
+        return super.aggByFilter(aggType, resultClass, attrName, filter, joinVoucherMapper);
     }
 
     @Override
     protected DataSource getDataSource() {
         return dataSource;
-    }
-
-    protected EntityMapper<Customer, CustomerFilter> getCustomerLeftJoinVoucherMapper() {
-        return getEntityMapper().leftJoin(getVoucherMapper(),
-            Conditions.eqAttributes(getEntityMapper().id, getVoucherMapper().reserved_by), // ON condition
-            (customer, voucher) -> { customer.setVoucher(voucher); return customer; }, // joined entity composition
-            filter -> new Pair<>(filter, filter) // filter decomposition to first and second entity filters
-        );
-    }
-
-    protected EntityMapper<Customer, CustomerFilter> getCustomerLeftJoinSupplyPointsMapper() {
-        return getEntityMapper().joinWithMany(getSupplyPointMapper(),
-            Conditions.eqAttributes(getEntityMapper().id, getSupplyPointMapper().customer_id),
-            new ArrayList<Condition>(), // additional ON condition
-            (customer, supplyPoints) -> { customer.setSupplyPoints(supplyPoints); return customer; }, // joined entity composition with many records
-            filter -> new Pair<>(filter, new SupplyPointFilter()), // filter decomposition to first and second entity filters
-            ordering -> new Pair<>(ordering, CollectionFuns.empty())
-        );
-    }
-
-    protected EntityMapper<Customer, CustomerFilter> getCustomerLeftJoinVoucherLeftJoinSupplyPointsMapper() {
-        return getCustomerLeftJoinVoucherMapper().joinWithMany(getSupplyPointMapper(),
-            Conditions.eqAttributes(getEntityMapper().id, getSupplyPointMapper().customer_id),
-            new ArrayList<Condition>(), // additional ON condition
-            (customer, supplyPoints) -> { customer.setSupplyPoints(supplyPoints); return customer; }, // joined entity composition with many records
-            filter -> new Pair<>(filter, new SupplyPointFilter()), // filter decomposition to first and second entity filters
-            ordering -> new Pair<>(ordering, CollectionFuns.empty())
-        );
     }
 
     protected VoucherMapper getVoucherMapper() {

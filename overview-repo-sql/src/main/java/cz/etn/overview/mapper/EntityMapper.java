@@ -18,6 +18,7 @@ package cz.etn.overview.mapper;
 
 import cz.etn.overview.Order;
 import cz.etn.overview.common.Pair;
+import cz.etn.overview.common.funs.CollectionFuns;
 import cz.etn.overview.filter.Condition;
 import cz.etn.overview.filter.EqAttributesCondition;
 import cz.etn.overview.repo.Conditions;
@@ -289,5 +290,9 @@ public interface EntityMapper<T, F> {
 
 	default <U, G, V, H, O> JoinWithManyEntityMapper<T, F, U, G, V, H, O> joinWithMany(EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinWithManyCondition, List<Condition> additionalOnConditions, BiFunction<T, List<U>, V> composeEntityWithMany, Function<H, Pair<F, G>> decomposeFilter, Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder) {
 		return new JoinWithManyEntityMapper(this, secondMapper, joinWithManyCondition, additionalOnConditions, composeEntityWithMany, decomposeFilter, decomposeOrder);
+	}
+
+	default <U, G, V, H, O> JoinWithManyEntityMapper<T, F, U, G, V, H, O> joinWithMany(EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinWithManyCondition, BiFunction<T, List<U>, V> composeEntityWithMany, Function<H, Pair<F, G>> decomposeFilter, Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder) {
+		return new JoinWithManyEntityMapper(this, secondMapper, joinWithManyCondition, CollectionFuns.empty(), composeEntityWithMany, decomposeFilter, decomposeOrder);
 	}
 }
