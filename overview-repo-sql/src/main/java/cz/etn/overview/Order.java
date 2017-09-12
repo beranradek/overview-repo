@@ -25,7 +25,7 @@ import java.io.Serializable;
 public final class Order implements Serializable {
 	private static final long serialVersionUID = -8270735262783017159L;
 
-	// TODO RBe: Change this to typed attribute object?
+	// Change this to typed attribute object? Maybe not, Order is handy as Serializable and attributes are not serializable.
 	private final String attribute;
 
 	private final boolean desc;
@@ -35,10 +35,16 @@ public final class Order implements Serializable {
 		this.desc = desc;
 	}
 
+	/**
+	 * Name or full (qualified) name of attribute.
+	 */
 	public String getAttribute() {
 		return attribute;
 	}
 
+	/**
+	 * True if sorted in descending order.
+	 */
 	public boolean isDesc() {
 		return desc;
 	}
