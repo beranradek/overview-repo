@@ -199,7 +199,7 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 		List<T> firstEntities = findByOverview(firstEntityOverview, joinedEntityMapper.getFirstMapper());
 
 		// Lazy loading of related right-side entities using one additional query (if they would be joined with left entities in one query, it could break pagination limit)
-		EqAttributesCondition<T, U, O, O> eqAttrCondition = joinedEntityMapper.getJoinWithManyCondition();
+		EqAttributesCondition<T, U, O, O> eqAttrCondition = joinedEntityMapper.getJoinCondition();
 		Attribute<T, O> firstEntityJoinAttr = eqAttrCondition.getFirstAttribute();
 		Attribute<U, O> secondEntityJoinAttr = eqAttrCondition.getSecondAttribute();
 		// Get all identifiers of first (=left) entities

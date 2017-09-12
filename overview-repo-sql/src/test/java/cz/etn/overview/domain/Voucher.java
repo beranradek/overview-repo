@@ -80,7 +80,7 @@ public class Voucher implements Serializable {
 	/**
 	 * Identifier of customer who has reserved the voucher.
 	 */
-	private String reservedBy;
+	private Integer reservedBy;
 
 	/**
 	 * Identifier of business partner in which the voucher applied.
@@ -169,11 +169,11 @@ public class Voucher implements Serializable {
 		this.redeemedBy = redeemedBy;
 	}
 	
-	public String getReservedBy() {
+	public Integer getReservedBy() {
 		return reservedBy;
 	}
 	
-	public void setReservedBy(String reservedBy) {
+	public void setReservedBy(Integer reservedBy) {
 		this.reservedBy = reservedBy;
 	}
 

@@ -28,7 +28,7 @@ import java.time.Instant;
  */
 public class VoucherTestData {
 
-	public Voucher createVoucher(String code, String reservedBy) {
+	public Voucher createVoucher(String code, Integer reservedBy) {
 		Voucher voucher = new Voucher();
 		voucher.setCode(code);
 		Instant creationTime = Instant.now();

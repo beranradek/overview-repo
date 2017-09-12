@@ -38,6 +38,8 @@ public class Joins {
      */
     public static Function<List<Order>, Pair<List<Order>, List<Order>>> orderingForLeftSide = ordering -> new Pair<>(ordering, CollectionFuns.empty());
 
+    public static Function<List<Order>, Pair<List<Order>, List<Order>>> DEFAULT_ORDERING_DECOMPOSITION = Joins.orderingForLeftSide;
+
     private Joins() {
         throw new AssertionError("Use static members of this class.");
     }

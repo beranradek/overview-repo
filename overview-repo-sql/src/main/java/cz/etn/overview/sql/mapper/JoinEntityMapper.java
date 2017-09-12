@@ -19,6 +19,7 @@ package cz.etn.overview.sql.mapper;
 import cz.etn.overview.common.Pair;
 import cz.etn.overview.common.funs.CollectionFuns;
 import cz.etn.overview.filter.Condition;
+import cz.etn.overview.filter.EqAttributesCondition;
 import cz.etn.overview.mapper.Attribute;
 import cz.etn.overview.mapper.AttributeSource;
 import cz.etn.overview.mapper.EntityMapper;
@@ -44,21 +45,25 @@ import java.util.stream.Collectors;
  * @param <G> type of filter for second entity
  * @param <V> type of resulting entity
  * @param <H> type of filter for resulting entity
+ * @param <O> type of attribute used for join operation
  */
-public class JoinEntityMapper<T, F, U, G, V, H> implements EntityMapper<V, H> {
+public class JoinEntityMapper<T, F, U, G, V, H, O> implements EntityMapper<V, H> {
 
     private static final SqlConditionBuilder sqlConditionBuilder = new SqlConditionBuilder();
     private final EntityMapper<T, F> firstMapper;
     private final EntityMapper<U, G> secondMapper;
-    private final List<Condition> onConditions;
+
+    private final EqAttributesCondition<T, U, O, O> joinCondition;
+    private final List<Condition> additionalOnConditions;
     private final BiFunction<T, U, V> composeEntity;
     private final Function<H, Pair<F, G>> decomposeFilter;
     private final JoinType joinType;
 
-    public JoinEntityMapper(EntityMapper<T, F> firstMapper, EntityMapper<U, G> secondMapper, List<Condition> onConditions, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter, JoinType joinType) {
+    public JoinEntityMapper(EntityMapper<T, F> firstMapper, EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinCondition, List<Condition> additionalOnConditions, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter, JoinType joinType) {
         this.firstMapper = firstMapper;
         this.secondMapper = secondMapper;
-        this.onConditions = onConditions;
+        this.joinCondition = joinCondition;
+        this.additionalOnConditions = additionalOnConditions;
         this.composeEntity = composeEntity;
         this.decomposeFilter = decomposeFilter;
         this.joinType = joinType;
@@ -70,6 +75,14 @@ public class JoinEntityMapper<T, F, U, G, V, H> implements EntityMapper<V, H> {
 
     public EntityMapper<U, G> getSecondMapper() {
         return secondMapper;
+    }
+
+    public List<Condition> getOnConditions() {
+        return CollectionFuns.listWithPrepended(additionalOnConditions, joinCondition);
+    }
+
+    public EqAttributesCondition<T, U, O, O> getJoinCondition() {
+        return joinCondition;
     }
 
     @Override
@@ -88,6 +101,7 @@ public class JoinEntityMapper<T, F, U, G, V, H> implements EntityMapper<V, H> {
     public String getDataSet() {
         StringBuilder sqlBuilder = new StringBuilder(firstMapper.getDataSet() + " " + joinType.name() + " JOIN " + secondMapper.getDataSet());
         // TODO RBe: Do not duplicate this condition transformation logic with repository
+        List<Condition> onConditions = getOnConditions();
         if (onConditions != null && !onConditions.isEmpty()) {
             List<SqlCondition> sqlConditions = onConditions.stream().map(c -> getConditionBuilder().build(c, this::getDbSupportedAttributeValue)).collect(Collectors.toList());
             List<String> onClause = sqlConditions.stream().map(c -> c.getConditionWithPlaceholders()).collect(Collectors.toList());
@@ -151,10 +165,6 @@ public class JoinEntityMapper<T, F, U, G, V, H> implements EntityMapper<V, H> {
     @Override
     public List<Object> getAttributeValues(V instance) {
         throw new UnsupportedOperationException("Unsupported operation in joined mapper");
-    }
-
-    public List<Condition> getOnConditions() {
-        return onConditions;
     }
 
     public BiFunction<T, U, V> getComposeEntity() {

@@ -48,7 +48,7 @@ public class VoucherMapper extends DynamicEntityMapper<Voucher, Object> {
 	public final Attribute<Voucher, Instant> invalidation_time;
 	public final Attribute<Voucher, String> invalidation_note;
 	public final Attribute<Voucher, String> renewal_note;
-	public final Attribute<Voucher, String> reserved_by;
+	public final Attribute<Voucher, Integer> reserved_by;
 	public final Attribute<Voucher, String> redeemed_by;
 	public final Attribute<Voucher, String> sold_by;
 	public final Attribute<Voucher, Instant> invoice_time;
@@ -64,7 +64,7 @@ public class VoucherMapper extends DynamicEntityMapper<Voucher, Object> {
 		invalidation_time = add(Attr.ofInstant(cls, "invalidation_time").get(e -> e.getInvalidationTime()).set((e, a) -> e.setInvalidationTime(a)));
 		invalidation_note = add(Attr.ofString(cls, "invalidation_note").get(e -> e.getInvalidationNote()).set((e, a) -> e.setInvalidationNote(a)).maxLength(200));
 		renewal_note = add(Attr.ofString(cls, "renewal_note").get(e -> e.getRenewalNote()).set((e, a) -> e.setRenewalNote(a)).maxLength(200));
-		reserved_by = add(Attr.ofString(cls, "reserved_by").get(e -> e.getReservedBy()).set((e, a) -> e.setReservedBy(a)).maxLength(40));
+		reserved_by = add(Attr.ofInteger(cls, "reserved_by").get(e -> e.getReservedBy()).set((e, a) -> e.setReservedBy(a)).maxLength(40));
 		redeemed_by = add(Attr.ofString(cls, "redeemed_by").get(e -> e.getRedeemedBy()).set((e, a) -> e.setRedeemedBy(a)).maxLength(40));
 		sold_by = add(Attr.ofString(cls, "sold_by").get(e -> e.getSoldBy()).set((e, a) -> e.setSoldBy(a)).maxLength(40));
 		invoice_time = add(Attr.ofInstant(cls, "invoice_time").get(e -> e.getInvoiceTime()).set((e, a) -> e.setInvoiceTime(a)));

@@ -44,8 +44,7 @@ public class CustomerRepositoryImpl extends AbstractSqlRepository<Customer, Inte
     final EntityMapper<Customer, CustomerFilter> joinSupplyPointsMapper = getEntityMapper().joinWithMany(getSupplyPointMapper(),
         Conditions.eqAttributes(getEntityMapper().id, getSupplyPointMapper().customer_id),
         (customer, supplyPoints) -> { customer.setSupplyPoints(supplyPoints); return customer; }, // joined entity composition with many records
-        Joins.filterForLeftSideWithRightFilter(new SupplyPointFilter()), // filter decomposition to first and second entity filters
-        Joins.orderingForLeftSide
+        Joins.filterForLeftSideWithRightFilter(new SupplyPointFilter()) // filter decomposition to first and second entity filters
     );
 
     final EntityMapper<Customer, CustomerFilter> joinVoucherMapper = getEntityMapper().leftJoin(getVoucherMapper(),
@@ -57,8 +56,7 @@ public class CustomerRepositoryImpl extends AbstractSqlRepository<Customer, Inte
     final EntityMapper<Customer, CustomerFilter> joinVoucherJoinSupplyPointsMapper = joinVoucherMapper.joinWithMany(getSupplyPointMapper(),
         Conditions.eqAttributes(getEntityMapper().id, getSupplyPointMapper().customer_id),
         (customer, supplyPoints) -> { customer.setSupplyPoints(supplyPoints); return customer; }, // joined entity composition with many records
-        Joins.filterForLeftSideWithRightFilter(new SupplyPointFilter()), // filter decomposition to first and second entity filters
-        Joins.orderingForLeftSide
+        Joins.filterForLeftSideWithRightFilter(new SupplyPointFilter()) // filter decomposition to first and second entity filters
     );
 
     public CustomerRepositoryImpl(DataSource dataSource, SupplyPointRepository supplyPointDao) {

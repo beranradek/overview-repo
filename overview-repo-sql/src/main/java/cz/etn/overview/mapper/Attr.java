@@ -136,6 +136,11 @@ public class Attr<E, A> implements Attribute<E, A> {
             return this;
         }
 
+        public Builder<E, A> maxLength(Optional<Integer> lengthOpt) {
+            maxLength = lengthOpt;
+            return this;
+        }
+
         public Builder<E, A> get(Function<E, A> fromEntity) {
             this.fromEntity = fromEntity;
             return this;
@@ -232,4 +237,9 @@ public class Attr<E, A> implements Attribute<E, A> {
     public Attribute<E, A> withNamePrefix(String namePrefix) {
         return new Attr(this, namePrefix);
     }
+
+    // Allow conversion to String attribute?
+    //    public Attribute<E, String> asStringAttr() {
+    //        return Attr.ofString(entityClass, name).primary(primary).get(e -> { A v = fromEntity.apply(e); return v != null ? v.toString() : null; }).updatedEntity((e, a) -> { attributeClass. toEntity.apply() }).namePrefix(namePrefix).maxLength(maxLength).build();
+    //    }
 }

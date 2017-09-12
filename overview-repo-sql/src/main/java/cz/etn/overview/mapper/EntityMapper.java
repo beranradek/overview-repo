@@ -244,7 +244,8 @@ public interface EntityMapper<T, F> {
 	/**
 	 * Creates entity mapper for joined entities.
 	 * @param secondMapper mapper of second entity to join with
-	 * @param onConditions condition(s) for joining the tables
+	 * @param joinCondition basic condition for joining the entities
+	 * @param additionalOnConditions additional conditions for joining the entities
 	 * @param composeEntity function combining joined entities together to resulting entity
 	 * @param decomposeFilter function returning partial filters for first and second joined entity
 	 * @param joinType type of join operation
@@ -254,45 +255,47 @@ public interface EntityMapper<T, F> {
 	 * @param <H> type of resulting entity filter
 	 * @return mapper for joined entities
 	 */
-	default <U, G, V, H> EntityMapper<V, H> join(EntityMapper<U, G> secondMapper, List<Condition> onConditions, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter, JoinType joinType) {
-		return new JoinEntityMapper(this, secondMapper, onConditions, composeEntity, decomposeFilter, joinType);
+	default <U, G, V, H, O> EntityMapper<V, H> join(EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinCondition, List<Condition> additionalOnConditions, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter, JoinType joinType) {
+		return new JoinEntityMapper(this, secondMapper, joinCondition, additionalOnConditions, composeEntity, decomposeFilter, joinType);
 	}
 
-	default <U, G, V, H> EntityMapper<V, H> join(EntityMapper<U, G> secondMapper, List<Condition> onConditions, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter) {
-		return join(secondMapper, onConditions, composeEntity, decomposeFilter, JoinType.INNER);
+	default <U, G, V, H, O> EntityMapper<V, H> join(EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinCondition, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter, JoinType joinType) {
+		return new JoinEntityMapper(this, secondMapper, joinCondition, CollectionFuns.empty(), composeEntity, decomposeFilter, joinType);
 	}
 
-	default <U, G, V, H> EntityMapper<V, H> join(EntityMapper<U, G> secondMapper, Condition onCondition, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter) {
-		List<Condition> onConditions = new ArrayList<>();
-		onConditions.add(onCondition);
-		return join(secondMapper, onConditions, composeEntity, decomposeFilter);
+	default <U, G, V, H, O> EntityMapper<V, H> join(EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinCondition, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter) {
+		return join(secondMapper, joinCondition, CollectionFuns.empty(), composeEntity, decomposeFilter, JoinType.INNER);
 	}
 
-	default <U, G, V, H> EntityMapper<V, H> leftJoin(EntityMapper<U, G> secondMapper, List<Condition> onConditions, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter) {
-		return join(secondMapper, onConditions, composeEntity, decomposeFilter, JoinType.LEFT);
+	default <U, G, V, H, O> EntityMapper<V, H> leftJoin(EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinCondition, List<Condition> additionalOnConditions, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter) {
+		return join(secondMapper, joinCondition, additionalOnConditions, composeEntity, decomposeFilter, JoinType.LEFT);
 	}
 
-	default <U, G, V, H> EntityMapper<V, H> leftJoin(EntityMapper<U, G> secondMapper, Condition onCondition, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter) {
-		List<Condition> onConditions = new ArrayList<>();
-		onConditions.add(onCondition);
-		return leftJoin(secondMapper, onConditions, composeEntity, decomposeFilter);
+	default <U, G, V, H, O> EntityMapper<V, H> leftJoin(EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinCondition, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter) {
+		return leftJoin(secondMapper, joinCondition, CollectionFuns.empty(), composeEntity, decomposeFilter);
 	}
 
-	default <U, G, V, H> EntityMapper<V, H> rightJoin(EntityMapper<U, G> secondMapper, List<Condition> onConditions, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter) {
-		return join(secondMapper, onConditions, composeEntity, decomposeFilter, JoinType.RIGHT);
+	default <U, G, V, H, O> EntityMapper<V, H> rightJoin(EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinCondition, List<Condition> additionalOnConditions, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter) {
+		return join(secondMapper, joinCondition, additionalOnConditions, composeEntity, decomposeFilter, JoinType.RIGHT);
 	}
 
-	default <U, G, V, H> EntityMapper<V, H> rightJoin(EntityMapper<U, G> secondMapper, Condition onCondition, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter) {
-		List<Condition> onConditions = new ArrayList<>();
-		onConditions.add(onCondition);
-		return rightJoin(secondMapper, onConditions, composeEntity, decomposeFilter);
+	default <U, G, V, H, O> EntityMapper<V, H> rightJoin(EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinCondition, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter) {
+		return rightJoin(secondMapper, joinCondition, CollectionFuns.empty(), composeEntity, decomposeFilter);
 	}
 
 	default <U, G, V, H, O> JoinWithManyEntityMapper<T, F, U, G, V, H, O> joinWithMany(EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinWithManyCondition, List<Condition> additionalOnConditions, BiFunction<T, List<U>, V> composeEntityWithMany, Function<H, Pair<F, G>> decomposeFilter, Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder) {
 		return new JoinWithManyEntityMapper(this, secondMapper, joinWithManyCondition, additionalOnConditions, composeEntityWithMany, decomposeFilter, decomposeOrder);
 	}
 
+	default <U, G, V, H, O> JoinWithManyEntityMapper<T, F, U, G, V, H, O> joinWithMany(EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinWithManyCondition, List<Condition> additionalOnConditions, BiFunction<T, List<U>, V> composeEntityWithMany, Function<H, Pair<F, G>> decomposeFilter) {
+		return new JoinWithManyEntityMapper(this, secondMapper, joinWithManyCondition, additionalOnConditions, composeEntityWithMany, decomposeFilter, Joins.DEFAULT_ORDERING_DECOMPOSITION);
+	}
+
 	default <U, G, V, H, O> JoinWithManyEntityMapper<T, F, U, G, V, H, O> joinWithMany(EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinWithManyCondition, BiFunction<T, List<U>, V> composeEntityWithMany, Function<H, Pair<F, G>> decomposeFilter, Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder) {
 		return new JoinWithManyEntityMapper(this, secondMapper, joinWithManyCondition, CollectionFuns.empty(), composeEntityWithMany, decomposeFilter, decomposeOrder);
+	}
+
+	default <U, G, V, H, O> JoinWithManyEntityMapper<T, F, U, G, V, H, O> joinWithMany(EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinWithManyCondition, BiFunction<T, List<U>, V> composeEntityWithMany, Function<H, Pair<F, G>> decomposeFilter) {
+		return new JoinWithManyEntityMapper(this, secondMapper, joinWithManyCondition, CollectionFuns.empty(), composeEntityWithMany, decomposeFilter, Joins.DEFAULT_ORDERING_DECOMPOSITION);
 	}
 }

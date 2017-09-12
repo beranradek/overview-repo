@@ -41,19 +41,16 @@ import java.util.function.Function;
  * @param <H> type of filter for resulting entity
  * @param <O> type of attribute of first and second entity in join condition
  */
-public class JoinWithManyEntityMapper<T, F, U, G, V, H, O> extends JoinEntityMapper<T, F, U, G, V, H> {
+public class JoinWithManyEntityMapper<T, F, U, G, V, H, O> extends JoinEntityMapper<T, F, U, G, V, H, O> {
 
-    private final EqAttributesCondition<T, U, O, O> joinWithManyCondition;
     private final BiFunction<T, List<U>, V> composeEntityWithMany;
     private final Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder;
 
-    public JoinWithManyEntityMapper(EntityMapper<T, F> firstMapper, EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinWithManyCondition, List<Condition> additionalOnConditions, BiFunction<T, List<U>, V> composeEntityWithMany, Function<H, Pair<F, G>> decomposeFilter, Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder) {
-        super(firstMapper, secondMapper,
-            CollectionFuns.listWithPrepended(additionalOnConditions, joinWithManyCondition),
+    public JoinWithManyEntityMapper(EntityMapper<T, F> firstMapper, EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinCondition, List<Condition> additionalOnConditions, BiFunction<T, List<U>, V> composeEntityWithMany, Function<H, Pair<F, G>> decomposeFilter, Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder) {
+        super(firstMapper, secondMapper, joinCondition, additionalOnConditions,
             createComposeEntityFun(composeEntityWithMany),
             decomposeFilter,
             JoinType.LEFT);
-        this.joinWithManyCondition = joinWithManyCondition;
         this.composeEntityWithMany = composeEntityWithMany;
         this.decomposeOrder = decomposeOrder;
     }
@@ -64,10 +61,6 @@ public class JoinWithManyEntityMapper<T, F, U, G, V, H, O> extends JoinEntityMap
 
     public BiFunction<T, List<U>, V> getComposeEntityWithMany() {
         return composeEntityWithMany;
-    }
-
-    public EqAttributesCondition<T, U, O, O> getJoinWithManyCondition() {
-        return joinWithManyCondition;
     }
 
     public Function<List<Order>, Pair<List<Order>, List<Order>>> getDecomposeOrder() {

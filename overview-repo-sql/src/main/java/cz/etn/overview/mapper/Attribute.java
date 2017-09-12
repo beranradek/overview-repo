@@ -118,4 +118,7 @@ public interface Attribute<E, A> {
 	default Optional<Integer> getMaxLength() {
 		return Optional.empty();
 	}
+
+	// Allow conversion to String attribute?
+	// Attribute<E, String> asStringAttr();
 }
