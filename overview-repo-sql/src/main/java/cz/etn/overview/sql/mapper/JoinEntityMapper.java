@@ -16,14 +16,12 @@
  */
 package cz.etn.overview.sql.mapper;
 
+import cz.etn.overview.Order;
 import cz.etn.overview.common.Pair;
 import cz.etn.overview.common.funs.CollectionFuns;
 import cz.etn.overview.filter.Condition;
 import cz.etn.overview.filter.EqAttributesCondition;
-import cz.etn.overview.mapper.Attribute;
-import cz.etn.overview.mapper.AttributeSource;
-import cz.etn.overview.mapper.EntityMapper;
-import cz.etn.overview.mapper.JoinType;
+import cz.etn.overview.mapper.*;
 import cz.etn.overview.sql.filter.SqlCondition;
 import cz.etn.overview.sql.filter.SqlConditionBuilder;
 
@@ -56,17 +54,23 @@ public class JoinEntityMapper<T, F, U, G, V, H, O> implements EntityMapper<V, H>
     private final EqAttributesCondition<T, U, O, O> joinCondition;
     private final List<Condition> additionalOnConditions;
     private final BiFunction<T, U, V> composeEntity;
+    private final BiFunction<T, List<U>, V> composeEntityWithMany;
     private final Function<H, Pair<F, G>> decomposeFilter;
     private final JoinType joinType;
+    private final Cardinality cardinality;
+    private final Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder;
 
-    public JoinEntityMapper(EntityMapper<T, F> firstMapper, EntityMapper<U, G> secondMapper, EqAttributesCondition<T, U, O, O> joinCondition, List<Condition> additionalOnConditions, BiFunction<T, U, V> composeEntity, Function<H, Pair<F, G>> decomposeFilter, JoinType joinType) {
+    JoinEntityMapper(EntityMapper<T, F> firstMapper, EntityMapper<U, G> secondMapper, JoinType joinType, Cardinality cardinality, EqAttributesCondition<T, U, O, O> joinCondition, List<Condition> additionalOnConditions, BiFunction<T, U, V> composeEntity, BiFunction<T, List<U>, V> composeEntityWithMany, Function<H, Pair<F, G>> decomposeFilter, Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder) {
         this.firstMapper = firstMapper;
         this.secondMapper = secondMapper;
         this.joinCondition = joinCondition;
         this.additionalOnConditions = additionalOnConditions;
         this.composeEntity = composeEntity;
+        this.composeEntityWithMany = composeEntityWithMany;
         this.decomposeFilter = decomposeFilter;
         this.joinType = joinType;
+        this.cardinality = cardinality;
+        this.decomposeOrder = decomposeOrder;
     }
 
     public EntityMapper<T, F> getFirstMapper() {
@@ -171,6 +175,10 @@ public class JoinEntityMapper<T, F, U, G, V, H, O> implements EntityMapper<V, H>
         return composeEntity;
     }
 
+    public BiFunction<T, List<U>, V> getComposeEntityWithMany() {
+        return composeEntityWithMany;
+    }
+
     public Function<H, Pair<F, G>> getDecomposeFilter() {
         return decomposeFilter;
     }
@@ -181,6 +189,10 @@ public class JoinEntityMapper<T, F, U, G, V, H, O> implements EntityMapper<V, H>
 
     public SqlConditionBuilder getConditionBuilder() {
         return sqlConditionBuilder;
+    }
+
+    public Cardinality getCardinality() {
+        return cardinality;
     }
 
     // TODO RBe: Do not duplicate this condition transformation logic with repository
