@@ -31,7 +31,7 @@ import cz.etn.overview.repo.AggType;
 import cz.etn.overview.repo.Conditions;
 import cz.etn.overview.repo.Repository;
 import cz.etn.overview.repo.RepositoryException;
-import cz.etn.overview.sql.mapper.JoinWithManyEntityMapper;
+import cz.etn.overview.sql.mapper.JoinEntityMapper;
 import cz.etn.overview.sql.mapper.ResultSetAttributeSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,8 +165,8 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 	public <T, F> List<T> findByOverview(final Overview<F> overview, EntityMapper<T, F> entityMappper) {
 		List<T> objects;
     	// TODO RBe: Perform JOIN for JoinWithManyEntityMapper on database level if pagination is not set
-		if (entityMappper instanceof JoinWithManyEntityMapper) {
-			objects = findJoinedWithMany(overview, (JoinWithManyEntityMapper)entityMappper);
+		if (isJoinWithManyMapper(entityMappper)) {
+			objects = findJoinedWithMany(overview, (JoinEntityMapper)entityMappper);
 		} else {
 			List<String> attributeNames = entityMappper.getAttributeNames();
 			String from = entityMappper.getDataSet();
@@ -175,7 +175,7 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 		}
 		return objects;
 	}
-	
+
 	@Override
 	public List<T> findByOverview(final Overview<F> overview) {
 		return findByOverview(overview, getEntityMapper());
@@ -183,7 +183,7 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 
 	protected abstract DataSource getDataSource();
 
-    protected <T, F, U, G, V, H, O> List<V> findJoinedWithMany(final Overview<H> overview, JoinWithManyEntityMapper<T, F, U, G, V, H, O> joinedEntityMapper) {
+    protected <T, F, U, G, V, H, O> List<V> findJoinedWithMany(final Overview<H> overview, JoinEntityMapper<T, F, U, G, V, H, O> joinedEntityMapper) {
 		// Filters for first and second joined entity types
     	Pair<F, G> decomposedFilter = joinedEntityMapper.getDecomposeFilter().apply(overview.getFilter());
     	F firstEntityFilter = decomposedFilter.getFirst();
@@ -583,5 +583,13 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 
 	protected SqlConditionBuilder getConditionBuilder() {
 		return sqlConditionBuilder;
+	}
+
+	private <T, F> boolean isJoinWithManyMapper(EntityMapper<T, F> entityMappper) {
+		if (!(entityMappper instanceof JoinEntityMapper)) {
+			return false;
+		}
+		JoinEntityMapper joinMapper = (JoinEntityMapper)entityMappper;
+		return joinMapper.getCardinality() != null && joinMapper.getCardinality() == Cardinality.MANY;
 	}
 }

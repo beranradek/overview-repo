@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package cz.etn.overview.sql.mapper;
 
 import cz.etn.overview.Order;
@@ -5,10 +21,7 @@ import cz.etn.overview.common.Pair;
 import cz.etn.overview.common.funs.CollectionFuns;
 import cz.etn.overview.filter.Condition;
 import cz.etn.overview.filter.EqAttributesCondition;
-import cz.etn.overview.mapper.Attribute;
-import cz.etn.overview.mapper.Cardinality;
-import cz.etn.overview.mapper.EntityMapper;
-import cz.etn.overview.mapper.JoinType;
+import cz.etn.overview.mapper.*;
 import cz.etn.overview.repo.Conditions;
 
 import java.util.List;
@@ -31,9 +44,9 @@ public class JoinEntityMapperBuilder<T, F, U, G, V, H, O> {
     private BiFunction<T, U, V> composeEntity;
     private BiFunction<T, List<U>, V> composeEntityWithMany;
     private Function<H, Pair<F, G>> decomposeFilter;
-    private Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder;
+    private Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder = Joins.DEFAULT_ORDERING_DECOMPOSITION;
 
-    JoinEntityMapperBuilder(EntityMapper<T, F> firstMapper, EntityMapper<U, G> secondMapper, JoinType joinType) {
+    public JoinEntityMapperBuilder(EntityMapper<T, F> firstMapper, EntityMapper<U, G> secondMapper, JoinType joinType) {
         this.firstMapper = firstMapper;
         this.secondMapper = secondMapper;
         this.joinType = joinType;
@@ -55,12 +68,22 @@ public class JoinEntityMapperBuilder<T, F, U, G, V, H, O> {
         return this;
     }
 
+    /**
+     * Composition of first entity with many records of second entity.
+     * @param composeEntityWithMany
+     * @return
+     */
     public JoinEntityMapperBuilder<T, F, U, G, V, H, O> composeEntityWithMany(BiFunction<T, List<U>, V> composeEntityWithMany) {
         this.composeEntityWithMany = composeEntityWithMany;
         this.cardinality = Cardinality.MANY;
         return this;
     }
 
+    /**
+     * Filter decomposition to first and second entity filters.
+     * @param decomposeFilter
+     * @return
+     */
     public JoinEntityMapperBuilder<T, F, U, G, V, H, O> decomposeFilter(Function<H, Pair<F, G>> decomposeFilter) {
         this.decomposeFilter = decomposeFilter;
         return this;

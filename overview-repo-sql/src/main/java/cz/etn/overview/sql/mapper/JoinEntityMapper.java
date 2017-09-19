@@ -171,6 +171,10 @@ public class JoinEntityMapper<T, F, U, G, V, H, O> implements EntityMapper<V, H>
         throw new UnsupportedOperationException("Unsupported operation in joined mapper");
     }
 
+    public Function<List<Order>, Pair<List<Order>, List<Order>>> getDecomposeOrder() {
+        return decomposeOrder;
+    }
+
     public BiFunction<T, U, V> getComposeEntity() {
         return composeEntity;
     }
