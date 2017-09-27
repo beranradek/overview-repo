@@ -16,14 +16,18 @@
  */
 package cz.etn.overview.sql.repo;
 
+import cz.etn.overview.Overview;
 import cz.etn.overview.domain.Customer;
 import cz.etn.overview.domain.CustomerFilter;
 import cz.etn.overview.repo.Repository;
+
+import java.util.List;
 
 /**
  * Voucher customer repository.
  * @author Radek Beran
  */
 public interface CustomerRepository extends Repository<Customer, Integer, CustomerFilter> {
-    // nothing new here
+
+    List<Customer> findWithVoucherAndSupplyPoints(Overview<CustomerFilter> overview);
 }

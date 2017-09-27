@@ -5,12 +5,9 @@ import cz.etn.overview.data.CustomerTestData;
 import cz.etn.overview.data.SupplyPointTestData;
 import cz.etn.overview.sql.repo.CustomerRepository;
 import cz.etn.overview.sql.repo.CustomerRepositoryImpl;
-import cz.etn.overview.sql.repo.SupplyPointRepositoryImpl;
 import org.junit.Test;
 
 import javax.sql.DataSource;
-
-import static org.junit.Assert.*;
 
 /**
  * @author Radek Beran
@@ -34,6 +31,6 @@ public class JoinWithManyTest {
     }
 
     protected CustomerRepositoryImpl createCustomerRepository() {
-        return new CustomerRepositoryImpl(dataSource, new SupplyPointRepositoryImpl(dataSource));
+        return new CustomerRepositoryImpl(dataSource);
     }
 }

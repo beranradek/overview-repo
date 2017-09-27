@@ -163,6 +163,8 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 
 	@Override
 	public <T, F> List<T> findByOverview(final Overview<F> overview, EntityMapper<T, F> entityMappper) {
+		Objects.requireNonNull(overview, "overview should be specified");
+		Objects.requireNonNull(entityMappper, "entityMappper should be specified");
 		List<T> objects;
     	// TODO RBe: Perform JOIN for JoinWithManyEntityMapper on database level if pagination is not set
 		if (isJoinWithManyMapper(entityMappper)) {

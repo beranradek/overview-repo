@@ -17,19 +17,14 @@
 package cz.etn.overview.sql.repo;
 
 import cz.etn.overview.Overview;
-import cz.etn.overview.common.funs.CollectionFuns;
 import cz.etn.overview.domain.Customer;
 import cz.etn.overview.domain.CustomerFilter;
 import cz.etn.overview.domain.SupplyPointFilter;
 import cz.etn.overview.mapper.EntityMapper;
 import cz.etn.overview.mapper.Joins;
-import cz.etn.overview.repo.AggType;
-import cz.etn.overview.repo.Conditions;
 
 import javax.sql.DataSource;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Default implementation of {@link CustomerRepository}.
@@ -38,8 +33,6 @@ import java.util.Optional;
 public class CustomerRepositoryImpl extends AbstractSqlRepository<Customer, Integer, CustomerFilter> implements CustomerRepository {
 
     private final DataSource dataSource;
-
-    private final SupplyPointRepository supplyPointDao;
 
     final EntityMapper<Customer, CustomerFilter> joinSupplyPointsMapper = getEntityMapper().leftJoin(getSupplyPointMapper(), Customer.class, CustomerFilter.class, Integer.class)
         .on(getEntityMapper().id, getSupplyPointMapper().customer_id)
@@ -59,9 +52,8 @@ public class CustomerRepositoryImpl extends AbstractSqlRepository<Customer, Inte
         .decomposeFilter(Joins.filterForLeftSideWithRightFilter(new SupplyPointFilter()))
         .build();
 
-    public CustomerRepositoryImpl(DataSource dataSource, SupplyPointRepository supplyPointDao) {
+    public CustomerRepositoryImpl(DataSource dataSource) {
         this.dataSource = dataSource;
-        this.supplyPointDao = supplyPointDao;
     }
 
     @Override
@@ -69,29 +61,9 @@ public class CustomerRepositoryImpl extends AbstractSqlRepository<Customer, Inte
         return CustomerMapper.getInstance();
     }
 
-    // This is overriden, so the related voucher and supply points are also fetched
     @Override
-    public Optional<Customer> findById(Integer id) {
-        CustomerFilter filter = new CustomerFilter();
-        filter.setId(id);
-        return CollectionFuns.headOpt(findByFilter(filter));
-    }
-
-    /**
-     * Loads customers including joined voucher and supply points data.
-     */
-    @Override
-    public List<Customer> findByOverview(Overview<CustomerFilter> overview) {
-        Objects.requireNonNull(overview, "overview should be specified");
+    public List<Customer> findWithVoucherAndSupplyPoints(Overview<CustomerFilter> overview) {
         return findByOverview(overview, joinVoucherJoinSupplyPointsMapper);
-    }
-
-    /**
-     * Computes customers aggregation value including applied conditions on joined customer and voucher data.
-     */
-    @Override
-    public <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, CustomerFilter filter) {
-        return super.aggByFilter(aggType, resultClass, attrName, filter, joinVoucherMapper);
     }
 
     @Override

@@ -17,11 +17,11 @@
 package cz.etn.overview.sql.repo;
 
 import cz.etn.overview.Overview;
+import cz.etn.overview.VoucherTestDb;
 import cz.etn.overview.data.CustomerTestData;
 import cz.etn.overview.data.VoucherTestData;
-import cz.etn.overview.VoucherTestDb;
-import cz.etn.overview.domain.Voucher;
 import cz.etn.overview.domain.Customer;
+import cz.etn.overview.domain.Voucher;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.Test;
 
@@ -87,7 +87,7 @@ public class CustomerRepositoryImplTest {
 		martina.setSupplyPoints(new ArrayList<>());
 		// without voucher
 
-		List<Customer> customers = customerRepo.findByOverview(new Overview<>(null, null, null));
+		List<Customer> customers = customerRepo.findWithVoucherAndSupplyPoints(new Overview<>(null, null, null));
 		// Customers are sorted by their id (default ordering)
 		assertEquals(2, customers.size());
 		Customer janLoaded = customers.get(0);
@@ -104,7 +104,7 @@ public class CustomerRepositoryImplTest {
 	}
 
 	protected CustomerRepositoryImpl createCustomerRepository() {
-		return new CustomerRepositoryImpl(dataSource, new SupplyPointRepositoryImpl(dataSource));
+		return new CustomerRepositoryImpl(dataSource);
 	}
 
 	protected VoucherRepositoryImpl createVoucherRepository() {
