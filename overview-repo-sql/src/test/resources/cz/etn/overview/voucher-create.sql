@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS `voucher` (
 	`invalidation_time` DATETIME NULL DEFAULT NULL,
 	`invalidation_note` VARCHAR(200) NULL DEFAULT NULL,
 	`renewal_note` VARCHAR(200) NULL DEFAULT NULL,
-	`reserved_by` INT(11) NULL DEFAULT NULL,
+	`reserved_by` VARCHAR(40) NULL DEFAULT NULL,
 	`redeemed_by` VARCHAR(40) NULL DEFAULT NULL,
 	`sold_by` VARCHAR(40) NULL DEFAULT NULL,
 	`invoice_time` DATETIME NULL DEFAULT NULL,

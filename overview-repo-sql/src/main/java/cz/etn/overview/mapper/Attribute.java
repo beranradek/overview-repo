@@ -17,6 +17,7 @@
 package cz.etn.overview.mapper;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Mapped attribute interface.
@@ -119,6 +120,13 @@ public interface Attribute<E, A> {
 		return Optional.empty();
 	}
 
-	// Allow conversion to String attribute?
-	// Attribute<E, String> asStringAttr();
+	/**
+	 * Converts attribute to attribute of another type.
+	 * @param attrClass
+	 * @param toNewType
+	 * @param toOldType
+	 * @param <T>
+	 * @return
+	 */
+	<T> Attribute<E, T> as(Class<T> attrClass, Function<A, T> toNewType, Function<T, A> toOldType);
 }

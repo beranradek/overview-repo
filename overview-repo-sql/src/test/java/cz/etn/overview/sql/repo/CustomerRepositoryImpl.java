@@ -47,8 +47,8 @@ public class CustomerRepositoryImpl extends AbstractSqlRepository<Customer, Inte
         .decomposeFilter(Joins.filterForLeftSideWithRightFilter(new SupplyPointFilter()))
         .build();
 
-    final EntityMapper<Customer, CustomerFilter> joinVoucherMapper = getEntityMapper().leftJoin(getVoucherMapper(), Customer.class, CustomerFilter.class, Integer.class)
-        .on(getEntityMapper().id, getVoucherMapper().reserved_by)
+    final EntityMapper<Customer, CustomerFilter> joinVoucherMapper = getEntityMapper().leftJoin(getVoucherMapper(), Customer.class, CustomerFilter.class, String.class)
+        .on(getEntityMapper().id.as(String.class, a -> a.toString(), a -> Integer.parseInt(a)), getVoucherMapper().reserved_by)
         .composeEntity((customer, voucher) -> { customer.setVoucher(voucher); return customer; })
         .decomposeFilter(Joins.filterForLeftSide())
         .build();

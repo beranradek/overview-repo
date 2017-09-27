@@ -238,8 +238,14 @@ public class Attr<E, A> implements Attribute<E, A> {
         return new Attr(this, namePrefix);
     }
 
-    // Allow conversion to String attribute?
-    //    public Attribute<E, String> asStringAttr() {
-    //        return Attr.ofString(entityClass, name).primary(primary).get(e -> { A v = fromEntity.apply(e); return v != null ? v.toString() : null; }).updatedEntity((e, a) -> { attributeClass. toEntity.apply() }).namePrefix(namePrefix).maxLength(maxLength).build();
-    //    }
+    @Override
+    public <T> Attribute<E, T> as(Class<T> attrClass, Function<A, T> toNewType, Function<T, A> toOldType) {
+        return Attr.of(entityClass, attrClass, name)
+            .get(e -> { A v = fromEntity.apply(e); return v != null ? toNewType.apply(v) : null; })
+            .updatedEntity((e, t) -> { return toEntity.apply(e, t != null ? toOldType.apply(t) : null); })
+            .primary(primary)
+            .namePrefix(namePrefix)
+            .maxLength(maxLength)
+            .build();
+    }
 }

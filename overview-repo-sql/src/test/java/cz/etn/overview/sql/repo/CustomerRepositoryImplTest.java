@@ -77,7 +77,7 @@ public class CustomerRepositoryImplTest {
 		Customer jan = customerTestData.createCustomer("jan.novak@gmail.com", "Jan", "Novak");
 		jan = customerRepo.create(jan, true);
 
-		Voucher janVoucher = voucherTestData.createVoucher("XCVB", jan.getId());
+		Voucher janVoucher = voucherTestData.createVoucher("XCVB", "" + jan.getId());
 		janVoucher = voucherRepo.create(janVoucher, false);
 		jan.setVoucher(janVoucher);
 		jan.setSupplyPoints(new ArrayList<>());
