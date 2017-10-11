@@ -30,21 +30,25 @@ import java.util.function.Function;
 
 /**
  * Builder for {@link JoinEntityMapper}.
+ * @param <T> type of first joined entity
+ * @param <F> type of filter for first entity
+ * @param <U> type of second joined entity
+ * @param <G> type of filter for second entity
  * @author Radek Beran
  */
-public class JoinEntityMapperBuilder<T, F, U, G, V, H, O> {
+public class JoinEntityMapperBuilder<T, F, U, G> {
 
     private final EntityMapper<T, F> firstMapper;
     private final EntityMapper<U, G> secondMapper;
     private final JoinType joinType;
 
     private Cardinality cardinality;
-    private EqAttributesCondition<T, U, O, O> joinCondition;
+    private EqAttributesCondition<T, U, ?, ?> joinCondition;
     private List<Condition> additionalOnConditions;
-    private BiFunction<T, U, V> composeEntity;
-    private BiFunction<T, List<U>, V> composeEntityWithMany;
-    private Function<H, Pair<F, G>> decomposeFilter;
-    private Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder = Joins.DEFAULT_ORDERING_DECOMPOSITION;
+    private BiFunction<T, U, ?> composeEntity;
+    private BiFunction<T, List<U>, ?> composeEntityWithMany;
+    private Function<?, Pair<F, G>> decomposeFilter;
+    private Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder = Decompose.DEFAULT_ORDERING_DECOMPOSITION;
 
     public JoinEntityMapperBuilder(EntityMapper<T, F> firstMapper, EntityMapper<U, G> secondMapper, JoinType joinType) {
         this.firstMapper = firstMapper;
@@ -52,17 +56,17 @@ public class JoinEntityMapperBuilder<T, F, U, G, V, H, O> {
         this.joinType = joinType;
     }
 
-    public JoinEntityMapperBuilder<T, F, U, G, V, H, O> on(Attribute<T, O> firstAttribute, Attribute<U, O> secondAttribute, List<Condition> additionalOnConditions) {
+    public <O> JoinEntityMapperBuilder<T, F, U, G> on(Attribute<T, O> firstAttribute, Attribute<U, O> secondAttribute, List<Condition> additionalOnConditions) {
         this.joinCondition = Conditions.eqAttributes(firstAttribute, secondAttribute);
         this.additionalOnConditions = additionalOnConditions;
         return this;
     }
 
-    public JoinEntityMapperBuilder<T, F, U, G, V, H, O> on(Attribute<T, O> firstAttribute, Attribute<U, O> secondAttribute) {
+    public <O> JoinEntityMapperBuilder<T, F, U, G> on(Attribute<T, O> firstAttribute, Attribute<U, O> secondAttribute) {
         return on(firstAttribute, secondAttribute, CollectionFuns.empty());
     }
 
-    public JoinEntityMapperBuilder<T, F, U, G, V, H, O> composeEntity(BiFunction<T, U, V> composeEntity) {
+    public <V> JoinEntityMapperBuilder<T, F, U, G> composeEntity(BiFunction<T, U, V> composeEntity) {
         this.composeEntity = composeEntity;
         this.cardinality = Cardinality.ONE;
         return this;
@@ -73,7 +77,7 @@ public class JoinEntityMapperBuilder<T, F, U, G, V, H, O> {
      * @param composeEntityWithMany
      * @return
      */
-    public JoinEntityMapperBuilder<T, F, U, G, V, H, O> composeEntityWithMany(BiFunction<T, List<U>, V> composeEntityWithMany) {
+    public <V> JoinEntityMapperBuilder<T, F, U, G> composeEntityWithMany(BiFunction<T, List<U>, V> composeEntityWithMany) {
         this.composeEntityWithMany = composeEntityWithMany;
         this.cardinality = Cardinality.MANY;
         return this;
@@ -84,19 +88,25 @@ public class JoinEntityMapperBuilder<T, F, U, G, V, H, O> {
      * @param decomposeFilter
      * @return
      */
-    public JoinEntityMapperBuilder<T, F, U, G, V, H, O> decomposeFilter(Function<H, Pair<F, G>> decomposeFilter) {
+    public <H> JoinEntityMapperBuilder<T, F, U, G> decomposeFilter(Function<H, Pair<F, G>> decomposeFilter) {
         this.decomposeFilter = decomposeFilter;
         return this;
     }
 
-    public JoinEntityMapperBuilder<T, F, U, G, V, H, O> decomposeOrder(Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder) {
+    public JoinEntityMapperBuilder<T, F, U, G> decomposeOrder(Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder) {
         this.decomposeOrder = decomposeOrder;
         return this;
     }
 
-    public JoinEntityMapper<T, F, U, G, V, H, O> build() {
+    public <V, H, O> JoinEntityMapper<T, F, U, G, V, H, O> build() {
         // TODO: Checks on required fields
-        return new JoinEntityMapper<T, F, U, G, V, H, O>(firstMapper, secondMapper, joinType, cardinality, joinCondition, additionalOnConditions, composeEntity, composeEntityWithMany, decomposeFilter, decomposeOrder);
+        return new JoinEntityMapper<>(firstMapper, secondMapper, joinType, cardinality,
+            (EqAttributesCondition<T, U, O, O>)joinCondition,
+            additionalOnConditions,
+            (BiFunction<T, U, V>)composeEntity,
+            (BiFunction<T, List<U>, V>)composeEntityWithMany,
+            (Function<H, Pair<F, G>>)decomposeFilter,
+            decomposeOrder);
     }
 
 }

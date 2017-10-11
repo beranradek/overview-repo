@@ -21,7 +21,7 @@ import cz.etn.overview.domain.Customer;
 import cz.etn.overview.domain.CustomerFilter;
 import cz.etn.overview.domain.SupplyPointFilter;
 import cz.etn.overview.mapper.EntityMapper;
-import cz.etn.overview.mapper.Joins;
+import cz.etn.overview.mapper.Decompose;
 
 import javax.sql.DataSource;
 import java.util.List;
@@ -34,22 +34,22 @@ public class CustomerRepositoryImpl extends AbstractSqlRepository<Customer, Inte
 
     private final DataSource dataSource;
 
-    final EntityMapper<Customer, CustomerFilter> joinSupplyPointsMapper = getEntityMapper().leftJoin(getSupplyPointMapper(), Customer.class, CustomerFilter.class, Integer.class)
+    final EntityMapper<Customer, CustomerFilter> joinSupplyPointsMapper = getEntityMapper().leftJoin(getSupplyPointMapper())
         .on(getEntityMapper().id, getSupplyPointMapper().customer_id)
         .composeEntityWithMany((customer, supplyPoints) -> { customer.setSupplyPoints(supplyPoints); return customer; })
-        .decomposeFilter(Joins.filterForLeftSideWithRightFilter(new SupplyPointFilter()))
+        .decomposeFilter(Decompose.filterToIdenticalAnd(new SupplyPointFilter()))
         .build();
 
-    final EntityMapper<Customer, CustomerFilter> joinVoucherMapper = getEntityMapper().leftJoin(getVoucherMapper(), Customer.class, CustomerFilter.class, String.class)
+    final EntityMapper<Customer, CustomerFilter> joinVoucherMapper = getEntityMapper().leftJoin(getVoucherMapper())
         .on(getEntityMapper().id.as(String.class, a -> a.toString(), a -> Integer.parseInt(a)), getVoucherMapper().reserved_by)
         .composeEntity((customer, voucher) -> { customer.setVoucher(voucher); return customer; })
-        .decomposeFilter(Joins.filterForLeftSide())
+        .decomposeFilter(Decompose.filterToIdenticalAndObject())
         .build();
 
-    final EntityMapper<Customer, CustomerFilter> joinVoucherJoinSupplyPointsMapper = joinVoucherMapper.leftJoin(getSupplyPointMapper(), Customer.class, CustomerFilter.class, Integer.class)
+    final EntityMapper<Customer, CustomerFilter> joinVoucherJoinSupplyPointsMapper = joinVoucherMapper.leftJoin(getSupplyPointMapper())
         .on(getEntityMapper().id, getSupplyPointMapper().customer_id)
         .composeEntityWithMany((customer, supplyPoints) -> { customer.setSupplyPoints(supplyPoints); return customer; })
-        .decomposeFilter(Joins.filterForLeftSideWithRightFilter(new SupplyPointFilter()))
+        .decomposeFilter(Decompose.filterToIdenticalAnd(new SupplyPointFilter()))
         .build();
 
     public CustomerRepositoryImpl(DataSource dataSource) {

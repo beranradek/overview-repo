@@ -246,19 +246,19 @@ public interface EntityMapper<T, F> {
 	 * @param <O> type of attribute used for join operation
 	 * @return builder of join mapper for fetching joined entities
 	 */
-	default <U, G, V, H, O> JoinEntityMapperBuilder<T, F, U, G, V, H, O> join(EntityMapper<U, G> secondMapper, JoinType joinType, Class<V> resultingEntityClass, Class<H> resultingFilterClass, Class<O> joinAttrClass) {
+	default <U, G, V, H, O> JoinEntityMapperBuilder<T, F, U, G> join(EntityMapper<U, G> secondMapper, JoinType joinType) {
 		return new JoinEntityMapperBuilder<>(this, secondMapper, joinType);
 	}
 
-	default <U, G, V, H, O> JoinEntityMapperBuilder<T, F, U, G, V, H, O> join(EntityMapper<U, G> secondMapper, Class<V> resultingEntityClass, Class<H> resultingFilterClass, Class<O> joinAttrClass) {
+	default <U, G, V, H, O> JoinEntityMapperBuilder<T, F, U, G> join(EntityMapper<U, G> secondMapper) {
 		return new JoinEntityMapperBuilder<>(this, secondMapper, JoinType.INNER);
 	}
 
-	default <U, G, V, H, O> JoinEntityMapperBuilder<T, F, U, G, V, H, O> leftJoin(EntityMapper<U, G> secondMapper, Class<V> resultingEntityClass, Class<H> resultingFilterClass, Class<O> joinAttrClass) {
+	default <U, G, V, H, O> JoinEntityMapperBuilder<T, F, U, G> leftJoin(EntityMapper<U, G> secondMapper) {
 		return new JoinEntityMapperBuilder<>(this, secondMapper, JoinType.LEFT);
 	}
 
-	default <U, G, V, H, O> JoinEntityMapperBuilder<T, F, U, G, V, H, O> rightJoin(EntityMapper<U, G> secondMapper, Class<V> resultingEntityClass, Class<H> resultingFilterClass, Class<O> joinAttrClass) {
+	default <U, G, V, H, O> JoinEntityMapperBuilder<T, F, U, G> rightJoin(EntityMapper<U, G> secondMapper) {
 		return new JoinEntityMapperBuilder<>(this, secondMapper, JoinType.RIGHT);
 	}
 }

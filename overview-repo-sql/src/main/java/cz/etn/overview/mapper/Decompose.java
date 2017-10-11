@@ -24,10 +24,10 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * Auxiliary methods for defining join operations.
+ * Auxiliary methods for defining decompositions.
  * @author Radek Beran
  */
-public class Joins {
+public class Decompose {
 
     private static final Object OBJECT_FILTER = new Object();
 
@@ -36,8 +36,8 @@ public class Joins {
      * @param <F>
      * @return
      */
-    public static <F> Function<F, Pair<F, Object>> filterForLeftSide() {
-        return filterForLeftSideWithRightFilter(OBJECT_FILTER);
+    public static <F> Function<F, Pair<F, Object>> filterToIdenticalAndObject() {
+        return filterToIdenticalAnd(OBJECT_FILTER);
     }
 
     /**
@@ -45,18 +45,18 @@ public class Joins {
      * @param <F>
      * @return
      */
-    public static <F, G> Function<F, Pair<F, G>> filterForLeftSideWithRightFilter(final G rightFilter) {
+    public static <F, G> Function<F, Pair<F, G>> filterToIdenticalAnd(final G rightFilter) {
         return filter -> new Pair<>(filter, rightFilter);
     }
 
     /**
      * Decomposition of ordering: Ordering can be used directly for left side of join operation.
      */
-    public static Function<List<Order>, Pair<List<Order>, List<Order>>> orderingForLeftSide = ordering -> new Pair<>(ordering, CollectionFuns.empty());
+    public static Function<List<Order>, Pair<List<Order>, List<Order>>> orderingToIdenticalAndEmpty = ordering -> new Pair<>(ordering, CollectionFuns.empty());
 
-    public static Function<List<Order>, Pair<List<Order>, List<Order>>> DEFAULT_ORDERING_DECOMPOSITION = Joins.orderingForLeftSide;
+    public static Function<List<Order>, Pair<List<Order>, List<Order>>> DEFAULT_ORDERING_DECOMPOSITION = Decompose.orderingToIdenticalAndEmpty;
 
-    private Joins() {
+    private Decompose() {
         throw new AssertionError("Use static members of this class.");
     }
 }
