@@ -53,7 +53,7 @@ public final class Pagination implements Serializable {
 	
 	/**
 	 * Returns new instance/copy of pagination with offset set.
-	 * @param count
+	 * @param offset
 	 * @return
 	 */
 	public Pagination withOffset(int offset) {
@@ -64,10 +64,18 @@ public final class Pagination implements Serializable {
 		return offset;
 	}
 
+	/**
+	 * Page size.
+	 * @return
+	 */
 	public int getLimit() {
 		return limit;
 	}
 
+	/**
+	 * Total count of available records, or {@code null] in case records are not loaded yet.
+	 * @return
+	 */
 	public Integer getTotalCount() {
 		return totalCount;
 	}
@@ -102,6 +110,27 @@ public final class Pagination implements Serializable {
 			next = getNextOffset() < totalCount.intValue();  
 		}
 		return !next;
+	}
+
+	/**
+	 * Number of current page (from 1).
+	 * @return
+	 */
+	public int getPage() {
+		return (offset / limit) + 1;
+	}
+
+	/**
+	 * Total count of pages.
+	 * @return
+	 */
+	public Integer getPageCount() {
+		Integer cnt = null;
+		if (totalCount != null) {
+			int tc = totalCount.intValue();
+			cnt = Integer.valueOf(tc/limit + (tc % limit > 0 ? 1 : 0));
+		}
+		return cnt;
 	}
 	
 	@Override
