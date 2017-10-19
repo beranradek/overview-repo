@@ -51,7 +51,7 @@ public class CustomerRepositoryImplTest {
 	@Test
 	public void createFindDeleteCustomer() {
 		CustomerRepository repo = createCustomerRepository();
-		Customer customer = customerTestData.createCustomer("jan.novak@gmail.com", "Jan", "Novak");
+		Customer customer = customerTestData.createCustomerWithSupplyPoints("jan.novak@gmail.com", "Jan", "Novak");
 		customer.setSupplyPoints(null); // Supply points from test data are not loaded by findById
 		customer.setVoucher(null); // Voucher from test data are now not loaded by findById
 
@@ -74,7 +74,7 @@ public class CustomerRepositoryImplTest {
 		VoucherRepositoryImpl voucherRepo = createVoucherRepository();
 
 		// Customer has at most one generated voucher
-		Customer jan = customerTestData.createCustomer("jan.novak@gmail.com", "Jan", "Novak");
+		Customer jan = customerTestData.createCustomerWithSupplyPoints("jan.novak@gmail.com", "Jan", "Novak");
 		jan = customerRepo.create(jan, true);
 
 		Voucher janVoucher = voucherTestData.createVoucher("XCVB", "" + jan.getId());
@@ -82,7 +82,7 @@ public class CustomerRepositoryImplTest {
 		jan.setVoucher(janVoucher);
 		jan.setSupplyPoints(new ArrayList<>());
 
-		Customer martina = customerTestData.createCustomer("martina.vesela@gmail.com", "Martina", "Vesela");
+		Customer martina = customerTestData.createCustomerWithSupplyPoints("martina.vesela@gmail.com", "Martina", "Vesela");
 		martina = customerRepo.create(martina, true);
 		martina.setSupplyPoints(new ArrayList<>());
 		// without voucher

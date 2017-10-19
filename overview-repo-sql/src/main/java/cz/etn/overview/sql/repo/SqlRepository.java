@@ -33,12 +33,10 @@ public class SqlRepository<T, K, F> extends AbstractSqlRepository<T, K, F> {
 
     private final EntityMapper<T, F> entityMapper;
 
-
     public SqlRepository(DataSource dataSource, EntityMapper<T, F> entityMapper) {
         this.dataSource = dataSource;
         this.entityMapper = entityMapper;
     }
-
 
     @Override
     protected DataSource getDataSource() {

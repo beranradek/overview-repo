@@ -63,7 +63,7 @@ public class JoinEntityMapperBuilder<T, F, U, G> {
     }
 
     public <O> JoinEntityMapperBuilder<T, F, U, G> on(Attribute<T, O> firstAttribute, Attribute<U, O> secondAttribute) {
-        return on(firstAttribute, secondAttribute, CollectionFuns.empty());
+        return on(firstAttribute, secondAttribute, CollectionFuns.emptyList());
     }
 
     public <V> JoinEntityMapperBuilder<T, F, U, G> composeEntity(BiFunction<T, U, V> composeEntity) {

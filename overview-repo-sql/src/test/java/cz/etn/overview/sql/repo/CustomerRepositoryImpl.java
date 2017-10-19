@@ -67,6 +67,11 @@ public class CustomerRepositoryImpl extends AbstractSqlRepository<Customer, Inte
     }
 
     @Override
+    public List<Customer> findWithSupplyPoints(Overview<CustomerFilter> overview) {
+        return findByOverview(overview, joinSupplyPointsMapper);
+    }
+
+    @Override
     protected DataSource getDataSource() {
         return dataSource;
     }

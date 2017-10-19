@@ -32,16 +32,21 @@ public class CustomerTestData {
 
 	private final SupplyPointTestData supplyPointTestData = new SupplyPointTestData();
 
+	public Customer createCustomerWithSupplyPoints(String email, String firstName, String lastName) {
+		Customer customer = createCustomer(email, firstName, lastName);
+		List<SupplyPoint> supplyPoints = new ArrayList<>();
+		supplyPoints.add(supplyPointTestData.createSupplyPoint("4100272309"));
+		supplyPoints.add(supplyPointTestData.createSupplyPoint("4100272310"));
+		customer.setSupplyPoints(supplyPoints);
+		return customer;
+	}
+
 	public Customer createCustomer(String email, String firstName, String lastName) {
 		Customer customer = new Customer();
 		customer.setCreationTime(Instant.now());
 		customer.setEmail(email);
 		customer.setFirstName(firstName);
 		customer.setLastName(lastName);
-		List<SupplyPoint> supplyPoints = new ArrayList<>();
-		supplyPoints.add(supplyPointTestData.createSupplyPoint("4100272309"));
-		supplyPoints.add(supplyPointTestData.createSupplyPoint("4100272310"));
-		customer.setSupplyPoints(supplyPoints);
 		customer.setDiscountEmailType(DiscountEmailType.MORE_SUPPLY_POINTS_DISCOUNT);
 		customer.setImportFileName("body_Benefit_body_rijen_31102016.xlsx");
 		return customer;

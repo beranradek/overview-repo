@@ -52,7 +52,7 @@ public class Decompose {
     /**
      * Decomposition of ordering: Ordering can be used directly for left side of join operation.
      */
-    public static Function<List<Order>, Pair<List<Order>, List<Order>>> orderingToIdenticalAndEmpty = ordering -> new Pair<>(ordering, CollectionFuns.empty());
+    public static Function<List<Order>, Pair<List<Order>, List<Order>>> orderingToIdenticalAndEmpty = ordering -> new Pair<>(ordering, CollectionFuns.emptyList());
 
     public static Function<List<Order>, Pair<List<Order>, List<Order>>> DEFAULT_ORDERING_DECOMPOSITION = Decompose.orderingToIdenticalAndEmpty;
 

@@ -30,10 +30,16 @@ public class CollectionFuns {
     /**
      * Empty unmodifiable list of objects.
      */
-    public static List<Object> EMPTY_OBJECT_LIST = Collections.unmodifiableList(empty());
+    public static List<Object> EMPTY_OBJECT_LIST = Collections.unmodifiableList(emptyList());
 
-    public static <T> List<T> empty() {
+    public static <T> List<T> emptyList() {
         return new ArrayList<>();
+    }
+
+    public static <T> List<T> list(T ... elements) {
+        List<T> list = emptyList();
+        Collections.addAll(list, elements);
+        return list;
     }
 
     /**

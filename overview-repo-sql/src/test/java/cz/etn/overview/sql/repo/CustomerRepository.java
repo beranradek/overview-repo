@@ -30,4 +30,6 @@ import java.util.List;
 public interface CustomerRepository extends Repository<Customer, Integer, CustomerFilter> {
 
     List<Customer> findWithVoucherAndSupplyPoints(Overview<CustomerFilter> overview);
+
+    List<Customer> findWithSupplyPoints(Overview<CustomerFilter> overview);
 }
