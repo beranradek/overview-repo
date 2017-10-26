@@ -1,16 +1,13 @@
 package cz.etn.overview.sql.mapper;
 
+import cz.etn.overview.Order;
 import cz.etn.overview.Overview;
 import cz.etn.overview.VoucherTestDb;
-import cz.etn.overview.common.funs.CollectionFuns;
 import cz.etn.overview.data.CustomerTestData;
 import cz.etn.overview.data.SupplyPointTestData;
 import cz.etn.overview.domain.Customer;
 import cz.etn.overview.domain.SupplyPoint;
-import cz.etn.overview.sql.repo.CustomerRepository;
-import cz.etn.overview.sql.repo.CustomerRepositoryImpl;
-import cz.etn.overview.sql.repo.SupplyPointRepository;
-import cz.etn.overview.sql.repo.SupplyPointRepositoryImpl;
+import cz.etn.overview.sql.repo.*;
 import org.junit.Test;
 
 import javax.sql.DataSource;
@@ -39,25 +36,28 @@ public class JoinWithManyTest {
     public void findCustomersLeftJoinManySupplyPoints() {
         CustomerRepository repo = createCustomerRepository();
         SupplyPointRepository spRepo = createSupplyPointRepository();
-        List<Customer> customers = createCustomersWithSupplyPoints();
-        saveCustomersWithSupplyPoints(repo, spRepo, customers);
+
+        // Customers, saved and returned with generated ids
+        List<Customer> customersCreated = repo.createAll(createCustomers(), true);
+        // Supply points, saved and returned with generated ids
+        spRepo.createAll(createSupplyPoints(customersCreated), true);
 
         // Find all customers joined with supply points
-        List<Customer> foundCustomers = repo.findWithSupplyPoints(Overview.empty());
-        assertEquals(customers.size(), foundCustomers.size());
-        for (int i = 0; i < foundCustomers.size(); i++) {
-            Customer customer = customers.get(i);
-            Customer foundCustomer = foundCustomers.get(i);
+        List<Customer> customersFound = repo.findWithSupplyPoints(Overview.fromOrdering(new Order(CustomerMapper.getInstance().id.getName(), false)));
+        assertEquals(customersCreated.size(), customersFound.size());
+        for (int i = 0; i < customersFound.size(); i++) {
+            Customer customerCreated = customersCreated.get(i);
+            Customer customerFound = customersFound.get(i);
 
-            assertEquals(customer.getEmail(), foundCustomer.getEmail());
-            assertEquals(customer.getFirstName(), foundCustomer.getFirstName());
-            assertEquals(customer.getLastName(), foundCustomer.getLastName());
-            assertNotNull("Supply points are set", foundCustomer.getSupplyPoints());
+            assertEquals(customerCreated.getEmail(), customerFound.getEmail());
+            assertEquals(customerCreated.getFirstName(), customerFound.getFirstName());
+            assertEquals(customerCreated.getLastName(), customerFound.getLastName());
+            assertNotNull("Supply points are set", customerFound.getSupplyPoints());
         }
 
-        assertEquals(2, foundCustomers.get(0).getSupplyPoints().size());
-        assertEquals(3, foundCustomers.get(1).getSupplyPoints().size());
-        assertEquals(4, foundCustomers.get(2).getSupplyPoints().size());
+        assertEquals(2, customersFound.get(0).getSupplyPoints().size());
+        assertEquals(3, customersFound.get(1).getSupplyPoints().size());
+        assertEquals(1, customersFound.get(2).getSupplyPoints().size());
     }
 
     protected CustomerRepository createCustomerRepository() {
@@ -68,38 +68,41 @@ public class JoinWithManyTest {
         return new SupplyPointRepositoryImpl(dataSource);
     }
 
-    protected List<Customer> createCustomersWithSupplyPoints() {
-        List<Customer> customers = new ArrayList<>();
-        Customer c1 = customerTestData.createCustomer("john.smith@gmail.com", "John", "Smith");
-        Customer c2 = customerTestData.createCustomer("vanessa.twiggy@gmail.com", "Vanessa", "Twiggy");
-        Customer c3 = customerTestData.createCustomer("jeremy.scott@gmail.com", "Jeremy", "Scott");
-        SupplyPoint sp1 = supplyPointsTestData.createSupplyPoint("A1");
-        SupplyPoint sp2 = supplyPointsTestData.createSupplyPoint("A2");
-        SupplyPoint sp3 = supplyPointsTestData.createSupplyPoint("B1");
-        SupplyPoint sp4 = supplyPointsTestData.createSupplyPoint("B2");
-        SupplyPoint sp5 = supplyPointsTestData.createSupplyPoint("B3");
-        SupplyPoint sp6 = supplyPointsTestData.createSupplyPoint("C1");
-
-        c1.setSupplyPoints(CollectionFuns.list(sp1, sp2));
-        c2.setSupplyPoints(CollectionFuns.list(sp3, sp4, sp5));
-        c3.setSupplyPoints(CollectionFuns.list(sp6));
-
-        customers.add(c1);
-        customers.add(c2);
-        customers.add(c3);
-        return customers;
+    protected List<Customer> createCustomers() {
+        List<Customer> list = new ArrayList<>();
+        list.add(customerTestData.createCustomer("john.smith@gmail.com", "John", "Smith"));
+        list.add(customerTestData.createCustomer("vanessa.twiggy@gmail.com", "Vanessa", "Twiggy"));
+        list.add(customerTestData.createCustomer("jeremy.scott@gmail.com", "Jeremy", "Scott"));
+        return list;
     }
 
-    protected void saveCustomersWithSupplyPoints(CustomerRepository repo, SupplyPointRepository spRepo, List<Customer> customers) {
-        if (customers != null) {
-            for (Customer c : customers) {
-                repo.create(c, true);
-                if (c.getSupplyPoints() != null) {
-                    for (SupplyPoint sp : c.getSupplyPoints()) {
-                        spRepo.create(sp, true);
-                    }
-                }
-            }
-        }
+    protected List<SupplyPoint> createSupplyPoints(List<Customer> customersWithIds) {
+        List<SupplyPoint> list = new ArrayList<>();
+
+        SupplyPoint a1 = supplyPointsTestData.createSupplyPoint("A1");
+        a1.setCustomerId(customersWithIds.get(0).getId());
+        list.add(a1);
+
+        SupplyPoint a2 = supplyPointsTestData.createSupplyPoint("A2");
+        a2.setCustomerId(customersWithIds.get(0).getId());
+        list.add(a2);
+
+        SupplyPoint b1 = supplyPointsTestData.createSupplyPoint("B1");
+        b1.setCustomerId(customersWithIds.get(1).getId());
+        list.add(b1);
+
+        SupplyPoint b2 = supplyPointsTestData.createSupplyPoint("B2");
+        b2.setCustomerId(customersWithIds.get(1).getId());
+        list.add(b2);
+
+        SupplyPoint b3 = supplyPointsTestData.createSupplyPoint("B3");
+        b3.setCustomerId(customersWithIds.get(1).getId());
+        list.add(b3);
+
+        SupplyPoint c1 = supplyPointsTestData.createSupplyPoint("C1");
+        c1.setCustomerId(customersWithIds.get(2).getId());
+        list.add(c1);
+
+        return list;
     }
 }
