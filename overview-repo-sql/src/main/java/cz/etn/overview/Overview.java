@@ -16,6 +16,8 @@
  */
 package cz.etn.overview;
 
+import cz.etn.overview.common.funs.CollectionFuns;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +41,14 @@ public class Overview<F> implements Serializable {
     	return new Overview<>(null, null, null);
     }
 
+    public static <F> Overview<F> fromOrdering(Order order) {
+        return Overview.<F>empty().withOrdering(order);
+    }
+
+    public static <F> Overview<F> fromOrdering(List<Order> ordering) {
+        return Overview.<F>empty().withOrdering(ordering);
+    }
+
     public Overview(F filter, List<Order> order, Pagination pagination) {
         this.filter = filter;
         this.order = order;
@@ -59,8 +69,17 @@ public class Overview<F> implements Serializable {
      * @param ordering
      * @return
      */
-    public Overview<F> withOrder(List<Order> ordering) {
+    public Overview<F> withOrdering(List<Order> ordering) {
     	return new Overview<>(this.filter, ordering, this.pagination);
+    }
+
+    /**
+     * Returns new instance/copy of overview with given order set.
+     * @param order
+     * @return
+     */
+    public Overview<F> withOrdering(Order order) {
+        return withOrdering(CollectionFuns.list(order));
     }
     
     /**
