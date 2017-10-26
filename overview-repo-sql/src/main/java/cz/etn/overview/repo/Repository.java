@@ -23,6 +23,7 @@ import cz.etn.overview.common.Pair;
 import cz.etn.overview.mapper.Attribute;
 import cz.etn.overview.mapper.EntityMapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,6 +47,22 @@ public interface Repository<T, K, F> {
 	 * @return created entity which includes also possible generated key
 	 */
 	T create(T entity, boolean autogenerateKey);
+
+	/**
+	 * Creates all given entities.
+	 * @param entities entities to create
+	 * @param autogenerateKey true if entity key should be generated
+	 * @return created entities that include also possible generated keys
+	 */
+	default List<T> createAll(List<T> entities, boolean autogenerateKey) {
+		List<T> list = new ArrayList<>();
+		if (entities != null) {
+			for (T e : entities) {
+				list.add(create(e, autogenerateKey));
+			}
+		}
+		return list;
+	}
 	
 	/**
 	 * Updates entity with given data. Returns updated entity if entity was successfully updated, or empty result if entity was not found.
