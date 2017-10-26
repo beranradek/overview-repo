@@ -330,8 +330,7 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 	}
 
 	protected List<Order> createDefaultOrdering() {
-		// default ordering by id
-		return composeOrderingForPrimaryKey();
+		return new ArrayList<>();
 	}
 	
 	protected K create(String sql, List<Object> attributeValues, boolean autogenerateKey) {
