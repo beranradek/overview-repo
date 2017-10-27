@@ -50,6 +50,22 @@ public class Decompose {
     }
 
     /**
+     * Decomposition of ordering: Ordering can be used directly for left side of join operation. Ordering for right side is specified.
+     * @return
+     */
+    public static Function<List<Order>, Pair<List<Order>, List<Order>>> orderingToIdenticalAnd(final List<Order> rightOrdering) {
+        return ordering -> new Pair<>(ordering, rightOrdering);
+    }
+
+    /**
+     * Decomposition of ordering: Ordering can be used directly for left side of join operation. Ordering for right side is specified.
+     * @return
+     */
+    public static Function<List<Order>, Pair<List<Order>, List<Order>>> orderingToIdenticalAnd(final Order rightOrder) {
+        return orderingToIdenticalAnd(CollectionFuns.list(rightOrder));
+    }
+
+    /**
      * Decomposition of ordering: Ordering can be used directly for left side of join operation.
      */
     public static Function<List<Order>, Pair<List<Order>, List<Order>>> orderingToIdenticalAndEmpty = ordering -> new Pair<>(ordering, CollectionFuns.emptyList());

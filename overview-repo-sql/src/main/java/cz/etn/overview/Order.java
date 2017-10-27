@@ -16,6 +16,8 @@
  */
 package cz.etn.overview;
 
+import cz.etn.overview.mapper.Attribute;
+
 import java.io.Serializable;
 
 /**
@@ -30,9 +32,13 @@ public final class Order implements Serializable {
 
 	private final boolean desc;
 
-	public Order(String attribute, boolean desc) {
-		this.attribute = attribute;
+	public Order(Attribute<?, ?> attribute, boolean desc) {
+		this.attribute = attribute.getNameFull();
 		this.desc = desc;
+	}
+
+	public Order(Attribute<?, ?> attribute) {
+		this(attribute, false);
 	}
 
 	/**

@@ -20,13 +20,10 @@ import cz.etn.overview.domain.SupplyPoint;
 import cz.etn.overview.domain.SupplyPointFilter;
 import cz.etn.overview.repo.Repository;
 
-import java.util.List;
-
 /**
  * Repository for supply points.
  * @author Radek Beran
  */
 public interface SupplyPointRepository extends Repository<SupplyPoint, Integer, SupplyPointFilter> {
-
-	List<SupplyPoint> findByCustomerIds(List<Integer> customerIds);
+	// nothing new here
 }

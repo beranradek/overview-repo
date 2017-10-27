@@ -17,12 +17,13 @@
 package cz.etn.overview.sql.repo;
 
 
-import cz.etn.overview.data.VoucherTestData;
 import cz.etn.overview.VoucherTestDb;
 import cz.etn.overview.common.Pair;
+import cz.etn.overview.data.VoucherTestData;
 import cz.etn.overview.domain.Voucher;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.junit.After;
 import org.junit.Test;
 
 import javax.sql.DataSource;
@@ -49,6 +50,13 @@ public class VoucherRepositoryImplTest {
 		this.dataSource = testDb.createDataSource();
 		this.testData = new VoucherTestData();
 		this.repo = new VoucherRepositoryImpl(dataSource);
+	}
+
+	@After
+	public void runAfter() {
+		// TODO RBe: Clear VoucherTestDb
+		// Delete all records after test
+		repo.deleteByFilter(new Object());
 	}
 
 	@Test

@@ -24,13 +24,13 @@ import cz.etn.overview.common.funs.CheckedFunction;
 import cz.etn.overview.common.funs.CollectionFuns;
 import cz.etn.overview.filter.Condition;
 import cz.etn.overview.filter.EqAttributesCondition;
-import cz.etn.overview.sql.filter.SqlCondition;
-import cz.etn.overview.sql.filter.SqlConditionBuilder;
 import cz.etn.overview.mapper.*;
 import cz.etn.overview.repo.AggType;
 import cz.etn.overview.repo.Conditions;
 import cz.etn.overview.repo.Repository;
 import cz.etn.overview.repo.RepositoryException;
+import cz.etn.overview.sql.filter.SqlCondition;
+import cz.etn.overview.sql.filter.SqlConditionBuilder;
 import cz.etn.overview.sql.mapper.JoinEntityMapper;
 import cz.etn.overview.sql.mapper.ResultSetAttributeSource;
 import org.slf4j.Logger;
@@ -231,20 +231,11 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 		if (updatedAttributeValues != null) {
 			parameterValues.addAll(getDbSupportedAttributeValues(updatedAttributeValues));
 		}
-		parameterValues.addAll(appendFilter(sqlBuilder, conditions));
-		return updateAttributeValues(sqlBuilder.toString(), parameterValues);
-	}
-
-	protected List<Order> composeOrderingForPrimaryKey() {
-		List<Order> ordering = new ArrayList<>();
-		List<String> names = getEntityMapper().getPrimaryAttributeNames();
-		if (names != null) {
-			for (String name : names) {
-				String tablePrefix = getEntityMapper().getDataSet() + ".";
-				ordering.add(new Order(name.startsWith(tablePrefix) ? name : tablePrefix + name, false));
-			}
+		List<Object> pValues = appendFilter(sqlBuilder, conditions);
+		if (pValues != null) {
+			parameterValues.addAll(pValues);
 		}
-		return ordering;
+		return updateAttributeValues(sqlBuilder.toString(), parameterValues);
 	}
 
 	protected List<T> findByOverview(Overview<F> overview, List<String> selectedAttributes, String from) {

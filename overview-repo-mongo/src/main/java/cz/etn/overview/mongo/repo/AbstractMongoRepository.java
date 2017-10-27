@@ -268,8 +268,7 @@ public abstract class AbstractMongoRepository<T, K, F> implements Repository<T, 
     }
 
     protected List<Order> composeOrderingForPrimaryKey() {
-        List<String> names = getEntityMapper().getPrimaryAttributeNames();
-        return names.stream().map(name -> new Order(name, false)).collect(Collectors.toList());
+        return getEntityMapper().getPrimaryAttributes().stream().map(attr -> new Order(attr)).collect(Collectors.toList());
     }
 
     // Custom T type is used, this method should be independent on entity type (can be used to load specific attribute type).

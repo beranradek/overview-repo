@@ -6,7 +6,9 @@ import cz.etn.overview.VoucherTestDb;
 import cz.etn.overview.data.CustomerTestData;
 import cz.etn.overview.data.SupplyPointTestData;
 import cz.etn.overview.domain.Customer;
+import cz.etn.overview.domain.CustomerFilter;
 import cz.etn.overview.domain.SupplyPoint;
+import cz.etn.overview.domain.SupplyPointFilter;
 import cz.etn.overview.sql.repo.*;
 import org.junit.Test;
 
@@ -37,27 +39,50 @@ public class JoinWithManyTest {
         CustomerRepository repo = createCustomerRepository();
         SupplyPointRepository spRepo = createSupplyPointRepository();
 
-        // Customers, saved and returned with generated ids
-        List<Customer> customersCreated = repo.createAll(createCustomers(), true);
-        // Supply points, saved and returned with generated ids
-        spRepo.createAll(createSupplyPoints(customersCreated), true);
+        try {
 
-        // Find all customers joined with supply points
-        List<Customer> customersFound = repo.findWithSupplyPoints(Overview.fromOrdering(new Order(CustomerMapper.getInstance().id.getName(), false)));
-        assertEquals(customersCreated.size(), customersFound.size());
-        for (int i = 0; i < customersFound.size(); i++) {
-            Customer customerCreated = customersCreated.get(i);
-            Customer customerFound = customersFound.get(i);
+            // Customers, saved and returned with generated ids
+            List<Customer> customersCreated = repo.createAll(createCustomers(), true);
+            // Supply points, saved and returned with generated ids
+            spRepo.createAll(createSupplyPoints(customersCreated), true);
 
-            assertEquals(customerCreated.getEmail(), customerFound.getEmail());
-            assertEquals(customerCreated.getFirstName(), customerFound.getFirstName());
-            assertEquals(customerCreated.getLastName(), customerFound.getLastName());
-            assertNotNull("Supply points are set", customerFound.getSupplyPoints());
+            // Find all customers joined with supply points
+            List<Customer> customersFound = repo.findWithSupplyPoints(Overview.fromOrdering(new Order(CustomerMapper.getInstance().id)));
+            assertEquals(customersCreated.size(), customersFound.size());
+            for (int i = 0; i < customersFound.size(); i++) {
+                Customer customerCreated = customersCreated.get(i);
+                Customer customerFound = customersFound.get(i);
+
+                assertEquals(customerCreated.getEmail(), customerFound.getEmail());
+                assertEquals(customerCreated.getFirstName(), customerFound.getFirstName());
+                assertEquals(customerCreated.getLastName(), customerFound.getLastName());
+                assertNotNull("Supply points are set", customerFound.getSupplyPoints());
+            }
+
+            assertEquals(2, customersFound.get(0).getSupplyPoints().size());
+            assertEquals(3, customersFound.get(1).getSupplyPoints().size());
+            assertEquals(1, customersFound.get(2).getSupplyPoints().size());
+
+            SupplyPoint a1 = customersFound.get(0).getSupplyPoints().get(0);
+            assertEquals("A1", a1.getCode());
+            SupplyPoint a2 = customersFound.get(0).getSupplyPoints().get(1);
+            assertEquals("A2", a2.getCode());
+
+            SupplyPoint b1 = customersFound.get(1).getSupplyPoints().get(0);
+            assertEquals("B1", b1.getCode());
+            SupplyPoint b2 = customersFound.get(1).getSupplyPoints().get(1);
+            assertEquals("B2", b2.getCode());
+            SupplyPoint b3 = customersFound.get(1).getSupplyPoints().get(2);
+            assertEquals("B3", b3.getCode());
+
+            SupplyPoint c1 = customersFound.get(2).getSupplyPoints().get(0);
+            assertEquals("C1", c1.getCode());
+        } finally {
+            // TODO RBe: Clear VoucherTestDb
+            // Delete all records after test
+            spRepo.deleteByFilter(new SupplyPointFilter());
+            repo.deleteByFilter(new CustomerFilter());
         }
-
-        assertEquals(2, customersFound.get(0).getSupplyPoints().size());
-        assertEquals(3, customersFound.get(1).getSupplyPoints().size());
-        assertEquals(1, customersFound.get(2).getSupplyPoints().size());
     }
 
     protected CustomerRepository createCustomerRepository() {

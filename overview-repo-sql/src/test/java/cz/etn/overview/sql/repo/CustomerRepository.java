@@ -32,4 +32,6 @@ public interface CustomerRepository extends Repository<Customer, Integer, Custom
     List<Customer> findWithVoucherAndSupplyPoints(Overview<CustomerFilter> overview);
 
     List<Customer> findWithSupplyPoints(Overview<CustomerFilter> overview);
+
+    List<Customer> findWithVoucher(Overview<CustomerFilter> overview);
 }

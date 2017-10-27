@@ -16,12 +16,13 @@
  */
 package cz.etn.overview.sql.repo;
 
+import cz.etn.overview.Order;
 import cz.etn.overview.Overview;
 import cz.etn.overview.domain.Customer;
 import cz.etn.overview.domain.CustomerFilter;
 import cz.etn.overview.domain.SupplyPointFilter;
-import cz.etn.overview.mapper.EntityMapper;
 import cz.etn.overview.mapper.Decompose;
+import cz.etn.overview.mapper.EntityMapper;
 
 import javax.sql.DataSource;
 import java.util.List;
@@ -30,14 +31,13 @@ import java.util.List;
  * Default implementation of {@link CustomerRepository}.
  * @author Radek Beran
  */
-public class CustomerRepositoryImpl extends AbstractSqlRepository<Customer, Integer, CustomerFilter> implements CustomerRepository {
-
-    private final DataSource dataSource;
+public class CustomerRepositoryImpl extends SqlRepository<Customer, Integer, CustomerFilter> implements CustomerRepository {
 
     final EntityMapper<Customer, CustomerFilter> joinSupplyPointsMapper = getEntityMapper().leftJoin(getSupplyPointMapper())
         .on(getEntityMapper().id, getSupplyPointMapper().customer_id)
         .composeEntityWithMany((customer, supplyPoints) -> { customer.setSupplyPoints(supplyPoints); return customer; })
         .decomposeFilter(Decompose.filterToIdenticalAnd(new SupplyPointFilter()))
+        .decomposeOrder(Decompose.orderingToIdenticalAnd(new Order(getSupplyPointMapper().code)))
         .build();
 
     final EntityMapper<Customer, CustomerFilter> joinVoucherMapper = getEntityMapper().leftJoin(getVoucherMapper())
@@ -53,7 +53,7 @@ public class CustomerRepositoryImpl extends AbstractSqlRepository<Customer, Inte
         .build();
 
     public CustomerRepositoryImpl(DataSource dataSource) {
-        this.dataSource = dataSource;
+        super(dataSource, CustomerMapper.getInstance());
     }
 
     @Override
@@ -72,8 +72,8 @@ public class CustomerRepositoryImpl extends AbstractSqlRepository<Customer, Inte
     }
 
     @Override
-    protected DataSource getDataSource() {
-        return dataSource;
+    public List<Customer> findWithVoucher(Overview<CustomerFilter> overview) {
+        return findByOverview(overview, joinVoucherMapper);
     }
 
     protected VoucherMapper getVoucherMapper() {

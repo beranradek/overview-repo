@@ -17,7 +17,6 @@
 package cz.etn.overview.sql.repo;
 
 import cz.etn.overview.domain.Voucher;
-import cz.etn.overview.mapper.EntityMapper;
 
 import javax.sql.DataSource;
 
@@ -26,22 +25,9 @@ import javax.sql.DataSource;
  * Default implementation of {@link VoucherRepository}. 
  * @author Radek Beran
  */
-public class VoucherRepositoryImpl extends AbstractSqlRepository<Voucher, String, Object> implements VoucherRepository {
-	
-	private final DataSource dataSource;
+public class VoucherRepositoryImpl extends SqlRepository<Voucher, String, Object> implements VoucherRepository {
 
 	public VoucherRepositoryImpl(DataSource dataSource) {
-		this.dataSource = dataSource;
+		super(dataSource, VoucherMapper.getInstance());
 	}
-
-	@Override
-	public EntityMapper<Voucher, Object> getEntityMapper() {
-		return VoucherMapper.getInstance();
-	}
-
-	@Override
-	protected DataSource getDataSource() {
-		return dataSource;
-	}
-
 }
