@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.16] - 2017-11-02
+- Convenience methods for creating Overview from ordering.
+- createAll method in repository.
+- Builder for joins and refactored joins.
+
 ## [1.0.15] - 2017-08-06
 - Gradle multiproject build with sql and mongo submodules.
 - More general filter conditions.
