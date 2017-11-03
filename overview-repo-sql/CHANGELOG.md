@@ -1,7 +1,10 @@
 # Changelog
 
-## [1.0.20] - ?
+## [1.0.21] - ?
 - What is new?
+
+## [1.0.20] - 2017-11-03
+- Convenience methods in Conditions for gt, gte, lt, lte
 
 ## [1.0.19] - 2017-11-03
 - gt, gte, lt, lte conditions fixed

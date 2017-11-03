@@ -67,6 +67,46 @@ public class Conditions {
 		return new InCondition(attribute, values);
 	}
 
-	// TODO RBe: Conditions for ne, lte, gte, lt, gt
+	/**
+	 * Less than condition.
+	 * @param attribute
+	 * @param value
+	 * @return
+	 */
+	public static <T, A> LtCondition<T, A> lt(Attribute<T, A> attribute, A value) {
+		return new LtCondition(attribute, value);
+	}
+
+	/**
+	 * Less than or equal condition.
+	 * @param attribute
+	 * @param value
+	 * @return
+	 */
+	public static <T, A> LteCondition<T, A> lte(Attribute<T, A> attribute, A value) {
+		return new LteCondition(attribute, value);
+	}
+
+	/**
+	 * Greater than condition.
+	 * @param attribute
+	 * @param value
+	 * @return
+	 */
+	public static <T, A> GtCondition<T, A> gt(Attribute<T, A> attribute, A value) {
+		return new GtCondition(attribute, value);
+	}
+
+	/**
+	 * Greater than or equal condition.
+	 * @param attribute
+	 * @param value
+	 * @return
+	 */
+	public static <T, A> GteCondition<T, A> gte(Attribute<T, A> attribute, A value) {
+		return new GteCondition(attribute, value);
+	}
+
+	// TODO RBe: Conditions for ne, or, and
 
 }
