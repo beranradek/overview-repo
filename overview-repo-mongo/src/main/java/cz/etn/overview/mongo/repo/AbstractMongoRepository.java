@@ -347,7 +347,7 @@ public abstract class AbstractMongoRepository<T, K, F> implements Repository<T, 
     }
 
     protected MongoCollection<Document> getCollection() {
-        return getDatabase().getCollection(getEntityMapper().getDataSet());
+        return getDatabase().getCollection(getEntityMapper().getTableName());
     }
 
     protected Document updateDocWithEntity(Document doc, T entity) {

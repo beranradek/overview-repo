@@ -54,7 +54,7 @@ public class CustomerMapper extends DynamicEntityMapper<Customer, CustomerFilter
 	public final Attribute<Customer, String> email_text;
 	public final Attribute<Customer, String> import_file_name;
 
-	private CustomerMapper() {
+	protected CustomerMapper() {
 		id = add(Attr.ofInteger(cls, "id").primary().get(e -> e.getId()).set((e, a) -> e.setId(a)));
 		creation_time = add(Attr.ofInstant(cls, "creation_time").get(e -> e.getCreationTime()).set((e, a) -> e.setCreationTime(a)));
 		email = add(Attr.ofString(cls, "email").get(e -> e.getEmail()).set((e, a) -> e.setEmail(a)));
@@ -90,7 +90,7 @@ public class CustomerMapper extends DynamicEntityMapper<Customer, CustomerFilter
 	}
 
 	@Override
-	public String getDataSet() {
+	public String getTableName() {
 		return DB_TABLE_NAME;
 	}
 

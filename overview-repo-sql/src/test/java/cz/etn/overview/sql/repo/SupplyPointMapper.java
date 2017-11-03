@@ -43,7 +43,7 @@ public class SupplyPointMapper extends DynamicEntityMapper<SupplyPoint, SupplyPo
 	public final Attribute<SupplyPoint, String> code;
 	public final Attribute<SupplyPoint, Integer> customer_id;
 
-	private SupplyPointMapper() {
+	protected SupplyPointMapper() {
 		id = add(Attr.ofInteger(cls, "id").primary().get(e -> e.getId()).set((e, a) -> e.setId(a)));
 		code = add(Attr.ofString(cls, "code").get(e -> e.getCode()).set((e, a) -> e.setCode(a)));
 		add(Attr.ofString(cls, "address_street").get(e -> e.getAddress() != null ? e.getAddress().getStreet() : null).set((e, a) -> {
@@ -84,7 +84,7 @@ public class SupplyPointMapper extends DynamicEntityMapper<SupplyPoint, SupplyPo
 		return INSTANCE;
 	}
 	@Override
-	public String getDataSet() {
+	public String getTableName() {
 		return DB_TABLE_NAME;
 	}
 

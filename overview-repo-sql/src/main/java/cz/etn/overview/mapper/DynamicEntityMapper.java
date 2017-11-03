@@ -70,6 +70,6 @@ public abstract class DynamicEntityMapper<T, F> implements EntityMapper<T, F> {
     }
 
     protected String getNamePrefix() {
-        return getDataSet();
+        return getTableName();
     }
 }

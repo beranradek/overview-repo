@@ -38,7 +38,35 @@ public interface EntityMapper<T, F> {
 	 * Name of database table/collection that contains entities.
 	 * @return
 	 */
-	String getDataSet();
+	String getTableName();
+
+	/**
+	 * Name of database that contains entities. Should be specified only if database name
+	 * should be used in the queries (prepended before the table name).
+	 * @return
+	 */
+	default String getDbName() {
+		return null;
+	}
+
+	/**
+	 * Name of database table/collection that contains entities. Contains also prepended DB name, if specified.
+	 * @return
+	 */
+	default String getTableNameWithDb() {
+		String name = null;
+		String dbName = getDbName();
+		if (dbName == null) {
+			name = getTableName();
+		} else {
+			if (dbName.endsWith(".")) {
+				name = dbName + getTableName();
+			} else {
+				name = dbName + "." + getTableName();
+			}
+		}
+		return name;
+	}
 
 	/**
 	 * Creates new instance of entity.
@@ -113,7 +141,7 @@ public interface EntityMapper<T, F> {
 		List<Pair<Attribute<T, ?>, Object>> attributesToValues = new ArrayList<>();
 		List<Attribute<T, ?>> pkAttributes = getPrimaryAttributes();
 		if (pkAttributes.isEmpty()) {
-			throw new IllegalStateException("Please define some primary attributes of entity (data set " + getDataSet() + ")");
+			throw new IllegalStateException("Please define some primary attributes of entity (data set " + getTableName() + ")");
 		} else if (pkAttributes.size() == 1) {
 			attributesToValues.add(new Pair<>(pkAttributes.get(0), key));
 		} else {
@@ -127,7 +155,7 @@ public interface EntityMapper<T, F> {
 		List<Pair<Attribute<T, ?>, Object>> attributesToValues = new ArrayList<>();
 		List<Attribute<T, ?>> pkAttributes = getPrimaryAttributes();
 		if (pkAttributes.isEmpty()) {
-			throw new IllegalStateException("Please define some primary attributes of entity (data set " + getDataSet() + ")");
+			throw new IllegalStateException("Please define some primary attributes of entity (data set " + getTableName() + ")");
 		} else {
 			List<Object> pkValues = getPrimaryAttributeValues(entity);
 			for (int i = 0; i < pkAttributes.size(); i++) {
@@ -142,7 +170,7 @@ public interface EntityMapper<T, F> {
 	 * @return
 	 */
 	default String getAliasPrefix() {
-		return getDataSet() + "_";
+		return getTableName() + "_";
 	}
 
 	default List<Attribute<T, ?>> getPrimaryAttributes() {

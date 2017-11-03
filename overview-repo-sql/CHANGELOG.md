@@ -1,7 +1,11 @@
 # Changelog
 
-## [1.0.17] - ?
+## [1.0.18] - ?
 - What is new?
+
+## [1.0.17] - 2017-11-03
+- Renamed getDataSet -> getTableName
+- Support for using database name in queries: getDbName and getTableNameWithDb in EntityMapper
 
 ## [1.0.16] - 2017-11-02
 - Convenience methods for creating Overview from ordering.

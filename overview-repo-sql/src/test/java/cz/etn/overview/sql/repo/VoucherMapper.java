@@ -54,7 +54,7 @@ public class VoucherMapper extends DynamicEntityMapper<Voucher, Object> {
 	public final Attribute<Voucher, Instant> invoice_time;
 	public final Attribute<Voucher, String> invoice_note;
 
-	private VoucherMapper() {
+	protected VoucherMapper() {
 		code = add(Attr.ofString(cls, "code").primary().get(e -> e.getCode()).set((e, a) -> e.setCode(a)).maxLength(20));
 		creation_time = add(Attr.ofInstant(cls, "creation_time").get(e -> e.getCreationTime()).set((e, a) -> e.setCreationTime(a)));
 		discount_price = add(Attr.ofBigDecimal(cls, "discount_price").get(e -> e.getDiscountPrice()).set((e, a) -> e.setDiscountPrice(a)).maxLength(10));
@@ -76,7 +76,7 @@ public class VoucherMapper extends DynamicEntityMapper<Voucher, Object> {
 	}
 
 	@Override
-	public String getDataSet() {
+	public String getTableName() {
 		return DB_TABLE_NAME;
 	}
 	

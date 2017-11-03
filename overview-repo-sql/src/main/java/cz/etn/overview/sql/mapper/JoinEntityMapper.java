@@ -102,8 +102,8 @@ public class JoinEntityMapper<T, F, U, G, V, H, O> implements EntityMapper<V, H>
     }
 
     @Override
-    public String getDataSet() {
-        StringBuilder sqlBuilder = new StringBuilder(firstMapper.getDataSet() + " " + joinType.name() + " JOIN " + secondMapper.getDataSet());
+    public String getTableName() {
+        StringBuilder sqlBuilder = new StringBuilder(firstMapper.getTableNameWithDb() + " " + joinType.name() + " JOIN " + secondMapper.getTableName());
         // TODO RBe: Do not duplicate this condition transformation logic with repository
         List<Condition> onConditions = getOnConditions();
         if (onConditions != null && !onConditions.isEmpty()) {
@@ -147,7 +147,7 @@ public class JoinEntityMapper<T, F, U, G, V, H, O> implements EntityMapper<V, H>
 
     @Override
     public String getAliasPrefix() {
-        return firstMapper.getDataSet() + "_" + secondMapper.getDataSet() + "_";
+        return firstMapper.getTableName() + "_" + secondMapper.getTableName() + "_";
     }
 
     @Override

@@ -76,7 +76,7 @@ public class MongoVoucherMapper extends DynamicEntityMapper<Voucher, Object> {
     }
 
     @Override
-    public String getDataSet() {
+    public String getTableName() {
         return COLLECTION_NAME;
     }
 

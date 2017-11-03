@@ -59,7 +59,7 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 	@Override
 	public T create(T entity, boolean autogenerateKey) {
 		Objects.requireNonNull(entity, "Entity should be specified");
-		String tableName = getEntityMapper().getDataSet();
+		String tableName = getEntityMapper().getTableNameWithDb();
 		String attributeNamesCommaSeparated = CollectionFuns.join(getEntityMapper().getAttributeNames(), ",");
 		String questionMarks = getPlaceholdersCommaSeparated(getEntityMapper().getAttributeNames().size());
 		List<Object> attributeValues = getEntityMapper().getAttributeValues(entity);
@@ -80,7 +80,7 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 		Objects.requireNonNull(entity, "Entity should be specified");
 		String attributeNamesEqToPlaceholders = getAttributeNamesEqToPlaceholdersCommaSeparated(getEntityMapper().getAttributeNames());
 		int updatedCount = updateByFilterConditions(
-			"UPDATE " + getEntityMapper().getDataSet() + " SET " + attributeNamesEqToPlaceholders,
+			"UPDATE " + getEntityMapper().getTableNameWithDb() + " SET " + attributeNamesEqToPlaceholders,
 			getEntityMapper().composeFilterConditionsForPrimaryKeyOfEntity(entity),
 			getEntityMapper().getAttributeValues(entity));
 		if (updatedCount == 1) {
@@ -96,7 +96,7 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 		String attributeNamesEqToPlaceholders = getAttributeNamesEqToPlaceholdersCommaSeparated(attributeNames);
 		List<Object> attributeValues = attributesWithValues.stream().map(p -> p.getSecond()).collect(Collectors.toList());
 		return updateByFilterConditions(
-			"UPDATE " + getEntityMapper().getDataSet() + " SET " + attributeNamesEqToPlaceholders,
+			"UPDATE " + getEntityMapper().getTableNameWithDb() + " SET " + attributeNamesEqToPlaceholders,
 			getEntityMapper().composeFilterConditionsForPrimaryKey(id),
 			attributeValues);
 	}
@@ -104,13 +104,13 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 	@Override
 	public boolean delete(K id) {
 		Objects.requireNonNull(id, "id should be specified");
-		return updateByFilterConditions("DELETE FROM " + getEntityMapper().getDataSet(), getEntityMapper().composeFilterConditionsForPrimaryKey(id), CollectionFuns.EMPTY_OBJECT_LIST) == 1;
+		return updateByFilterConditions("DELETE FROM " + getEntityMapper().getTableNameWithDb(), getEntityMapper().composeFilterConditionsForPrimaryKey(id), CollectionFuns.EMPTY_OBJECT_LIST) == 1;
 	}
 
 	@Override
 	public int deleteByFilter(F filter) {
 		Objects.requireNonNull(filter, "filter should be specified");
-		return updateByFilterConditions("DELETE FROM " + getEntityMapper().getDataSet(), getEntityMapper().composeFilterConditions(filter), CollectionFuns.EMPTY_OBJECT_LIST);
+		return updateByFilterConditions("DELETE FROM " + getEntityMapper().getTableNameWithDb(), getEntityMapper().composeFilterConditions(filter), CollectionFuns.EMPTY_OBJECT_LIST);
 	}
 
 	/**
@@ -134,7 +134,7 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 		String aggAttributeAlias = attrName + "_agg";
 		List<R> results = queryWithOverview(
 			aggFunction(aggType, attrName) + " AS " + aggAttributeAlias,
-			entityMapper.getDataSet(),
+			entityMapper.getTableNameWithDb(),
 			filter != null ? entityMapper.composeFilterConditions(filter) : new ArrayList<>(),
 			null,
 			null,
@@ -171,7 +171,7 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 			objects = findJoinedWithMany(overview, (JoinEntityMapper)entityMappper);
 		} else {
 			List<String> attributeNames = entityMappper.getAttributeNames();
-			String from = entityMappper.getDataSet();
+			String from = entityMappper.getTableNameWithDb();
 			List<Condition> filterConditions = overview.getFilter() != null ? entityMappper.composeFilterConditions(overview.getFilter()) : new ArrayList<>();
 			objects = queryWithOverview(attributeNames, from, filterConditions, overview.getOrder(), overview.getPagination(), as -> entityMappper.buildEntity(as));
 		}
@@ -256,7 +256,7 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 	protected <T, F> List<T> findByFilterConditions(List<Condition> filterConditions, List<Order> ordering, EntityMapper<T, F> entityMapper) {
 		return queryWithOverview(
 			entityMapper.getAttributeNames(),
-			entityMapper.getDataSet(),
+			entityMapper.getTableNameWithDb(),
 			filterConditions,
 			ordering,
 			null,
