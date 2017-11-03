@@ -27,23 +27,23 @@ public class SqlConditionBuilder {
             if (c.getValue() == null) {
                 sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + " IS NULL", CollectionFuns.EMPTY_OBJECT_LIST);
             } else {
-                sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + "=?", CollectionFuns.singleValueList(valueToDbSupportedValue.apply(c.getValue())));
+                sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + " = ?", CollectionFuns.singleValueList(valueToDbSupportedValue.apply(c.getValue())));
             }
         } else if (condition instanceof LtCondition) {
             LtCondition c = (LtCondition)condition;
-            sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + " < ", CollectionFuns.singleValueList(valueToDbSupportedValue.apply(c.getValue())));
+            sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + " < ?", CollectionFuns.singleValueList(valueToDbSupportedValue.apply(c.getValue())));
         } else if (condition instanceof LteCondition) {
             LteCondition c = (LteCondition)condition;
-            sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + " <= ", CollectionFuns.singleValueList(valueToDbSupportedValue.apply(c.getValue())));
+            sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + " <= ?", CollectionFuns.singleValueList(valueToDbSupportedValue.apply(c.getValue())));
         } else if (condition instanceof GtCondition) {
             GtCondition c = (GtCondition)condition;
-            sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + " > ", CollectionFuns.singleValueList(valueToDbSupportedValue.apply(c.getValue())));
+            sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + " > ?", CollectionFuns.singleValueList(valueToDbSupportedValue.apply(c.getValue())));
         } else if (condition instanceof GteCondition) {
             GteCondition c = (GteCondition)condition;
-            sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + " >= ", CollectionFuns.singleValueList(valueToDbSupportedValue.apply(c.getValue())));
+            sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + " >= ?", CollectionFuns.singleValueList(valueToDbSupportedValue.apply(c.getValue())));
         } else if (condition instanceof EqAttributesCondition) {
             EqAttributesCondition c = (EqAttributesCondition)condition;
-            sqlCondition = new SqlCondition(c.getFirstAttribute().getNameFull() + "=" + c.getSecondAttribute().getNameFull(), CollectionFuns.EMPTY_OBJECT_LIST);
+            sqlCondition = new SqlCondition(c.getFirstAttribute().getNameFull() + " = " + c.getSecondAttribute().getNameFull(), CollectionFuns.EMPTY_OBJECT_LIST);
         } else if (condition instanceof ContainsCondition) {
             ContainsCondition c = (ContainsCondition)condition;
             List<Object> values = new ArrayList<>();
@@ -60,7 +60,7 @@ public class SqlConditionBuilder {
                 sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + " IN (" + commaSeparatedPlaceholders + ")", valuesForPlaceholders);
             } else {
                 // empty values for IN, value of attribute is certainly not among empty values
-                sqlCondition = new SqlCondition("1=0", CollectionFuns.EMPTY_OBJECT_LIST);
+                sqlCondition = new SqlCondition("1 = 0", CollectionFuns.EMPTY_OBJECT_LIST);
             }
 
         } else {

@@ -1,10 +1,13 @@
 # Changelog
 
-## [1.0.19] - ?
+## [1.0.20] - ?
 - What is new?
 
+## [1.0.19] - 2017-11-03
+- gt, gte, lt, lte conditions fixed
+
 ## [1.0.18] - 2017-11-03
-- gt, gte, lt, lte conditions
+- gt, gte, lt, lte conditions (not working)
 
 ## [1.0.17] - 2017-11-03
 - Renamed getDataSet -> getTableName
