@@ -160,6 +160,38 @@ public class Attr<E, A> implements Attribute<E, A> {
             return this;
         }
 
+        public Class<E> getEntityClass() {
+            return entityClass;
+        }
+
+        public Class<A> getAttributeClass() {
+            return attributeClass;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Function<E, A> getFromEntity() {
+            return fromEntity;
+        }
+
+        public BiFunction<E, A, E> getToEntity() {
+            return toEntity;
+        }
+
+        public String getNamePrefix() {
+            return namePrefix;
+        }
+
+        public boolean isPrimary() {
+            return primary;
+        }
+
+        public Optional<Integer> getMaxLength() {
+            return maxLength;
+        }
+
         public Attr build() {
             Attr attr = new Attr(this);
             // Possible validations here (checks on fields)...
