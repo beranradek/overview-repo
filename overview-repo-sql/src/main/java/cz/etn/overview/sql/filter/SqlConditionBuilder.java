@@ -29,6 +29,18 @@ public class SqlConditionBuilder {
             } else {
                 sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + "=?", CollectionFuns.singleValueList(valueToDbSupportedValue.apply(c.getValue())));
             }
+        } else if (condition instanceof LtCondition) {
+            LtCondition c = (LtCondition)condition;
+            sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + " < ", CollectionFuns.singleValueList(valueToDbSupportedValue.apply(c.getValue())));
+        } else if (condition instanceof LteCondition) {
+            LteCondition c = (LteCondition)condition;
+            sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + " <= ", CollectionFuns.singleValueList(valueToDbSupportedValue.apply(c.getValue())));
+        } else if (condition instanceof GtCondition) {
+            GtCondition c = (GtCondition)condition;
+            sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + " > ", CollectionFuns.singleValueList(valueToDbSupportedValue.apply(c.getValue())));
+        } else if (condition instanceof GteCondition) {
+            GteCondition c = (GteCondition)condition;
+            sqlCondition = new SqlCondition(c.getAttribute().getNameFull() + " >= ", CollectionFuns.singleValueList(valueToDbSupportedValue.apply(c.getValue())));
         } else if (condition instanceof EqAttributesCondition) {
             EqAttributesCondition c = (EqAttributesCondition)condition;
             sqlCondition = new SqlCondition(c.getFirstAttribute().getNameFull() + "=" + c.getSecondAttribute().getNameFull(), CollectionFuns.EMPTY_OBJECT_LIST);

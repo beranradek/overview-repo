@@ -1,7 +1,10 @@
 # Changelog
 
-## [1.0.18] - ?
+## [1.0.19] - ?
 - What is new?
+
+## [1.0.18] - 2017-11-03
+- gt, gte, lt, lte conditions
 
 ## [1.0.17] - 2017-11-03
 - Renamed getDataSet -> getTableName

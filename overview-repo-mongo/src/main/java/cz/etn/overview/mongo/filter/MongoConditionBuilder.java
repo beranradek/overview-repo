@@ -18,7 +18,9 @@ package cz.etn.overview.mongo.filter;
 
 import com.mongodb.Function;
 import com.mongodb.client.model.Filters;
+import cz.etn.overview.common.funs.CollectionFuns;
 import cz.etn.overview.filter.*;
+import cz.etn.overview.sql.filter.SqlCondition;
 
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -36,6 +38,18 @@ public class MongoConditionBuilder {
         } else if (condition instanceof EqCondition) {
             EqCondition c = (EqCondition)condition;
             mongoCondition = new MongoCondition(Filters.eq(c.getAttribute().getName(), valueToDbSupportedValue.apply(c.getValue())));
+        } else if (condition instanceof LtCondition) {
+            LtCondition c = (LtCondition)condition;
+            mongoCondition = new MongoCondition(Filters.lt(c.getAttribute().getName(), valueToDbSupportedValue.apply(c.getValue())));
+        } else if (condition instanceof LteCondition) {
+            LteCondition c = (LteCondition)condition;
+            mongoCondition = new MongoCondition(Filters.lte(c.getAttribute().getName(), valueToDbSupportedValue.apply(c.getValue())));
+        } else if (condition instanceof GtCondition) {
+            GtCondition c = (GtCondition)condition;
+            mongoCondition = new MongoCondition(Filters.gt(c.getAttribute().getName(), valueToDbSupportedValue.apply(c.getValue())));
+        } else if (condition instanceof GteCondition) {
+            GteCondition c = (GteCondition)condition;
+            mongoCondition = new MongoCondition(Filters.gte(c.getAttribute().getName(), valueToDbSupportedValue.apply(c.getValue())));
         } else if (condition instanceof EqAttributesCondition) {
             EqAttributesCondition c = (EqAttributesCondition)condition;
             // This isn't very efficient since $where doesn't take advantage of indexing. An alternative would be to
