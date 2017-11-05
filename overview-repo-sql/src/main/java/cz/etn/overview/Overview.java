@@ -33,12 +33,15 @@ public class Overview<F> implements Serializable {
     private final F filter;
     
     /** Order specification. */
-    private final List<Order> order;
+    private final List<Order> ordering;
 
     private final Pagination pagination;
+
+    /** Grouping specification. */
+    private final List<Group> grouping;
     
     public static <F> Overview<F> empty() {
-    	return new Overview<>(null, null, null);
+    	return new Overview<>(null, null, null, null);
     }
 
     public static <F> Overview<F> fromOrdering(Order order) {
@@ -49,10 +52,15 @@ public class Overview<F> implements Serializable {
         return Overview.<F>empty().withOrdering(ordering);
     }
 
-    public Overview(F filter, List<Order> order, Pagination pagination) {
+    public Overview(F filter, List<Order> ordering, Pagination pagination, List<Group> grouping) {
         this.filter = filter;
-        this.order = order;
+        this.ordering = ordering;
         this.pagination = pagination;
+        this.grouping = grouping;
+    }
+
+    public Overview(F filter, List<Order> ordering, Pagination pagination) {
+        this(filter, ordering, pagination, null);
     }
     
     /**
@@ -61,7 +69,7 @@ public class Overview<F> implements Serializable {
      * @return
      */
     public Overview<F> withFilter(F f) {
-    	return new Overview<>(f, this.order, this.pagination);
+    	return new Overview<>(f, this.ordering, this.pagination, this.grouping);
     }
     
     /**
@@ -70,16 +78,34 @@ public class Overview<F> implements Serializable {
      * @return
      */
     public Overview<F> withOrdering(List<Order> ordering) {
-    	return new Overview<>(this.filter, ordering, this.pagination);
+    	return new Overview<>(this.filter, ordering, this.pagination, this.grouping);
     }
 
     /**
-     * Returns new instance/copy of overview with given order set.
+     * Returns new instance/copy of overview with given ordering set.
      * @param order
      * @return
      */
     public Overview<F> withOrdering(Order order) {
         return withOrdering(CollectionFuns.list(order));
+    }
+
+    /**
+     * Returns new instance/copy of overview with given grouping set.
+     * @param grouping
+     * @return
+     */
+    public Overview<F> withGrouping(List<Group> grouping) {
+        return new Overview<>(this.filter, this.ordering, this.pagination, grouping);
+    }
+
+    /**
+     * Returns new instance/copy of overview with given grouping set.
+     * @param group
+     * @return
+     */
+    public Overview<F> withGrouping(Group group) {
+        return withGrouping(CollectionFuns.list(group));
     }
     
     /**
@@ -87,7 +113,7 @@ public class Overview<F> implements Serializable {
      * @return
      */
     public Overview<F> withEmptyPagination() {
-    	return new Overview<>(this.filter, this.order, null);
+    	return new Overview<>(this.filter, this.ordering, null, this.grouping);
     }
     
     /**
@@ -96,7 +122,7 @@ public class Overview<F> implements Serializable {
      * @return
      */
     public Overview<F> withPagination(Pagination pag) {
-    	return new Overview<>(this.filter, this.order, pag);
+    	return new Overview<>(this.filter, this.ordering, pag, this.grouping);
     }
     
     /**
@@ -104,7 +130,15 @@ public class Overview<F> implements Serializable {
      * @return
      */
     public Overview<F> withEmptyOrdering() {
-    	return new Overview<>(this.filter, new ArrayList<>(), this.pagination);
+    	return new Overview<>(this.filter, new ArrayList<>(), this.pagination, this.grouping);
+    }
+
+    /**
+     * Returns new instance/copy of overview with empty grouping set.
+     * @return
+     */
+    public Overview<F> withEmptyGrouping() {
+        return new Overview<>(this.filter, this.ordering, this.pagination, new ArrayList<>());
     }
 
     /**
@@ -119,8 +153,8 @@ public class Overview<F> implements Serializable {
      * Ordering settings.
      * @return
      */
-    public List<Order> getOrder() {
-		return order;
+    public List<Order> getOrdering() {
+		return ordering;
 	}
     
     /**
@@ -131,9 +165,17 @@ public class Overview<F> implements Serializable {
 		return pagination;
 	}
 
-	@Override
+    /**
+     * Grouping settings.
+     * @return
+     */
+    public List<Group> getGrouping() {
+        return grouping;
+    }
+
+    @Override
 	public String toString() {
-		return "Overview [filter=" + filter + ", order=" + order + ", pagination=" + pagination + "]";
+		return "Overview [filter=" + filter + ", ordering=[" + CollectionFuns.mkString(ordering, item -> item.toString(), ", ") + "], pagination=" + pagination + ", grouping=[" + CollectionFuns.mkString(grouping, item -> item.toString(), ", ") + "]]";
 	}    
     
 }

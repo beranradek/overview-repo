@@ -16,6 +16,7 @@
  */
 package cz.etn.overview.sql.repo;
 
+import cz.etn.overview.Group;
 import cz.etn.overview.Order;
 import cz.etn.overview.Overview;
 import cz.etn.overview.Pagination;
@@ -104,13 +105,15 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 	@Override
 	public boolean delete(K id) {
 		Objects.requireNonNull(id, "id should be specified");
-		return updateByFilterConditions("DELETE FROM " + getEntityMapper().getTableNameWithDb(), getEntityMapper().composeFilterConditionsForPrimaryKey(id), CollectionFuns.EMPTY_OBJECT_LIST) == 1;
+		return updateByFilterConditions("DELETE FROM " + getEntityMapper().getTableNameWithDb(),
+			getEntityMapper().composeFilterConditionsForPrimaryKey(id), CollectionFuns.EMPTY_OBJECT_LIST) == 1;
 	}
 
 	@Override
 	public int deleteByFilter(F filter) {
 		Objects.requireNonNull(filter, "filter should be specified");
-		return updateByFilterConditions("DELETE FROM " + getEntityMapper().getTableNameWithDb(), getEntityMapper().composeFilterConditions(filter), CollectionFuns.EMPTY_OBJECT_LIST);
+		return updateByFilterConditions("DELETE FROM " + getEntityMapper().getTableNameWithDb(),
+			getEntityMapper().composeFilterConditions(filter), CollectionFuns.EMPTY_OBJECT_LIST);
 	}
 
 	/**
@@ -119,12 +122,13 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 	 * @param resultClass
 	 * @param attrName
 	 * @param filter
+	 * @param grouping
 	 * @param entityMapper
 	 * @param <R>
 	 * @return
 	 */
 	@Override
-	public <R, T, F> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter, EntityMapper<T, F> entityMapper) {
+	public <R, T, F> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter, List<Group> grouping, EntityMapper<T, F> entityMapper) {
 		// TODO RBe: Count/aggreation with JoinWithManyEntityMapper
 
 		Objects.requireNonNull(aggType, "aggregation type should be specified");
@@ -135,9 +139,11 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 		List<R> results = queryWithOverview(
 			aggFunction(aggType, attrName) + " AS " + aggAttributeAlias,
 			entityMapper.getTableNameWithDb(),
-			filter != null ? entityMapper.composeFilterConditions(filter) : new ArrayList<>(),
+			filter != null ? entityMapper.composeFilterConditions(filter) : new ArrayList<Condition>(),
 			null,
 			null,
+			grouping,
+			entityMapper,
 			as -> as.get(resultClass, aggAttributeAlias));
 		return results != null && !results.isEmpty() ? results.get(0) : null;
 	}
@@ -148,32 +154,33 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
      * @param resultClass
      * @param attrName
      * @param filter
+	 * @param grouping
      * @param <R>
      * @return
      */
     @Override
-    public <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter) {
-        return aggByFilter(aggType, resultClass, attrName, filter, getEntityMapper());
+    public <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter, List<Group> grouping) {
+        return aggByFilter(aggType, resultClass, attrName, filter, grouping, getEntityMapper());
     }
 
 	@Override
 	public <T, K, F>  Optional<T> findById(K id, EntityMapper<T, F> entityMapper) {
-		return CollectionFuns.headOpt(findByFilterConditions(entityMapper.composeFilterConditionsForPrimaryKey(id), null, entityMapper));
+		return CollectionFuns.headOpt(findByFilterConditions(entityMapper.composeFilterConditionsForPrimaryKey(id), null, null, entityMapper));
 	}
 
 	@Override
-	public <T, F> List<T> findByOverview(final Overview<F> overview, EntityMapper<T, F> entityMappper) {
+	public <T, F> List<T> findByOverview(final Overview<F> overview, EntityMapper<T, F> entityMapper) {
 		Objects.requireNonNull(overview, "overview should be specified");
-		Objects.requireNonNull(entityMappper, "entityMappper should be specified");
+		Objects.requireNonNull(entityMapper, "entityMapper should be specified");
 		List<T> objects;
     	// TODO RBe: Perform JOIN for JoinWithManyEntityMapper on database level if pagination is not set
-		if (isJoinWithManyMapper(entityMappper)) {
-			objects = findJoinedWithMany(overview, (JoinEntityMapper)entityMappper);
+		if (isJoinWithManyMapper(entityMapper)) {
+			objects = findJoinedWithMany(overview, (JoinEntityMapper)entityMapper);
 		} else {
-			List<String> attributeNames = entityMappper.getAttributeNames();
-			String from = entityMappper.getTableNameWithDb();
-			List<Condition> filterConditions = overview.getFilter() != null ? entityMappper.composeFilterConditions(overview.getFilter()) : new ArrayList<>();
-			objects = queryWithOverview(attributeNames, from, filterConditions, overview.getOrder(), overview.getPagination(), as -> entityMappper.buildEntity(as));
+			List<String> attributeNames = entityMapper.getAttributeNames();
+			String from = entityMapper.getTableNameWithDb();
+			List<Condition> filterConditions = overview.getFilter() != null ? entityMapper.composeFilterConditions(overview.getFilter()) : new ArrayList<>();
+			objects = queryWithOverview(attributeNames, from, filterConditions, overview.getOrdering(), overview.getPagination(), overview.getGrouping(), entityMapper, as -> entityMapper.buildEntity(as));
 		}
 		return objects;
 	}
@@ -192,12 +199,17 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 		G secondEntityFilter = decomposedFilter.getSecond();
 
 		// Ordering for first and second joined entity types
-		Pair<List<Order>, List<Order>> orders = joinedEntityMapper.getDecomposeOrder().apply(overview.getOrder());
-		List<Order> firstEntityOrder = orders.getFirst();
-		List<Order> secondEntityOrder = orders.getSecond();
+		Pair<List<Order>, List<Order>> orders = joinedEntityMapper.getDecomposeOrdering().apply(overview.getOrdering());
+		List<Order> firstEntityOrdering = orders.getFirst();
+		List<Order> secondEntityOrdering = orders.getSecond();
+
+		// Grouping for first and second joined entity types
+		Pair<List<Group>, List<Group>> grouping = joinedEntityMapper.getDecomposeGrouping().apply(overview.getGrouping());
+		List<Group> firstEntityGrouping = grouping.getFirst();
+		List<Group> secondEntityGrouping = grouping.getSecond();
 
     	// First load all entities on the left side (entities of first type)
-		Overview<F> firstEntityOverview = new Overview<>(firstEntityFilter, firstEntityOrder, overview.getPagination());
+		Overview<F> firstEntityOverview = new Overview<>(firstEntityFilter, firstEntityOrdering, overview.getPagination(), firstEntityGrouping);
 		List<T> firstEntities = findByOverview(firstEntityOverview, joinedEntityMapper.getFirstMapper());
 
 		// Lazy loading of related right-side entities using one additional query (if they would be joined with left entities in one query, it could break pagination limit)
@@ -206,12 +218,12 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 		Attribute<U, O> secondEntityJoinAttr = eqAttrCondition.getSecondAttribute();
 		// Get all identifiers of first (=left) entities
 		List<O> firstEntitiesIds = firstEntities.stream().map(e -> firstEntityJoinAttr.getValue(e)).collect(Collectors.toList());
-		// Find second entities by these identifiers of first entities, with applying conditions from the second filter and ordering.
+		// Find second entities by these identifiers of first entities, with applying conditions from the second filter, ordering and grouping.
 		// Pagination is not applied for the entities on the right (many) side.
 		List<Condition> secondEntitiesConditions = new ArrayList<>();
 		secondEntitiesConditions.add(Conditions.in(secondEntityJoinAttr, firstEntitiesIds));
 		secondEntitiesConditions.addAll(joinedEntityMapper.getSecondMapper().composeFilterConditions(secondEntityFilter));
-		List<U> secondEntities = findByFilterConditions(secondEntitiesConditions, secondEntityOrder, joinedEntityMapper.getSecondMapper());
+		List<U> secondEntities = findByFilterConditions(secondEntitiesConditions, secondEntityOrdering, secondEntityGrouping, joinedEntityMapper.getSecondMapper());
 
 		// Attach second (many-side) entities to first entities
 		List<V> firstEntitiesWithJoinedSecondEntities = new ArrayList<>();
@@ -238,28 +250,28 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 		return updateAttributeValues(sqlBuilder.toString(), parameterValues);
 	}
 
-	protected List<T> findByOverview(Overview<F> overview, List<String> selectedAttributes, String from) {
+	protected <T, F> List<T> findByOverview(Overview<F> overview, List<String> selectedAttributes, String from, EntityMapper<T, F> entityMapper) {
 		return queryWithOverview(
 			selectedAttributes,
 			from,
-			overview.getFilter() != null ? getEntityMapper().composeFilterConditions(overview.getFilter()) : null,
-			overview.getOrder(),
+			overview.getFilter() != null ? entityMapper.composeFilterConditions(overview.getFilter()) : null,
+			overview.getOrdering(),
 			overview.getPagination(),
-			as -> getEntityMapper().buildEntity(as)
+			overview.getGrouping(),
+			entityMapper,
+			as -> entityMapper.buildEntity(as)
 		);
 	}
 
-	protected List<T> findByFilterConditions(List<Condition> filterConditions, List<Order> ordering) {
-		return findByFilterConditions(filterConditions, ordering, getEntityMapper());
-	}
-
-	protected <T, F> List<T> findByFilterConditions(List<Condition> filterConditions, List<Order> ordering, EntityMapper<T, F> entityMapper) {
+	protected <T, F> List<T> findByFilterConditions(List<Condition> filterConditions, List<Order> ordering, List<Group> grouping, EntityMapper<T, F> entityMapper) {
 		return queryWithOverview(
 			entityMapper.getAttributeNames(),
 			entityMapper.getTableNameWithDb(),
 			filterConditions,
 			ordering,
 			null,
+			grouping,
+			entityMapper,
 			as -> entityMapper.buildEntity(as)
 		);
 	}
@@ -268,14 +280,16 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 	 * Returns one entity for given unique attribute name and value.
 	 * @param attribute
 	 * @param attrValue
+	 * @param <T>
+ 	 * @param <F>
 	 * @param <U>
 	 * @return
 	 */
-	protected <U> Optional<T> findByAttribute(Attribute<T, U> attribute, U attrValue) {
+	protected <T, F, U> Optional<T> findByAttribute(Attribute<T, U> attribute, U attrValue, EntityMapper<T, F> entityMapper) {
 		Objects.requireNonNull(attribute, "attribute should be specified");
 		List<Condition> conditions = new ArrayList<>();
 		conditions.add(Conditions.eq(attribute, attrValue));
-		return CollectionFuns.headOpt(findByFilterConditions(conditions, createDefaultOrdering()));
+		return CollectionFuns.headOpt(findByFilterConditions(conditions, null, null, entityMapper));
 	}
 	
 	/**
@@ -318,10 +332,6 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 	protected Date instantToUtilDate(Instant date) {
 		if (date == null) return null;
 		return new Date(date.toEpochMilli());
-	}
-
-	protected List<Order> createDefaultOrdering() {
-		return new ArrayList<>();
 	}
 	
 	protected K create(String sql, List<Object> attributeValues, boolean autogenerateKey) {
@@ -378,12 +388,14 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 	}
 
 	// Custom T type is used, this method should be independent on entity type (can be used to load specific attribute type).
-	protected <T> List<T> queryWithOverview(
+	protected <T, F> List<T> queryWithOverview(
 		List<String> selectedAttributes,
 		String from,
 		List<Condition> filterConditions,
 		List<Order> ordering,
 		Pagination pagination,
+		List<Group> grouping,
+		EntityMapper<T, F> entityMapper,
 		Function<AttributeSource, T> entityBuilder) {
 
 		return queryWithOverview(
@@ -392,25 +404,30 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 			filterConditions,
 			ordering,
 			pagination,
+			grouping,
+			entityMapper,
 			entityBuilder
 		);
 	}
 
 	// Custom T type is used, this method should be independent on entity type (can be used to load specific attribute type).
-	protected <T> List<T> queryWithOverview(
+	protected <T, F, R> List<R> queryWithOverview(
 		String selection,
 		String from,
 		List<Condition> filterConditions,
 		List<Order> ordering,
 		Pagination pagination,
-		Function<AttributeSource, T> entityBuilder) {
+		List<Group> grouping,
+		EntityMapper<T, F> entityMappper,
+		Function<AttributeSource, R> entityBuilder) {
 
 		return withNewConnection(conn -> {
-			List<T> results = new ArrayList<>();
+			List<R> results = new ArrayList<>();
 			try {
 				StringBuilder sqlBuilder = new StringBuilder("SELECT " + selection + " FROM " + from);
 				List<Object> parameters = appendFilter(sqlBuilder, filterConditions);
-				appendOrdering(sqlBuilder, (ordering == null || ordering.isEmpty()) ? createDefaultOrdering() : ordering);
+				appendGrouping(sqlBuilder, (grouping == null || grouping.isEmpty()) ? entityMappper.defaultGrouping() : grouping);
+				appendOrdering(sqlBuilder, (ordering == null || ordering.isEmpty()) ? entityMappper.defaultOrdering() : ordering);
 				appendPagination(sqlBuilder, pagination);
 
 				String sql = sqlBuilder.toString();
@@ -444,10 +461,17 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 		return parameters;
 	}
 
+	protected void appendGrouping(StringBuilder sqlBuilder, List<Group> grouping) {
+		if (grouping != null && !grouping.isEmpty()) {
+			List<String> groupByAttributes = grouping.stream().map(c -> c.getAttribute()).collect(Collectors.toList());
+			sqlBuilder.append(" GROUP BY ").append(CollectionFuns.join(groupByAttributes, ", "));
+		}
+	}
+
 	protected void appendOrdering(StringBuilder sqlBuilder, List<Order> ordering) {
 		if (ordering != null && !ordering.isEmpty()) {
-			List<String> orderByClause = ordering.stream().map(c -> c.getDbString()).collect(Collectors.toList());
-			sqlBuilder.append(" ORDER BY ").append(CollectionFuns.join(orderByClause, ", "));
+			List<String> orderByAttributes = ordering.stream().map(c -> c.getDbString()).collect(Collectors.toList());
+			sqlBuilder.append(" ORDER BY ").append(CollectionFuns.join(orderByAttributes, ", "));
 		}
 	}
 

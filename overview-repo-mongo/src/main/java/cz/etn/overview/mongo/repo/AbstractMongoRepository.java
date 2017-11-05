@@ -23,6 +23,7 @@ import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.result.DeleteResult;
+import cz.etn.overview.Group;
 import cz.etn.overview.Order;
 import cz.etn.overview.Overview;
 import cz.etn.overview.Pagination;
@@ -126,18 +127,8 @@ public abstract class AbstractMongoRepository<T, K, F> implements Repository<T, 
         return (int)result.getDeletedCount(); // TODO RBe: Checked overflow typecast like in Guava
     }
 
-    /**
-     * Returns aggregated values of given attribute for given filter.
-     * @param aggType aggregation type
-     * @param resultClass
-     * @param attrName
-     * @param filter
-     * @param entityMapper
-     * @param <R>
-     * @return
-     */
     @Override
-    public <R, T, F> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter, EntityMapper<T, F> entityMapper) {
+    public <R, T, F> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter, List<Group> grouping, EntityMapper<T, F> entityMapper) {
         Objects.requireNonNull(aggType, "aggregation type should be specified");
         Objects.requireNonNull(resultClass, "result class should be specified");
         Objects.requireNonNull(attrName, "attribute name should be specified");
@@ -154,18 +145,9 @@ public abstract class AbstractMongoRepository<T, K, F> implements Repository<T, 
 //        return results != null && !results.isEmpty() ? results.get(0) : null;
     }
 
-    /**
-     * Returns aggregated values of given attribute for given filter.
-     * @param aggType aggregation type
-     * @param resultClass
-     * @param attrName
-     * @param filter
-     * @param <R>
-     * @return
-     */
     @Override
-    public <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter) {
-        return aggByFilter(aggType, resultClass, attrName, filter, getEntityMapper());
+    public <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter, List<Group> grouping) {
+        return aggByFilter(aggType, resultClass, attrName, filter, grouping, getEntityMapper());
     }
 
     @Override
@@ -177,7 +159,7 @@ public abstract class AbstractMongoRepository<T, K, F> implements Repository<T, 
     @Override
     public <T, F> List<T> findByOverview(final Overview<F> overview, EntityMapper<T, F> entityMapper) {
         List<Condition> filterConditions = overview.getFilter() != null ? entityMapper.composeFilterConditions(overview.getFilter()) : new ArrayList<>();
-        return queryWithOverview(entityMapper.getAttributes(), filterConditions, overview.getOrder(), overview.getPagination(), as -> entityMapper.buildEntity(as));
+        return queryWithOverview(entityMapper.getAttributes(), filterConditions, overview.getOrdering(), overview.getPagination(), as -> entityMapper.buildEntity(as));
     }
 
     @Override
@@ -191,7 +173,7 @@ public abstract class AbstractMongoRepository<T, K, F> implements Repository<T, 
         return queryWithOverview(
             projectionAttributes,
             overview.getFilter() != null ? getEntityMapper().composeFilterConditions(overview.getFilter()) : null,
-            overview.getOrder(),
+            overview.getOrdering(),
             overview.getPagination(),
             as -> getEntityMapper().buildEntity(as)
         );

@@ -16,6 +16,7 @@
  */
 package cz.etn.overview.mapper;
 
+import cz.etn.overview.Group;
 import cz.etn.overview.Order;
 import cz.etn.overview.common.Pair;
 import cz.etn.overview.common.funs.CollectionFuns;
@@ -66,11 +67,34 @@ public class Decompose {
     }
 
     /**
+     * Decomposition of grouping: Grouping can be used directly for left side of join operation. Grouping for right side is specified.
+     * @return
+     */
+    public static Function<List<Group>, Pair<List<Group>, List<Group>>> groupingToIdenticalAnd(final List<Group> rightGrouping) {
+        return grouping -> new Pair<>(grouping, rightGrouping);
+    }
+
+    /**
+     * Decomposition of grouping: Grouping can be used directly for left side of join operation. Grouping for right side is specified.
+     * @return
+     */
+    public static Function<List<Group>, Pair<List<Group>, List<Group>>> groupingToIdenticalAnd(final Group rightGrouping) {
+        return groupingToIdenticalAnd(CollectionFuns.list(rightGrouping));
+    }
+
+    /**
      * Decomposition of ordering: Ordering can be used directly for left side of join operation.
      */
     public static Function<List<Order>, Pair<List<Order>, List<Order>>> orderingToIdenticalAndEmpty = ordering -> new Pair<>(ordering, CollectionFuns.emptyList());
 
     public static Function<List<Order>, Pair<List<Order>, List<Order>>> DEFAULT_ORDERING_DECOMPOSITION = Decompose.orderingToIdenticalAndEmpty;
+
+    /**
+     * Decomposition of grouping: Grouping can be used directly for left side of join operation.
+     */
+    public static Function<List<Group>, Pair<List<Group>, List<Group>>> groupingToIdenticalAndEmpty = grouping -> new Pair<>(grouping, CollectionFuns.emptyList());
+
+    public static Function<List<Group>, Pair<List<Group>, List<Group>>> DEFAULT_GROUPING_DECOMPOSITION = Decompose.groupingToIdenticalAndEmpty;
 
     private Decompose() {
         throw new AssertionError("Use static members of this class.");

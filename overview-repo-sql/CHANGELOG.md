@@ -1,7 +1,8 @@
 # Changelog
 
 ## [1.0.21] - ?
-- What is new?
+- Grouping support in overview and SQL repository.
+- Definition of default ordering and grouping in entity mapper.
 
 ## [1.0.20] - 2017-11-03
 - Convenience methods in Conditions for gt, gte, lt, lte

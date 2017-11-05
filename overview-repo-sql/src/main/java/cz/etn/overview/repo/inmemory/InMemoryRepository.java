@@ -16,6 +16,7 @@
  */
 package cz.etn.overview.repo.inmemory;
 
+import cz.etn.overview.Group;
 import cz.etn.overview.Overview;
 import cz.etn.overview.repo.AggType;
 import cz.etn.overview.repo.Repository;
@@ -77,7 +78,7 @@ public abstract class InMemoryRepository<T, K, F> implements Repository<T, K, F>
 
 	@Override
 	public List<T> findByOverview(Overview<F> overview) {
-		if (overview.getOrder() != null) {
+		if (overview.getOrdering() != null) {
 			throw new UnsupportedOperationException("Ordering not supported by generic in-memory implementation");
 		}
 		if (overview.getFilter() != null) {
@@ -97,7 +98,7 @@ public abstract class InMemoryRepository<T, K, F> implements Repository<T, K, F>
 	}
 
 	@Override
-	public <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter) {
+	public <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter, List<Group> grouping) {
 		throw new UnsupportedOperationException("Aggregation is not supported by generic in-memory implementation");
 	}
 

@@ -16,6 +16,7 @@
  */
 package cz.etn.overview.sql.mapper;
 
+import cz.etn.overview.Group;
 import cz.etn.overview.Order;
 import cz.etn.overview.common.Pair;
 import cz.etn.overview.common.funs.CollectionFuns;
@@ -48,7 +49,8 @@ public class JoinEntityMapperBuilder<T, F, U, G> {
     private BiFunction<T, U, ?> composeEntity;
     private BiFunction<T, List<U>, ?> composeEntityWithMany;
     private Function<?, Pair<F, G>> decomposeFilter;
-    private Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder = Decompose.DEFAULT_ORDERING_DECOMPOSITION;
+    private Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrdering = Decompose.DEFAULT_ORDERING_DECOMPOSITION;
+    private Function<List<Group>, Pair<List<Group>, List<Group>>> decomposeGrouping = Decompose.DEFAULT_GROUPING_DECOMPOSITION;
 
     public JoinEntityMapperBuilder(EntityMapper<T, F> firstMapper, EntityMapper<U, G> secondMapper, JoinType joinType) {
         this.firstMapper = firstMapper;
@@ -93,9 +95,58 @@ public class JoinEntityMapperBuilder<T, F, U, G> {
         return this;
     }
 
-    public JoinEntityMapperBuilder<T, F, U, G> decomposeOrder(Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder) {
-        this.decomposeOrder = decomposeOrder;
+    public JoinEntityMapperBuilder<T, F, U, G> decomposeOrdering(Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrdering) {
+        this.decomposeOrdering = decomposeOrdering;
         return this;
+    }
+
+    public JoinEntityMapperBuilder<T, F, U, G> decomposeGrouping(Function<List<Group>, Pair<List<Group>, List<Group>>> decomposeGrouping) {
+        this.decomposeGrouping = decomposeGrouping;
+        return this;
+    }
+
+    public EntityMapper<T, F> getFirstMapper() {
+        return firstMapper;
+    }
+
+    public EntityMapper<U, G> getSecondMapper() {
+        return secondMapper;
+    }
+
+    public JoinType getJoinType() {
+        return joinType;
+    }
+
+    public Cardinality getCardinality() {
+        return cardinality;
+    }
+
+    public EqAttributesCondition<T, U, ?, ?> getJoinCondition() {
+        return joinCondition;
+    }
+
+    public List<Condition> getAdditionalOnConditions() {
+        return additionalOnConditions;
+    }
+
+    public BiFunction<T, U, ?> getComposeEntity() {
+        return composeEntity;
+    }
+
+    public BiFunction<T, List<U>, ?> getComposeEntityWithMany() {
+        return composeEntityWithMany;
+    }
+
+    public Function<?, Pair<F, G>> getDecomposeFilter() {
+        return decomposeFilter;
+    }
+
+    public Function<List<Order>, Pair<List<Order>, List<Order>>> getDecomposeOrdering() {
+        return decomposeOrdering;
+    }
+
+    public Function<List<Group>, Pair<List<Group>, List<Group>>> getDecomposeGrouping() {
+        return decomposeGrouping;
     }
 
     public <V, H, O> JoinEntityMapper<T, F, U, G, V, H, O> build() {
@@ -106,7 +157,8 @@ public class JoinEntityMapperBuilder<T, F, U, G> {
             (BiFunction<T, U, V>)composeEntity,
             (BiFunction<T, List<U>, V>)composeEntityWithMany,
             (Function<H, Pair<F, G>>)decomposeFilter,
-            decomposeOrder);
+            decomposeOrdering,
+            decomposeGrouping);
     }
 
 }

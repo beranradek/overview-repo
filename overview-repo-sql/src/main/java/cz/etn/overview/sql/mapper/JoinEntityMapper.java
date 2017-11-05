@@ -16,6 +16,7 @@
  */
 package cz.etn.overview.sql.mapper;
 
+import cz.etn.overview.Group;
 import cz.etn.overview.Order;
 import cz.etn.overview.common.Pair;
 import cz.etn.overview.common.funs.CollectionFuns;
@@ -58,9 +59,23 @@ public class JoinEntityMapper<T, F, U, G, V, H, O> implements EntityMapper<V, H>
     private final Function<H, Pair<F, G>> decomposeFilter;
     private final JoinType joinType;
     private final Cardinality cardinality;
-    private final Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder;
+    private final Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrdering;
+    private final Function<List<Group>, Pair<List<Group>, List<Group>>> decomposeGrouping;
 
-    JoinEntityMapper(EntityMapper<T, F> firstMapper, EntityMapper<U, G> secondMapper, JoinType joinType, Cardinality cardinality, EqAttributesCondition<T, U, O, O> joinCondition, List<Condition> additionalOnConditions, BiFunction<T, U, V> composeEntity, BiFunction<T, List<U>, V> composeEntityWithMany, Function<H, Pair<F, G>> decomposeFilter, Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrder) {
+    JoinEntityMapper(
+        EntityMapper<T, F> firstMapper,
+        EntityMapper<U, G> secondMapper,
+        JoinType joinType,
+        Cardinality cardinality,
+        EqAttributesCondition<T, U, O, O> joinCondition,
+        List<Condition> additionalOnConditions,
+        BiFunction<T, U, V> composeEntity,
+        BiFunction<T, List<U>, V> composeEntityWithMany,
+        Function<H, Pair<F, G>> decomposeFilter,
+        Function<List<Order>, Pair<List<Order>, List<Order>>> decomposeOrdering,
+        Function<List<Group>, Pair<List<Group>, List<Group>>> decomposeGrouping
+        ) {
+
         this.firstMapper = firstMapper;
         this.secondMapper = secondMapper;
         this.joinCondition = joinCondition;
@@ -70,7 +85,8 @@ public class JoinEntityMapper<T, F, U, G, V, H, O> implements EntityMapper<V, H>
         this.decomposeFilter = decomposeFilter;
         this.joinType = joinType;
         this.cardinality = cardinality;
-        this.decomposeOrder = decomposeOrder;
+        this.decomposeOrdering = decomposeOrdering;
+        this.decomposeGrouping = decomposeGrouping;
     }
 
     public EntityMapper<T, F> getFirstMapper() {
@@ -171,8 +187,12 @@ public class JoinEntityMapper<T, F, U, G, V, H, O> implements EntityMapper<V, H>
         throw new UnsupportedOperationException("Unsupported operation in joined mapper");
     }
 
-    public Function<List<Order>, Pair<List<Order>, List<Order>>> getDecomposeOrder() {
-        return decomposeOrder;
+    public Function<List<Order>, Pair<List<Order>, List<Order>>> getDecomposeOrdering() {
+        return decomposeOrdering;
+    }
+
+    public Function<List<Group>, Pair<List<Group>, List<Group>>> getDecomposeGrouping() {
+        return decomposeGrouping;
     }
 
     public BiFunction<T, U, V> getComposeEntity() {

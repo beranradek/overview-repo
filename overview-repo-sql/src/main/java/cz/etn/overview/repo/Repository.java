@@ -16,6 +16,7 @@
  */
 package cz.etn.overview.repo;
 
+import cz.etn.overview.Group;
 import cz.etn.overview.Order;
 import cz.etn.overview.Overview;
 import cz.etn.overview.ResultsWithOverview;
@@ -126,7 +127,7 @@ public interface Repository<T, K, F> {
 	}
 	
 	/**
-	 * Returns results for given filtering, sorting and pagination settings.
+	 * Returns results for given filtering, sorting, grouping and pagination settings.
 	 * @param overview
 	 * @return
 	 */
@@ -150,26 +151,28 @@ public interface Repository<T, K, F> {
      * @return
      */
 	default <T, F> List<T> findAll(EntityMapper<T, F> entityMapper) {
-		return findByOverview(new Overview<>(null, null, null), entityMapper);
+		return findByOverview(Overview.empty(), entityMapper);
 	}
 
 	/**
 	 * Returns total count of results for given filter.
 	 * @param filter
+	 * @param grouping
 	 * @return
 	 */
-	default int countByFilter(F filter) {
-		return countByFilter(filter, getEntityMapper());
+	default int countByFilter(F filter, List<Group> grouping) {
+		return countByFilter(filter, grouping, getEntityMapper());
 	}
 
 	/**
 	 * Returns total count of results for given filter.
 	 * @param filter
+	 * @param grouping
 	 * @param entityMapper
 	 * @return
 	 */
-	default <T, F> int countByFilter(F filter, EntityMapper<T, F> entityMapper) {
-		return aggByFilter(AggType.COUNT, Integer.class, "*", filter, entityMapper);
+	default <T, F> int countByFilter(F filter, List<Group> grouping, EntityMapper<T, F> entityMapper) {
+		return aggByFilter(AggType.COUNT, Integer.class, "*", filter, grouping, entityMapper);
 	}
 
 	/**
@@ -178,11 +181,12 @@ public interface Repository<T, K, F> {
 	 * @param resultClass
 	 * @param attrName
 	 * @param filter
+	 * @param grouping
 	 * @param <R>
 	 * @return
 	 */
-	default <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter) {
-		return aggByFilter(aggType, resultClass, attrName, filter, getEntityMapper());
+	default <R> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter, List<Group> grouping) {
+		return aggByFilter(aggType, resultClass, attrName, filter, grouping, getEntityMapper());
 	}
 
 	/**
@@ -191,11 +195,12 @@ public interface Repository<T, K, F> {
 	 * @param resultClass
 	 * @param attrName
 	 * @param filter
+	 * @param grouping
 	 * @param entityMapper
 	 * @param <R>
 	 * @return
 	 */
-	<R, T, F> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter, EntityMapper<T, F> entityMapper);
+	<R, T, F> R aggByFilter(AggType aggType, Class<R> resultClass, String attrName, F filter, List<Group> grouping, EntityMapper<T, F> entityMapper);
 
 	/**
 	 * Returns results for given filtering and sorting settings.
@@ -215,7 +220,7 @@ public interface Repository<T, K, F> {
 	 * @return
 	 */
 	default <T, F> List<T> findByFilter(F filter, List<Order> ordering, EntityMapper<T, F> entityMapper) {
-		Overview<F> overview = new Overview<>(filter, ordering, null);
+		Overview<F> overview = new Overview<>(filter, ordering, null, null);
 		return findByOverview(overview, entityMapper);
 	}
 
@@ -229,7 +234,7 @@ public interface Repository<T, K, F> {
 	}
 	
 	/**
-	 * Returns results along with overview (filtering, sorting and pagination) settings. Pagination settings is returned filled with total
+	 * Returns results along with overview (filtering, sorting, grouping and pagination) settings. Pagination settings is returned filled with total
 	 * count of records - this count is loaded using separate count query.
 	 * @param overview
 	 * @return
@@ -239,7 +244,7 @@ public interface Repository<T, K, F> {
 	}
 
 	/**
-	 * Returns results along with overview (filtering, sorting and pagination) settings. Pagination settings is returned filled with total
+	 * Returns results along with overview (filtering, sorting, grouping and pagination) settings. Pagination settings is returned filled with total
 	 * count of records - this count is loaded using separate count query.
 	 * @param overview
 	 * @param entityMapper
@@ -248,7 +253,7 @@ public interface Repository<T, K, F> {
 	default <T, F> ResultsWithOverview<T, F> findResultsWithOverview(Overview<F> overview, EntityMapper<T, F> entityMapper) {
 		List<T> results = findByOverview(overview, entityMapper);
 		// Total count of records regardless of page limit
-		int totalCount = countByFilter(overview.getFilter(), entityMapper);
+		int totalCount = countByFilter(overview.getFilter(), overview.getGrouping(), entityMapper);
 		return new ResultsWithOverview<>(results, overview.withPagination(overview.getPagination().withTotalCount(totalCount)));
 	}
 }

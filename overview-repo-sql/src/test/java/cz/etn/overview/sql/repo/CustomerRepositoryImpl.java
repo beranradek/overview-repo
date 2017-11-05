@@ -37,7 +37,7 @@ public class CustomerRepositoryImpl extends SqlRepository<Customer, Integer, Cus
         .on(getEntityMapper().id, getSupplyPointMapper().customer_id)
         .composeEntityWithMany((customer, supplyPoints) -> { customer.setSupplyPoints(supplyPoints); return customer; })
         .decomposeFilter(Decompose.filterToIdenticalAnd(new SupplyPointFilter()))
-        .decomposeOrder(Decompose.orderingToIdenticalAnd(new Order(getSupplyPointMapper().code)))
+        .decomposeOrdering(Decompose.orderingToIdenticalAnd(new Order(getSupplyPointMapper().code)))
         .build();
 
     final EntityMapper<Customer, CustomerFilter> joinVoucherMapper = getEntityMapper().leftJoin(getVoucherMapper())

@@ -16,6 +16,8 @@
  */
 package cz.etn.overview.mapper;
 
+import cz.etn.overview.Group;
+import cz.etn.overview.Order;
 import cz.etn.overview.common.Pair;
 import cz.etn.overview.filter.Condition;
 import cz.etn.overview.repo.Conditions;
@@ -73,6 +75,22 @@ public interface EntityMapper<T, F> {
 	 * @return
      */
 	T createEntity();
+
+	/**
+	 * Defines default ordering for entity.
+	 * @return
+	 */
+	default List<Order> defaultOrdering() {
+		return null;
+	}
+
+	/**
+	 * Defines default grouping for entity.
+	 * @return
+	 */
+	default List<Group> defaultGrouping() {
+		return null;
+	}
 
 	/**
 	 * Returns definition of entity attributes.
