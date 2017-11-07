@@ -1,6 +1,9 @@
 # Changelog
 
-## [1.0.21] - ?
+## [1.0.22] - ?
+- What is new?
+
+## [1.0.21] - 2017-11-07
 - Grouping support in overview and SQL repository.
 - Definition of default ordering and grouping in entity mapper.
 
