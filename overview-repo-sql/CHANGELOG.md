@@ -1,7 +1,10 @@
 # Changelog
 
-## [1.0.22] - ?
+## [1.0.23] - ?
 - What is new?
+
+## [1.0.22] - 2017-11-08
+- Fixed aggAttributeAlias in aggByFilter
 
 ## [1.0.21] - 2017-11-07
 - Grouping support in overview and SQL repository.

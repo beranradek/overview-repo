@@ -135,7 +135,7 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 		Objects.requireNonNull(resultClass, "result class should be specified");
 		Objects.requireNonNull(attrName, "attribute name should be specified");
 
-		String aggAttributeAlias = attrName + "_agg";
+		String aggAttributeAlias = attrName == "*" ? (aggType.name().toLowerCase() + "_agg") : (attrName + "_agg");
 		List<R> results = queryWithOverview(
 			aggFunction(aggType, attrName) + " AS " + aggAttributeAlias,
 			entityMapper.getTableNameWithDb(),
