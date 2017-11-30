@@ -1,7 +1,10 @@
 # Changelog
 
-## [1.0.23] - ?
+## [1.0.24] - ?
 - What is new?
+
+## [1.0.23] - 2017-11-08
+- equals and hashCode for Attr attribute implementation
 
 ## [1.0.22] - 2017-11-08
 - Fixed aggAttributeAlias in aggByFilter
