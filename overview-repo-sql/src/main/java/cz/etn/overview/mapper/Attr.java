@@ -280,4 +280,20 @@ public class Attr<E, A> implements Attribute<E, A> {
             .maxLength(maxLength)
             .build();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Attr)) return false;
+        Attr<?, ?> attr = (Attr<?, ?>) o;
+        if (!entityClass.equals(attr.entityClass)) return false;
+        return name.equals(attr.name);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = entityClass.hashCode();
+        result = 31 * result + name.hashCode();
+        return result;
+    }
 }
