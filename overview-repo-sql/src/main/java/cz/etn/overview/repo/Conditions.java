@@ -107,6 +107,26 @@ public class Conditions {
 		return new GteCondition(attribute, value);
 	}
 
-	// TODO RBe: Conditions for ne, or, and
+	/**
+	 * OR condition.
+	 * @param first
+	 * @param second
+	 * @return
+	 */
+	public static OrCondition or(Condition first, Condition second) {
+		return new OrCondition(first, second);
+	}
+
+	/**
+	 * AND condition.
+	 * @param first
+	 * @param second
+	 * @return
+	 */
+	public static AndCondition and(Condition first, Condition second) {
+		return new AndCondition(first, second);
+	}
+
+	// TODO RBe: Conditions for ne/negation
 
 }

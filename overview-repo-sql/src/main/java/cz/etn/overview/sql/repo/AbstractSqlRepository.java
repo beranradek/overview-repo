@@ -16,10 +16,7 @@
  */
 package cz.etn.overview.sql.repo;
 
-import cz.etn.overview.Group;
-import cz.etn.overview.Order;
-import cz.etn.overview.Overview;
-import cz.etn.overview.Pagination;
+import cz.etn.overview.*;
 import cz.etn.overview.common.Pair;
 import cz.etn.overview.common.funs.CheckedFunction;
 import cz.etn.overview.common.funs.CollectionFuns;
@@ -448,6 +445,28 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 			}
 			return results;
 		});
+	}
+
+	/**
+	 * Returns results along with overview (filtering, sorting, grouping and pagination) settings. Pagination settings is returned filled with total
+	 * count of records - this count is loaded using separate count query.
+	 * @param projection
+	 * @param overview
+	 * @param entityMapper
+	 * @param <T>
+	 * @param <F>
+	 * @return
+	 */
+	protected <T, F> ResultsWithOverview<T, F> findResultsWithOverviewAndProjection(String projection, Overview<F> overview, EntityMapper<T, F> entityMapper) {
+		String from = entityMapper.getTableNameWithDb();
+		List<Condition> filterConditions = overview.getFilter() != null ? entityMapper.composeFilterConditions(overview.getFilter()) : new ArrayList<>();
+		List<T> entities = queryWithOverview(projection, from, filterConditions, overview.getOrdering(), overview.getPagination(), overview.getGrouping(), entityMapper, as -> entityMapper.buildEntity(as));
+
+		String aggAlias = "attr_count";
+		List<Integer> countRes = queryWithOverview("COUNT(" + projection + ") AS " + aggAlias, from, filterConditions, null, null, overview.getGrouping(), entityMapper, as -> as.get(Integer.class, aggAlias));
+		Integer totalCount = (countRes != null && !countRes.isEmpty()) ? countRes.get(0) : null;
+
+		return new ResultsWithOverview<>(entities, overview.withPagination(overview.getPagination().withTotalCount(totalCount)));
 	}
 
 	protected List<Object> appendFilter(StringBuilder sqlBuilder, List<Condition> filterConditions) {

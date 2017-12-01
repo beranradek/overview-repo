@@ -63,9 +63,22 @@ public class SqlConditionBuilder {
                 sqlCondition = new SqlCondition("1 = 0", CollectionFuns.EMPTY_OBJECT_LIST);
             }
 
+        } else if (condition instanceof OrCondition) {
+            sqlCondition = createSqlCondition2((OrCondition)condition, "OR", valueToDbSupportedValue);
+        } else if (condition instanceof AndCondition) {
+            sqlCondition = createSqlCondition2((AndCondition)condition, "AND", valueToDbSupportedValue);
         } else {
             throw new IllegalStateException("Condition " + condition + " is not supported");
         }
         return sqlCondition;
+    }
+
+    private SqlCondition createSqlCondition2(Condition2 condition, String operator, Function<Object, Object> valueToDbSupportedValue) {
+        SqlCondition first = build(condition.getFirstCondition(), valueToDbSupportedValue);
+        SqlCondition second = build(condition.getSecondCondition(), valueToDbSupportedValue);
+        List<Object> values = new ArrayList<>();
+        values.addAll(first.getValues());
+        values.addAll(second.getValues());
+        return new SqlCondition("(" + first.getConditionWithPlaceholders() + " " + operator + " " + second.getConditionWithPlaceholders() + ")", values);
     }
 }

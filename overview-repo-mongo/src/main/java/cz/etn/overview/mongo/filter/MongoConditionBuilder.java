@@ -18,9 +18,7 @@ package cz.etn.overview.mongo.filter;
 
 import com.mongodb.Function;
 import com.mongodb.client.model.Filters;
-import cz.etn.overview.common.funs.CollectionFuns;
 import cz.etn.overview.filter.*;
-import cz.etn.overview.sql.filter.SqlCondition;
 
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -67,6 +65,12 @@ public class MongoConditionBuilder {
                 // empty values for IN, value of attribute is certainly not among empty values
                 mongoCondition = new MongoCondition(Filters.where("1 == 0"));
             }
+        } else if (condition instanceof OrCondition) {
+            OrCondition c = (OrCondition)condition;
+            mongoCondition = new MongoCondition(Filters.or(build(c.getFirstCondition(), valueToDbSupportedValue).getCondition(), build(c.getSecondCondition(), valueToDbSupportedValue).getCondition()));
+        } else if (condition instanceof AndCondition) {
+            AndCondition c = (AndCondition)condition;
+            mongoCondition = new MongoCondition(Filters.and(build(c.getFirstCondition(), valueToDbSupportedValue).getCondition(), build(c.getSecondCondition(), valueToDbSupportedValue).getCondition()));
         } else {
             throw new IllegalStateException("Condition " + condition + " is not supported");
         }

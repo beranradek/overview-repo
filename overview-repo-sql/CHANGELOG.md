@@ -1,7 +1,13 @@
 # Changelog
 
-## [1.0.24] - ?
+## [1.0.26] - ???
 - What is new?
+
+## [1.0.25] - 2017-12-01
+- AND/OR conditions
+
+## [1.0.24] - 2017-11-08
+- findResultsWithOverviewAndProjection in AbstractSqlRepository
 
 ## [1.0.23] - 2017-11-08
 - equals and hashCode for Attr attribute implementation
