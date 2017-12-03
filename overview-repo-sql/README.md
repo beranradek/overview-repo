@@ -86,7 +86,7 @@ public class VoucherMapper extends DynamicEntityMapper<Voucher, VoucherFilter> {
 	}
 
 	@Override
-	public String getDataSet() {
+	public String getTableName() {
 		return DB_TABLE_NAME;
 	}
 	
