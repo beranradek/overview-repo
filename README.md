@@ -1,8 +1,8 @@
 # overview-repo
 
 This library provides **rich repository implementation with overview (filtering, grouping, ordering and pagination) settings, including support for joins (for SQL)** declared in simple functional manner.
-Entity mappers provide metadata about attributes of stored entities, so the repository is able to construct all the queries
-based on this metadata. Entity mappers can possibly be used also for other transformations of data objects, outside the scope of this library.
+Entity mappers provide metadata about attributes of stored entities and the repository is able to construct all the queries
+using this metadata. Entity mappers can possibly be used also for other transformations of data objects, outside the scope of this library.
 
 Library has no dependencies except a database-type-specific client API and logging API. Various repository implementations that share the same repository interface can be introduced. For now, these implementations (modules) are available:
 
