@@ -1,6 +1,6 @@
 # overview-repo-mongo
 
-Mongo DB implementation of full-featured generic repository with overview (filtering, ordering and pagination) settings.
+Mongo DB implementation of rich repository with overview (filtering, grouping, ordering and pagination) settings.
 
 ## Library maintenance
 

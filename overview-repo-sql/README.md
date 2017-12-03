@@ -1,6 +1,6 @@
 # overview-repo-sql
 
-JDBC implementation of full-featured generic SQL repository with overview (filtering, ordering and pagination) settings, including support for all joins declared in simple functional manner.
+JDBC implementation of rich generic SQL repository with overview (filtering, grouping, ordering and pagination) settings, including support for all joins declared in simple functional manner.
 
 ## Additional features
  * Inner/left/right outer joins implemented as compositions of mappers to allow fetching of related entities as one composed (pageable) entity, with almost no effort (only simple join specification is needed when composing the mappers).
