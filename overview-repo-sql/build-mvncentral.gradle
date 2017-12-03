@@ -1,0 +1,3 @@
+group = 'org.xbery'
+version = '1.0.25'
+rootProject.description = 'JDBC implementation of rich generic SQL repository with filtering, grouping, ordering and pagination settings, including support for all joins.'
