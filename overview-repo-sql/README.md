@@ -11,7 +11,7 @@ Only simple reusable join specification is needed when composing the mappers.
 
 ## Quick start example
 
-We will create simple database with customers and their vouchers. Each voucher can be assigned to a customer as a discount for services 
+Let's assume we have simple database with customers and their vouchers. Voucher can be assigned to a customer as a discount for services 
 taken on one or more supply points of the customer. Customer can have at most one voucher assigned.
 There can be customers without any discount - without any voucher.
 
