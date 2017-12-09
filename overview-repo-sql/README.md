@@ -149,47 +149,31 @@ but our implementation is now more than complete. Let's hope this will be really
 There is not so much to maintain at all :-) Mainly the mapper implementation. But note you can reuse
 it probably as a general attribute source also for some other business logic (e.g. exports, generic forms etc.).
 
-### One-to-one and one-to-many joins
-
-Using the library, you can also implement queries returning joined entities. One-to-one
-(left/right/inner) joins are fully and easily supported in functional way. Regarding one-to-many or many-to-one joins, you can simply use the same
-implementation logic as for one-to-one joins, but for now, there is need to aggregate related entities together into one collection 
-after the objects are fetched, until the fully convenient support of one-to-many joins is implemented directly in the library.
+### One-to-one joins
  
 As an example, let's implement query that will fetch customers already joined with
-their vouchers (a customer can have at least one voucher assigned - Customer class has a field: private Voucher voucher and
-corresponding getter/setter).
+their vouchers (a customer can have at least one voucher assigned). Customer class has a private Voucher field and
+corresponding getter/setter.
 
-Joins are implemented as compositions of two mappers of related entities to allow fetching of related entities 
-as one composed (pageable) entity, with almost no effort. Only simple join specification is needed when composing the mappers.
-This join specification can reside in CustomerRepositoryImpl class:
-
-```java
-    protected EntityMapper<Customer, CustomerFilter> getCustomerLeftJoinVoucherMapper() {
-        return getEntityMapper().leftJoin(getVoucherMapper(),
-            Condition.eqAttributes(getEntityMapper().id, getVoucherMapper().reserved_by), // ON condition
-            (customer, voucher) -> { customer.setVoucher(voucher); return customer; }, // joined entity composition
-            filter -> new Pair<>(filter, filter) // filter decomposition to first and second entity filters
-        );
-    }
-```
-
-It could be defined also in private static final field. Let's implement query that will use this join specification
-to return already joined objects. For this, we will introduce overriden findByOverview method in CustomerRepositoryImpl, as our intention is
-to always return customers with joined vouchers:
+Joins are implemented as compositions of two mappers of related entities. Only simple reusable join specification 
+is needed when composing the mappers. This join specification can reside in CustomerRepositoryImpl class:
 
 ```java
-    /**
-     * Loads customers including joined (one or none) voucher.
-     */
-    @Override
-    public List<Customer> findByOverview(Overview<CustomerFilter> overview) {
-        Objects.requireNonNull(overview, "overview should be specified");
-        // Resulting records are returned according to given filtering, ordering and pagination settings
-        List<Customer> customers = findByOverview(overview, getCustomerLeftJoinVoucherMapper());
-        return customers;
-    }
+    final EntityMapper<Customer, CustomerFilter> joinVoucherMapper = getEntityMapper().leftJoin(getVoucherMapper())
+        .on(getEntityMapper().id, getVoucherMapper().reserved_by) // ON condition
+        .composeEntity((customer, voucher) -> { customer.setVoucher(voucher); return customer; }) // joined entity composition
+        .decomposeFilter(Decompose.filterToIdenticalAndObject()) // filter decomposition to first and second entity filters
+        .build();
 ```
+
+Join mapper could be defined also in private static final field of our customer repository. A query that will use this join specification
+to return already joined objects looks like this:
+
+```java
+List<Customer> customers = findByOverview(overview, joinVoucherMapper);
+```
+
+### One-to-many joins
 
 This was easy once the reusable join specification is defined. Consider the case we want to fetch customers not only with related
 vouchers but also with related supply points of customer. One customer can have one or many supply points. This one-to-many join
