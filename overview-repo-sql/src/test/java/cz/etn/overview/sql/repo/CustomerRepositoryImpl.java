@@ -18,6 +18,7 @@ package cz.etn.overview.sql.repo;
 
 import cz.etn.overview.Order;
 import cz.etn.overview.Overview;
+import cz.etn.overview.ResultsWithOverview;
 import cz.etn.overview.domain.Customer;
 import cz.etn.overview.domain.CustomerFilter;
 import cz.etn.overview.domain.SupplyPointFilter;

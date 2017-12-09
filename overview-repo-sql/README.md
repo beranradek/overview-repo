@@ -162,7 +162,7 @@ is needed when composing the mappers. This join specification can reside in Cust
     final EntityMapper<Customer, CustomerFilter> joinVoucherMapper = getEntityMapper().leftJoin(getVoucherMapper())
         .on(getEntityMapper().id, getVoucherMapper().reserved_by) // ON condition
         .composeEntity((customer, voucher) -> { customer.setVoucher(voucher); return customer; }) // joined entity composition
-        .decomposeFilter(Decompose.filterToIdenticalAndObject()) // filter decomposition to first and second entity filters
+        .decomposeFilter(Decompose.filterToIdenticalAnd(new VoucherFilter())) // filter decomposition to first and second entity filters
         .build();
 ```
 
@@ -175,41 +175,57 @@ List<Customer> customers = findByOverview(overview, joinVoucherMapper);
 
 ### One-to-many joins
 
-This was easy once the reusable join specification is defined. Consider the case we want to fetch customers not only with related
-vouchers but also with related supply points of customer. One customer can have one or many supply points. This one-to-many join
-can now be achieved using the second database query that will fetch all supply points for our current page of customers (not unlike the lazy loading in Hibernate).
-Once needed supply points are loaded, we will aggregate them into collections of related customers in the second phase.
-Note that this approach is correct for usage with arbitrary pagination, filtering and ordering settings.
+Consider the case we want to fetch customers with related supply points of customer. One customer can have many supply points. 
+If a pagination settings is specified, the library will automatically fetch related supply points using a second database query, 
+so the pagination is correctly applied for the primary records - customers. 
+This is not unlike the lazy loading in Hibernate. If the pagination settings is not specified, the library will perform only one join query.
+
+The good news are, one-to-many join looks very similar to one-to-one join, only the composeEntity method is replaced by composeEntityWithMany.
+This join specification can reside in CustomerRepositoryImpl class: 
 
 ```java
-    /**
-     * Loads customers including joined voucher and supply points data.
-     */
-    @Override
-    public List<Customer> findByOverview(Overview<CustomerFilter> overview) {
-        Objects.requireNonNull(overview, "overview should be specified");
-        // First load customers joined with vouchers
-        List<Customer> customers = findByOverview(overview, getCustomerLeftJoinVoucherMapper());
-
-        // Lazy loading of related supply points using one additional query
-        // (if they would be joined with customers in one query, it would break pagination limit in returned SQL result set)
-        List<Integer> customerIds = customers.stream().map(c -> c.getId()).collect(Collectors.toList());
-        List<SupplyPoint> supplyPoints = supplyPointRepo.findByCustomerIds(customerIds);
-
-        // Append supply points to customers
-        for (Customer customer : customers) {
-            Iterable<SupplyPoint> supplyPointsOfCustomer = Iterables.filter(supplyPoints, sp -> customer.getId().equals(sp.getCustomerId()));
-            customer.setSupplyPoints(Lists.newArrayList(supplyPointsOfCustomer));
-        }
-
-        return customers;
-    }
+    final EntityMapper<Customer, CustomerFilter> joinSupplyPointsMapper = getEntityMapper().leftJoin(getSupplyPointMapper())
+        .on(getEntityMapper().id, getSupplyPointMapper().customer_id) // ON condition
+        .composeEntityWithMany((customer, supplyPoints) -> { customer.setSupplyPoints(supplyPoints); return customer; })
+        .decomposeFilter(Decompose.filterToIdenticalAnd(new SupplyPointFilter())) // filter decomposition to first and second entity filters
+        .decomposeOrdering(Decompose.orderingToIdenticalAnd(new Order(getSupplyPointMapper().code))) // ordering decomposition to first and second entity ordering
+        .build();
 ```
 
+A query that will use this join specification to return customers already joined with supply points looks like this (using CustomerRepository):
+
+```java
+List<Customer> customers = findByOverview(overview, joinSupplyPointsMapper);
+```
+
+Or with counting total records:
+
+```java
+ResultsWithOverview<Customer, CustomerFilter> resultsWithOverview = findResultsWithOverview(overview, joinSupplyPointsMapper);
+List<Customer> customers = resultsWithOverview.getResults();
+Integer totalCount = resultsWithOverview.getOverview().getPagination().getTotalCount();
+```
+
+### Combine more joins together
+
+What if we want to load customers with both joined vouchers (one-to-one join) and supply points (one-to-many join)?
+We can compose already prepared joinVoucherMapper with the supply points mapper:
+
+```java
+    final EntityMapper<Customer, CustomerFilter> joinVoucherJoinSupplyPointsMapper = joinVoucherMapper.leftJoin(getSupplyPointMapper())
+        .on(getEntityMapper().id, getSupplyPointMapper().customer_id)
+        .composeEntityWithMany((customer, supplyPoints) -> { customer.setSupplyPoints(supplyPoints); return customer; })
+        .decomposeFilter(Decompose.filterToIdenticalAnd(new SupplyPointFilter()))
+        .decomposeOrdering(Decompose.orderingToIdenticalAnd(new Order(getSupplyPointMapper().code)))
+        .build();
+```
+
+## Where to go next?
+
 You can discover a little extended example that is part of the library's tests for yourself:
- * [VoucherMapper](src/test/java/cz/etn/overview/repo/VoucherMapper.java)
- * [VoucherRepository](src/test/java/cz/etn/overview/repo/VoucherRepository.java)
- * [VoucherRepositoryImpl](src/test/java/cz/etn/overview/repo/VoucherRepositoryImpl.java)
+ * [VoucherMapper](src/test/java/cz/etn/overview/sql/repo/VoucherMapper.java)
+ * [VoucherRepository](src/test/java/cz/etn/overview/sql/repo/VoucherRepository.java)
+ * [VoucherRepositoryImpl](src/test/java/cz/etn/overview/sql/repo/VoucherRepositoryImpl.java)
  * Methods in repository that you will gain implemented (repo interface): [Repository](src/main/java/cz/etn/overview/repo/Repository.java)
  * Just add attributes and implement composeFilterConditions method in your entity mapper.
 
