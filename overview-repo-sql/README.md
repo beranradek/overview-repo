@@ -152,7 +152,7 @@ it probably as a general attribute source also for some other business logic (e.
 ### One-to-one joins
  
 As an example, let's implement query that will fetch customers already joined with
-their vouchers (a customer can have at least one voucher assigned). Customer class has a private Voucher field and
+their vouchers (a customer can have one or none voucher assigned). Customer class has a private Voucher field and
 corresponding getter/setter.
 
 Joins are implemented as compositions of two mappers of related entities. Only simple reusable join specification 
