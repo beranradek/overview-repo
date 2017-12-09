@@ -1,20 +1,23 @@
 # overview-repo-sql
 
-JDBC implementation of rich generic SQL repository with overview (filtering, grouping, ordering and pagination) settings, including support for all joins declared in simple functional manner.
+JDBC implementation of rich generic SQL repository with overview (filtering, grouping, ordering and pagination) settings, 
+including support for one-to-one or one-to-many joins which can be declared in simple functional manner.
+
+Joins are implemented using composition of entity mappers and work well with provided pagination settings. 
+Only simple reusable join specification is needed when composing the mappers.
 
 ## Additional features
- * Inner/left/right outer joins implemented as compositions of mappers to allow fetching of related entities as one composed (pageable) entity, with almost no effort (only simple join specification is needed when composing the mappers).
- * "CREATE TABLE" SQL string generated from an entity mapper as an useful start to write DB schema (for now, MySQL only).
+  * "CREATE TABLE" SQL string can be generated from an entity mapper as an useful start to write DB schema (for now, only MySQL syntax is supported).
 
 ## Quick start example
 
 We will create simple database with customers and their vouchers. Each voucher can be assigned to a customer as a discount for services 
-taken on one ore more supply points of the customer. Customer can have at most one voucher assigned.
+taken on one or more supply points of the customer. Customer can have at most one voucher assigned.
 There can be customers without any discount - without any voucher.
 
-### Voucher entity and repository
+### Voucher entity
 
-So let's create a voucher entity:
+First, we will create a voucher entity:
 
 ```java
 /**
@@ -28,8 +31,6 @@ public class Voucher {
 	private Instant validFrom;
 	private Instant validTo;
 	private Instant redemptionTime;
-	private Instant invalidationTime;
-	private String invalidationNote;
 	private String redeemedBy;
 	private String reservedBy;
 	
@@ -39,12 +40,14 @@ public class Voucher {
 
 This POJO can be used by the library as it is, note that there is no one requirement on implementing 
 any interface or extending any base class or using any annotations. Naturally, the entity should have some accessors (getters) so its data
-can be read and there is one implicit requirement that attributes (fields) of entity should be settable individually per
+can be read and there is one implicit requirement that attributes (fields) of entity must be settable individually per
 each attribute. This can be simply achieved by creating setters, or using immutable entity with copy methods
 for each attribute (returning new updated entity) or using a builder of immutable entity.
 
+### Entity mapper
+
 For storing voucher entities in database, we must define an entity mapper which maps all persisted fields of entity to
-database attributes. So let's create voucher mapper:
+database attributes:
 
 ```java
 /**
@@ -63,8 +66,6 @@ public class VoucherMapper extends DynamicEntityMapper<Voucher, VoucherFilter> {
 	public final Attribute<Voucher, Instant> valid_from;
 	public final Attribute<Voucher, Instant> valid_to;
 	public final Attribute<Voucher, Instant> redemption_time;
-	public final Attribute<Voucher, Instant> invalidation_time;
-	public final Attribute<Voucher, String> invalidation_note;
 	public final Attribute<Voucher, String> reserved_by;
 	public final Attribute<Voucher, String> redeemed_by;
 
@@ -75,8 +76,6 @@ public class VoucherMapper extends DynamicEntityMapper<Voucher, VoucherFilter> {
 		valid_from = add(Attr.ofInstant(cls, "valid_from").get(e -> e.getValidFrom()).set((e, a) -> e.setValidFrom(a)));
 		valid_to = add(Attr.ofInstant(cls, "valid_to").get(e -> e.getValidTo()).set((e, a) -> e.setValidTo(a)));
 		redemption_time = add(Attr.ofInstant(cls, "redemption_time").get(e -> e.getRedemptionTime()).set((e, a) -> e.setRedemptionTime(a)));
-		invalidation_time = add(Attr.ofInstant(cls, "invalidation_time").get(e -> e.getInvalidationTime()).set((e, a) -> e.setInvalidationTime(a)));
-		invalidation_note = add(Attr.ofString(cls, "invalidation_note").get(e -> e.getInvalidationNote()).set((e, a) -> e.setInvalidationNote(a)).maxLength(200));
 		reserved_by = add(Attr.ofString(cls, "reserved_by").get(e -> e.getReservedBy()).set((e, a) -> e.setReservedBy(a)).maxLength(40));
 		redeemed_by = add(Attr.ofString(cls, "redeemed_by").get(e -> e.getRedeemedBy()).set((e, a) -> e.setRedeemedBy(a)).maxLength(40));
 	}
@@ -102,10 +101,11 @@ public class VoucherMapper extends DynamicEntityMapper<Voucher, VoucherFilter> {
 }
 ```
 
-Entity mapper provides name of database table to store the entities in, describes all persisted attributes of an entity and
-the way they are read from an entity and written to an existing entity (one-by-one so the updated entity is returned for each updated attribute). You must specify also 
-how new entity can be created and how filtering conditions are constructed from a filter object
-if there are any filtering requirements (we will cover filtering criteria later in a moment, basically, the filter object can be anything suitable to you).
+Entity mapper describes:
+  * name of database table to store the entities in,
+  * persisted attributes of an entity and the way they are read from an entity and written to an existing entity (one-by-one so the updated entity is returned for each updated attribute), 
+  * how a new entity can be created,
+  * how filtering conditions are constructed from a filter object if there are any filtering requirements (we will cover filtering criteria later in a moment; basically, the filter object can be anything suitable to you).
 
  ```java
 public class VoucherFilter {
@@ -113,14 +113,13 @@ public class VoucherFilter {
 }
 ```
 
-After we have covered all necessary mapping logic in one simple refactorable place, we can create and use a repository for storing/fetching entities 
-into/from a database. This will be really easy as you will see. Let's create extendable interface and
+### Voucher repository
+
+After we have covered all the necessary mapping logic in one simple refactorable entity mapper, we can create and use a repository for storing and querying entities. 
+This will be really easy as you will see. Let's create an extendable interface and
 implementation for the voucher repository:
  
 ```java
-/**
- * Voucher repository.
- */
 public interface VoucherRepository extends Repository<Voucher, String, VoucherFilter> {
 	// nothing new here
 }
@@ -128,43 +127,27 @@ public interface VoucherRepository extends Repository<Voucher, String, VoucherFi
 ```
 
 ```java
-/**
- * Default implementation of {@link VoucherRepository}. 
- */
-public class VoucherRepositoryImpl extends AbstractSqlRepository<Voucher, String, VoucherFilter> implements VoucherRepository {
-	
-	private final DataSource dataSource;
+public class VoucherRepositoryImpl extends SqlRepository<Voucher, String, VoucherFilter> implements VoucherRepository {
 
 	public VoucherRepositoryImpl(DataSource dataSource) {
-		this.dataSource = dataSource;
+		super(dataSource, VoucherMapper.getInstance());
 	}
-
-	@Override
-	public EntityMapper<Voucher, Object> getEntityMapper() {
-		return VoucherMapper.getInstance();
-	}
-
-	@Override
-	protected DataSource getDataSource() {
-		return dataSource;
-	}
-
 }
 ```
 
-Repository is connected to a database via standard javax.sql.DataSource and it's implementation 
-that is extended from AbstractSqlRepository requires also instance of entity mapper we have created
-before. Now we can extend a repository little bit and create some methods for storing and accessing database entities.
-But wait, what we can gain from Repository/AbstractSqlRepository we have extended?
+The repository is connected to a database via standard javax.sql.DataSource. Now, we can extend a repository little bit and create some methods for storing and accessing database entities.
+But wait, what we can gain from a Repository/SqlRepository we have already extended?
 
-There is already plenty of methods that are already fully implemented: create, update/partial update, delete, delete by filter,
-find by id, find by filtering and ordering and pagination settings (overview settings), find all, find by filter only (for convenience),
-count by filter, aggregate (count, sum, min, max, avg) by filter. That is probably all you will ever need!
-So you could add some specific query methods to your repository, but our implementation is now more
-than sufficient. Let's hope this will be really easily maintainable and refactorable code for you!
-There is not so much to maintain at all :-) Mainly the mapper implementation. But note you can leverage
-it probably as general attribute source also for some other business logic (e.g. exports, generic forms). If you have 
-some special requirements, you can implement additional queries using many protected methods present in abstract implementation.
+There is already plenty of methods that are fully implemented for you: 
+  * create, update/partial update, delete, delete by filter,
+  * find by id, find by filter, find by overview (filtering, grouping, ordering and pagination) settings, find all,
+  * count by filter, aggregate (count, sum, min, max, avg) by filter and grouping to obtain one aggregated result.
+  
+This is probably all you will need for various basic use cases! Also 1:1 and 1:n joins are prepared for you. 
+If you have some special requirements, you can implement additional queries using many protected methods that are present in superclass, 
+but our implementation is now more than complete. Let's hope this will be really easily maintainable and refactorable repository code for you!
+There is not so much to maintain at all :-) Mainly the mapper implementation. But note you can reuse
+it probably as a general attribute source also for some other business logic (e.g. exports, generic forms etc.).
 
 ### One-to-one and one-to-many joins
 
