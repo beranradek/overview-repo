@@ -232,7 +232,7 @@ You can discover a little extended example that is part of the library's tests f
 ## Library maintenance
 
  * Running tests: gradlew :overview-repo-sql:clean :overview-repo-sql:test
- * Publishing artifact: gradlew :overview-repo-sql:clean :overview-repo-sql:uploadArchives
- * Releasing artifact: 
-   * gradlew :overview-repo-sql:clean :overview-repo-sql:release
-   * Increase version in gradle.properties of subproject to next version
+ * Releasing artifact:
+   * Fill in CHANGELOG.md, create tag REL-x.y.z (with version to release) and push it 
+   * gradlew -Prelease :overview-repo-sql:clean :overview-repo-sql:uploadArchives :overview-repo-sql:closeAndPromoteRepository
+   * Increase version in build.gradle of subproject to next version
