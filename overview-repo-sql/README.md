@@ -223,10 +223,10 @@ We can compose already prepared joinVoucherMapper with the supply points mapper:
 ## Where to go next?
 
 You can discover a little extended example that is part of the library's tests for yourself:
- * [VoucherMapper](src/test/java/cz/etn/overview/sql/repo/VoucherMapper.java)
- * [VoucherRepository](src/test/java/cz/etn/overview/sql/repo/VoucherRepository.java)
- * [VoucherRepositoryImpl](src/test/java/cz/etn/overview/sql/repo/VoucherRepositoryImpl.java)
- * Methods in repository that you will gain implemented (repo interface): [Repository](src/main/java/cz/etn/overview/repo/Repository.java)
+ * [VoucherMapper](src/test/java/org/xbery/overview/sql/repo/VoucherMapper.java)
+ * [VoucherRepository](src/test/java/org/xbery/overview/sql/repo/VoucherRepository.java)
+ * [VoucherRepositoryImpl](src/test/java/org/xbery/overview/sql/repo/VoucherRepositoryImpl.java)
+ * Methods in repository that you will gain implemented (repo interface): [Repository](src/main/java/org/xbery/overview/repo/Repository.java)
  * Just add attributes and implement composeFilterConditions method in your entity mapper.
 
 ## Library maintenance
