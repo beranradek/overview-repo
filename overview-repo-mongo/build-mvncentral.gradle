@@ -1,3 +1,0 @@
-group = 'org.xbery'
-version = '1.0.0'
-rootProject.description = 'Mongo DB implementation of rich generic repository with filtering, grouping, ordering and pagination settings.'

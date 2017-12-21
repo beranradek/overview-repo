@@ -1,9 +1,17 @@
+// See authoritative guide for publishing to public Maven central repo
+// with Gradle: http://central.sonatype.org/pages/gradle.html
+// and also http://nemerosa.ghost.io/2015/07/01/publishing-to-the-maven-central-using-gradle/
 buildscript {
   repositories {
     jcenter()
     mavenCentral()
   }
+  dependencies {
+    classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.11.0"
+  }
 }
+
+apply plugin: 'io.codearte.nexus-staging'
 
 subprojects {
   apply plugin: 'java'
@@ -17,6 +25,91 @@ subprojects {
   repositories {
     jcenter()
     mavenCentral()
+  }
+
+  task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+  }
+
+  task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+  }
+
+  artifacts {
+    archives javadocJar, sourcesJar
+  }
+}
+
+if (project.hasProperty('release')) {
+  allprojects {
+    apply plugin: 'signing'
+    apply plugin: 'maven'
+
+    // Signature of artifacts
+    signing {
+      sign configurations.archives
+    }
+
+    // OSSRH publication
+    uploadArchives {
+      repositories {
+        mavenDeployer {
+          // POM signature
+          beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+          // Target repository
+          // Snapshots: https://oss.sonatype.org/content/repositories/snapshots
+          // Release: https://oss.sonatype.org/service/local/staging/deploy/maven2
+          repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+            authentication(userName: ossrhUser, password: ossrhPassword)
+          }
+          pom.project {
+            name project.name
+            description project.description
+            packaging 'jar'
+            url 'https://github.com/beranradek/overview-repo'
+
+            scm {
+              connection 'scm:git:https://github.com/beranradek/overview-repo.git'
+              developerConnection 'scm:git:git@github.com:beranradek/overview-repo.git'
+              url 'https://github.com/beranradek/overview-repo.git'
+            }
+
+            licenses {
+              license {
+                name 'The Apache License, Version 2.0'
+                url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                distribution 'repo'
+              }
+            }
+
+            developers {
+              developer {
+                id = 'beranradek'
+                name = 'Radek Beran'
+                email = 'beran.radek@seznam.cz'
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  nexusStaging {
+    username = ossrhUser
+    password = ossrhPassword
+  }
+}
+
+// Turning off doclint javadoc style checker that produces strict errors.
+// See: http://blog.joda.org/2014/02/turning-off-doclint-in-jdk-8-javadoc.html
+if (JavaVersion.current().isJava8Compatible()) {
+  allprojects {
+    tasks.withType(Javadoc) {
+      options.addStringOption('Xdoclint:none', '-quiet')
+    }
   }
 }
 

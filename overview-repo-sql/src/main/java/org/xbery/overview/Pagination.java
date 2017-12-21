@@ -73,7 +73,7 @@ public final class Pagination implements Serializable {
 	}
 
 	/**
-	 * Total count of available records, or {@code null] in case records are not loaded yet.
+	 * Total count of available records, or {@code null} in case records are not loaded yet.
 	 * @return
 	 */
 	public Integer getTotalCount() {
