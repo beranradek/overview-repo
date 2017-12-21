@@ -231,8 +231,13 @@ You can discover a little extended example that is part of the library's tests f
 
 ## Library maintenance
 
- * Running tests: gradlew :overview-repo-sql:clean :overview-repo-sql:test
- * Releasing artifact:
-   * Fill in CHANGELOG.md, create tag REL-x.y.z (with version to release) and push it 
-   * gradlew -Prelease :overview-repo-sql:clean :overview-repo-sql:uploadArchives :overview-repo-sql:closeAndPromoteRepository
-   * Increase version in build.gradle of subproject to next version
+### Release
+
+* Fill in CHANGELOG.md.
+* Just run: gradlew :overview-repo-sql:clean :overview-repo-sql:test :overview-repo-sql:assemble to see all is ok and ready for release.
+* Run: gradlew :overview-repo-sql:clean :overview-repo-sql:release
+  * This automatically executes also uploadArchives (upload to Maven central) after the release version is created
+* Push commits from Gradle release plugin to GitHub
+* Login to https://oss.sonatype.org/, "Close" the Staging repository for library, "Refresh" it and "Release" it.
+
+See http://central.sonatype.org/pages/ossrh-guide.html#releasing-to-central and http://central.sonatype.org/pages/gradle.html for details.  

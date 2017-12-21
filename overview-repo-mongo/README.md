@@ -4,9 +4,13 @@ Mongo DB implementation of rich repository with overview (filtering, grouping, o
 
 ## Library maintenance
 
- * Running tests: gradlew :overview-repo-mongo:clean :overview-repo-mongo:test
- * Publishing artifact: gradlew :overview-repo-mongo:clean :overview-repo-mongo:uploadArchives
- * Releasing artifact:
-   * Fill in CHANGELOG.md, create tag REL-x.y.z (with version to release) and push it 
-   * gradlew -Prelease overview-repo-mongo:clean overview-repo-mongo:uploadArchives overview-repo-mongo:closeAndPromoteRepository
-   * Increase version in build.gradle of subproject to next version
+### Release
+
+* Fill in CHANGELOG.md.
+* Just run: gradlew :overview-repo-mongo:clean :overview-repo-mongo:test :overview-repo-mongo:assemble to see all is ok and ready for release.
+* Run: gradlew :overview-repo-mongo:clean :overview-repo-mongo:release
+  * This automatically executes also uploadArchives (upload to Maven central) after the release version is created
+* Push commits from Gradle release plugin to GitHub
+* Login to https://oss.sonatype.org/, "Close" the Staging repository for library, "Refresh" it and "Release" it.
+
+See http://central.sonatype.org/pages/ossrh-guide.html#releasing-to-central and http://central.sonatype.org/pages/gradle.html for details.  

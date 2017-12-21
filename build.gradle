@@ -1,27 +1,32 @@
 // See authoritative guide for publishing to public Maven central repo
 // with Gradle: http://central.sonatype.org/pages/gradle.html
-// and also http://nemerosa.ghost.io/2015/07/01/publishing-to-the-maven-central-using-gradle/
+// and also http://jedicoder.blogspot.cz/2011/11/automated-gradle-project-deployment-to.html
 buildscript {
   repositories {
     jcenter()
     mavenCentral()
   }
-  dependencies {
-    classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.11.0"
-  }
 }
 
-apply plugin: 'io.codearte.nexus-staging'
+// Other plugins using plugins DSL
+// release plugin adding release task, see: https://github.com/researchgate/gradle-release
+plugins {
+  id 'net.researchgate.release' version '2.6.0'
+}
 
-subprojects {
+allprojects {
   apply plugin: 'java'
   apply plugin: 'eclipse'
   apply plugin: 'idea'
   apply plugin: 'jacoco'
-  
+  apply plugin: 'maven' // takes care of the metadata, generates the pom.xml when publishing to repo, deploys build output to repo
+  apply plugin: 'signing' // signs generated artifacts: https://docs.gradle.org/current/userguide/signing_plugin.html
+
   sourceCompatibility = 1.8
   targetCompatibility = 1.8
-  
+
+  ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
   repositories {
     jcenter()
     mavenCentral()
@@ -37,59 +42,66 @@ subprojects {
     from sourceSets.main.allSource
   }
 
+  // Gather all output artifacts together
   artifacts {
-    archives javadocJar, sourcesJar
+    archives jar
+    archives javadocJar
+    archives sourcesJar
   }
-}
 
-if (project.hasProperty('release')) {
-  allprojects {
-    apply plugin: 'signing'
-    apply plugin: 'maven'
-
-    // Signature of artifacts
+  // See: http://blog.sonatype.com/2010/01/how-to-generate-pgp-signatures-with-maven/
+  if (isReleaseVersion) {
     signing {
+      // Conditions under which the signing is executed
+      required { isReleaseVersion }
       sign configurations.archives
     }
+  }
 
-    // OSSRH publication
-    uploadArchives {
-      repositories {
-        mavenDeployer {
-          // POM signature
-          beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-          // Target repository
-          // Snapshots: https://oss.sonatype.org/content/repositories/snapshots
-          // Release: https://oss.sonatype.org/service/local/staging/deploy/maven2
-          repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-            authentication(userName: ossrhUser, password: ossrhPassword)
+  // Deployment to Maven Central repository can be started using: gradle uploadArchives
+  // The credentials for signing and upload are stored in <user-home>/.gradle/gradle.properties file
+  // Signing key is stored in <user-home>/AppData/Roaming/gnupg/secring.gpg
+  uploadArchives {
+    repositories {
+      mavenDeployer {
+        // POM signature
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+        // Sonatype Nexus Staging repository (for releases)
+        repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+          authentication(userName: ossrhUsername, password: ossrhPassword)
+        }
+
+        // Sonatype Nexus Snapshost repository
+        snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+          authentication(userName: ossrhUsername, password: ossrhPassword)
+        }
+
+        pom.project {
+          name project.name
+          description project.description
+          packaging 'jar'
+          url 'https://github.com/beranradek/overview-repo'
+
+          scm {
+            connection 'scm:git:git@github.com:beranradek/overview-repo.git'
+            developerConnection 'scm:git:git@github.com:beranradek/overview-repo.git'
+            url 'git@github.com:beranradek/overview-repo.git'
           }
-          pom.project {
-            name project.name
-            description project.description
-            packaging 'jar'
-            url 'https://github.com/beranradek/overview-repo'
 
-            scm {
-              connection 'scm:git:https://github.com/beranradek/overview-repo.git'
-              developerConnection 'scm:git:git@github.com:beranradek/overview-repo.git'
-              url 'https://github.com/beranradek/overview-repo.git'
+          licenses {
+            license {
+              name 'The Apache License, Version 2.0'
+              url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+              distribution 'repo'
             }
+          }
 
-            licenses {
-              license {
-                name 'The Apache License, Version 2.0'
-                url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                distribution 'repo'
-              }
-            }
-
-            developers {
-              developer {
-                id = 'beranradek'
-                name = 'Radek Beran'
-                email = 'beran.radek@seznam.cz'
-              }
+          developers {
+            developer {
+              id = 'beranradek'
+              name = 'Radek Beran'
+              email = 'beran.radek@seznam.cz'
             }
           }
         }
@@ -97,18 +109,17 @@ if (project.hasProperty('release')) {
     }
   }
 
-  nexusStaging {
-    username = ossrhUser
-    password = ossrhPassword
-  }
-}
+  // Make sure uploadArchives (uploading artifacts to Maven central) is performed
+  // after the build with the release version has finished
+  afterReleaseBuild.dependsOn uploadArchives
 
-// Turning off doclint javadoc style checker that produces strict errors.
-// See: http://blog.joda.org/2014/02/turning-off-doclint-in-jdk-8-javadoc.html
-if (JavaVersion.current().isJava8Compatible()) {
-  allprojects {
-    tasks.withType(Javadoc) {
-      options.addStringOption('Xdoclint:none', '-quiet')
+  // Turning off doclint javadoc style checker that produces strict errors.
+  // See: http://blog.joda.org/2014/02/turning-off-doclint-in-jdk-8-javadoc.html
+  if (JavaVersion.current().isJava8Compatible()) {
+    allprojects {
+      tasks.withType(Javadoc) {
+        options.addStringOption('Xdoclint:none', '-quiet')
+      }
     }
   }
 }
