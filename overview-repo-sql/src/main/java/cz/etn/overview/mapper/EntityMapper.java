@@ -255,6 +255,7 @@ public interface EntityMapper<T, F> {
 	
 	/**
 	 * Builds new data entity from attribute source.
+	 * This method can be overridden when you are working with immutable entity class.
 	 * @param attributeSource
 	 * @param aliasPrefix alias prefix for all database fields 
 	 * @return

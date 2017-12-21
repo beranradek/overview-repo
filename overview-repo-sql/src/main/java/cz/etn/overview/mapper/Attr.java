@@ -274,7 +274,7 @@ public class Attr<E, A> implements Attribute<E, A> {
     public <T> Attribute<E, T> as(Class<T> attrClass, Function<A, T> toNewType, Function<T, A> toOldType) {
         return Attr.of(entityClass, attrClass, name)
             .get(e -> { A v = fromEntity.apply(e); return v != null ? toNewType.apply(v) : null; })
-            .updatedEntity((e, t) -> { return toEntity.apply(e, t != null ? toOldType.apply(t) : null); })
+            .updatedEntity((e, t) -> toEntity.apply(e, t != null ? toOldType.apply(t) : null))
             .primary(primary)
             .namePrefix(namePrefix)
             .maxLength(maxLength)

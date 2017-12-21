@@ -209,6 +209,7 @@ public abstract class AbstractMongoRepository<T, K, F> implements Repository<T, 
 
     /**
      * Updates given entity with key and returns updated entity.
+     * This method can be overridden when you are working with immutable entity class.
      * @param entity
      * @param key
      * @return entity updated with given id

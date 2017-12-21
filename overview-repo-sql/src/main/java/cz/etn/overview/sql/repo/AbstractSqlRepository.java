@@ -291,6 +291,7 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 	
 	/**
 	 * Returns entity with updated primary key attributes.
+	 * This method can be overridden when you are working with immutable entity class.
 	 * @param entity
 	 * @param key
 	 * @return entity updated with given id
