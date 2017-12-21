@@ -20,5 +20,5 @@ There is plenty of methods already implemented for you: Create, update/partial u
 
 ## Planned features
  * Storage of new immutable versions of entity instead of updates, using supported version flag on an attribute (for now, this can be implemented in a custom way using for e.g. (entityId, version) composite key).
- * Minimal fetch levels configurable on attributes so not every attribute must be loaded (e.g. info, detail).
+ * Set of attributes to be loaded specified in overview settings (projection) - different sets can be used for informative or detail listings.
  * Cooperation with another data processing libraries that can leverage general, yet simple definition of attributes (generated forms, CSV/XLS exports from database, ...).
