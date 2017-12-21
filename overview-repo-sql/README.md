@@ -233,11 +233,10 @@ You can discover a little extended example that is part of the library's tests f
 
 ### Release
 
-* Fill in CHANGELOG.md.
-* Just run: gradlew :overview-repo-sql:clean :overview-repo-sql:test :overview-repo-sql:assemble to see all is ok and ready for release.
-* Run: gradlew :overview-repo-sql:clean :overview-repo-sql:release
-  * This automatically executes also uploadArchives (upload to Maven central) after the release version is created
-* Push commits from Gradle release plugin to GitHub
-* Login to https://oss.sonatype.org/, "Close" the Staging repository for library, "Refresh" it and "Release" it.
+ * Fill in CHANGELOG.md.
+ * Create tag REL-x.y.z (with version to release) and push it.
+ * Just run: gradlew :overview-repo-sql:clean :overview-repo-sql:test :overview-repo-sql:assemble to see all is ok and ready for release.
+ * Publish to Maven Central: gradlew :overview-repo-sql:clean :overview-repo-sql:uploadArchives 
+ * Login to https://oss.sonatype.org/, "Close" the Staging repository for library, "Refresh" it and "Release" it.
 
 See http://central.sonatype.org/pages/ossrh-guide.html#releasing-to-central and http://central.sonatype.org/pages/gradle.html for details.  
