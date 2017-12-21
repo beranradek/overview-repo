@@ -1,7 +1,7 @@
 # Changelog
 
-## [1.0.26] - ???
-- What is new?
+## [1.1.0] - 2017-12-21
+- Group name (packages) changed to org.xbery.
 
 ## [1.0.25] - 2017-12-01
 - AND/OR conditions

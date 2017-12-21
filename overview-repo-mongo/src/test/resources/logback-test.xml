@@ -8,7 +8,7 @@
         </encoder>
     </appender>
 
-    <logger name="cz.etn.overview" level="trace" />
+    <logger name="org.xbery.overview" level="trace" />
     <root level="debug">
         <appender-ref ref="STDOUT" />
     </root>
