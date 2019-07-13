@@ -16,6 +16,8 @@
  */
 package org.xbery.overview.sql.repo;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xbery.overview.*;
 import org.xbery.overview.common.Pair;
 import org.xbery.overview.common.funs.CheckedFunction;
@@ -29,16 +31,13 @@ import org.xbery.overview.repo.Repository;
 import org.xbery.overview.repo.RepositoryException;
 import org.xbery.overview.sql.filter.SqlCondition;
 import org.xbery.overview.sql.filter.SqlConditionBuilder;
+import org.xbery.overview.sql.mapper.DbTypeConvertor;
 import org.xbery.overview.sql.mapper.JoinEntityMapper;
 import org.xbery.overview.sql.mapper.ResultSetAttributeSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.time.Instant;
 import java.util.*;
-import java.util.Date;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -52,7 +51,8 @@ import java.util.stream.Collectors;
 public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K, F> {
 
 	protected static final Logger log = LoggerFactory.getLogger(AbstractSqlRepository.class);
-	private static final SqlConditionBuilder sqlConditionBuilder = new SqlConditionBuilder();
+	protected static final DbTypeConvertor dbTypeConvertor = new DbTypeConvertor();
+	protected static final SqlConditionBuilder sqlConditionBuilder = new SqlConditionBuilder();
 	
 	@Override
 	public T create(T entity, boolean autogenerateKey) {
@@ -238,7 +238,7 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 
 		final List<Object> parameterValues = new ArrayList<>();
 		if (updatedAttributeValues != null) {
-			parameterValues.addAll(getDbSupportedAttributeValues(updatedAttributeValues));
+			parameterValues.addAll(getDbTypeConvertor().toDbValues(updatedAttributeValues));
 		}
 		List<Object> pValues = appendFilter(sqlBuilder, conditions);
 		if (pValues != null) {
@@ -327,16 +327,11 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 		return (K)generatedId;
 	}
 	
-	protected Date instantToUtilDate(Instant date) {
-		if (date == null) return null;
-		return new Date(date.toEpochMilli());
-	}
-	
 	protected K create(String sql, List<Object> attributeValues, boolean autogenerateKey) {
 		return withNewConnection(conn -> {
 			K generatedKey = null;
 			try (PreparedStatement statement = conn.prepareStatement(sql, autogenerateKey ? Statement.RETURN_GENERATED_KEYS : Statement.NO_GENERATED_KEYS)) {
-				setParameters(statement, getDbSupportedAttributeValues(attributeValues));
+				setParameters(statement, getDbTypeConvertor().toDbValues(attributeValues));
 				if (autogenerateKey) {
 					statement.executeUpdate();
 					ResultSet rs = statement.getGeneratedKeys();
@@ -473,7 +468,7 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 	protected List<Object> appendFilter(StringBuilder sqlBuilder, List<Condition> filterConditions) {
 		List<Object> parameters = null;
 		if (filterConditions != null && !filterConditions.isEmpty()) {
-			List<SqlCondition> sqlConditions = filterConditions.stream().map(c -> getConditionBuilder().build(c, this::getDbSupportedAttributeValue)).collect(Collectors.toList());
+			List<SqlCondition> sqlConditions = filterConditions.stream().map(c -> getConditionBuilder().build(c, getDbTypeConvertor()::toDbValue)).collect(Collectors.toList());
 			List<String> whereClause = sqlConditions.stream().map(c -> c.getConditionWithPlaceholders()).collect(Collectors.toList());
 			parameters = sqlConditions.stream().flatMap(c -> c.getValues().stream()).collect(Collectors.toList());
 			sqlBuilder.append(" WHERE ").append(CollectionFuns.join(whereClause, " AND "));
@@ -526,27 +521,6 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
                 log.trace("{}: {}", i + 1, p);
             }
         }
-	}
-
-	protected List<Object> getDbSupportedAttributeValues(List<Object> attributeValues) {
-		List<Object> result = new ArrayList<>();
-		if (attributeValues != null) {
-			for (Object v : attributeValues) {
-				result.add(getDbSupportedAttributeValue(v));
-			}
-		}
-		return result;
-	}
-
-	protected Object getDbSupportedAttributeValue(Object v) {
-		Object valueForDb = null;
-		// TODO RBe: Conversion of another data types when not supported their passing to JDBC?
-		if (v instanceof Instant) {
-			valueForDb = instantToUtilDate((Instant)v);
-		} else {
-			valueForDb = v;
-		}
-		return valueForDb;
 	}
 
 	protected String aggFunction(AggType aggType, String attrName) {
@@ -620,6 +594,10 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 	protected SqlConditionBuilder getConditionBuilder() {
 		return sqlConditionBuilder;
 	}
+
+    protected DbTypeConvertor getDbTypeConvertor() {
+        return dbTypeConvertor;
+    }
 
 	private <T, F> boolean isJoinWithManyMapper(EntityMapper<T, F> entityMappper) {
 		if (!(entityMappper instanceof JoinEntityMapper)) {

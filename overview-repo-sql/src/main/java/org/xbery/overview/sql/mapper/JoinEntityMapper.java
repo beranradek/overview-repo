@@ -26,9 +26,7 @@ import org.xbery.overview.mapper.*;
 import org.xbery.overview.sql.filter.SqlCondition;
 import org.xbery.overview.sql.filter.SqlConditionBuilder;
 
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -49,6 +47,7 @@ import java.util.stream.Collectors;
 public class JoinEntityMapper<T, F, U, G, V, H, O> implements EntityMapper<V, H> {
 
     private static final SqlConditionBuilder sqlConditionBuilder = new SqlConditionBuilder();
+    private static final DbTypeConvertor dbTypeConvertor = new DbTypeConvertor();
     private final EntityMapper<T, F> firstMapper;
     private final EntityMapper<U, G> secondMapper;
 
@@ -123,7 +122,7 @@ public class JoinEntityMapper<T, F, U, G, V, H, O> implements EntityMapper<V, H>
         // TODO RBe: Do not duplicate this condition transformation logic with repository
         List<Condition> onConditions = getOnConditions();
         if (onConditions != null && !onConditions.isEmpty()) {
-            List<SqlCondition> sqlConditions = onConditions.stream().map(c -> getConditionBuilder().build(c, this::getDbSupportedAttributeValue)).collect(Collectors.toList());
+            List<SqlCondition> sqlConditions = onConditions.stream().map(c -> getConditionBuilder().build(c, getDbTypeConvertor()::toDbValue)).collect(Collectors.toList());
             List<String> onClause = sqlConditions.stream().map(c -> c.getConditionWithPlaceholders()).collect(Collectors.toList());
             List<Object> parameters = sqlConditions.stream().flatMap(c -> c.getValues().stream()).collect(Collectors.toList());
             if (parameters != null && !parameters.isEmpty()) {
@@ -211,29 +210,15 @@ public class JoinEntityMapper<T, F, U, G, V, H, O> implements EntityMapper<V, H>
         return joinType;
     }
 
-    public SqlConditionBuilder getConditionBuilder() {
-        return sqlConditionBuilder;
-    }
-
     public Cardinality getCardinality() {
         return cardinality;
     }
 
-    // TODO RBe: Do not duplicate this condition transformation logic with repository
-    protected Object getDbSupportedAttributeValue(Object v) {
-        Object valueForDb = null;
-        // TODO RBe: Conversion of another data types when not supported their passing to JDBC?
-        if (v instanceof Instant) {
-            valueForDb = instantToUtilDate((Instant)v);
-        } else {
-            valueForDb = v;
-        }
-        return valueForDb;
+    protected SqlConditionBuilder getConditionBuilder() {
+        return sqlConditionBuilder;
     }
 
-    // TODO RBe: Do not duplicate this with repository
-    protected Date instantToUtilDate(Instant date) {
-        if (date == null) return null;
-        return new Date(date.toEpochMilli());
+    protected DbTypeConvertor getDbTypeConvertor() {
+        return dbTypeConvertor;
     }
 }
