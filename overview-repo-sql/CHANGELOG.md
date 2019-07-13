@@ -3,6 +3,7 @@
 ## [1.1.1] - 2019-07-13
 - DbTypeConvertor for converting types to DB-supported types
 - buildEntityWithAttributes to fetch only partially filled entity from DB
+- Convenience Overview constructors
 
 ## [1.1.0] - 2017-12-21
 - Group name (packages) changed to org.xbery.

@@ -21,6 +21,7 @@ import org.xbery.overview.Order;
 import org.xbery.overview.common.Pair;
 import org.xbery.overview.filter.Condition;
 import org.xbery.overview.repo.Conditions;
+import org.xbery.overview.sql.mapper.JoinEntityMapper;
 import org.xbery.overview.sql.mapper.JoinEntityMapperBuilder;
 
 import java.util.ArrayList;
@@ -301,6 +302,9 @@ public interface EntityMapper<T, F> {
 				alias = aliasPrefix + attr.getName();
 			}
 			instance = attr.entityWithAttribute(instance, attributeSource, attr.getName(alias));
+		}
+		if (this instanceof JoinEntityMapper) {
+			return instance;
 		}
 		boolean primaryKeyFilled = getPrimaryAttributeValues(instance).stream().anyMatch(v -> v != null);
 		return primaryKeyFilled ? instance : null;

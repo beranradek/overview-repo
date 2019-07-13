@@ -62,6 +62,14 @@ public class Overview<F> implements Serializable {
     public Overview(F filter, List<Order> ordering, Pagination pagination) {
         this(filter, ordering, pagination, null);
     }
+
+    public Overview(F filter, List<Order> ordering) {
+        this(filter, ordering, null);
+    }
+
+    public Overview(F filter) {
+        this(filter, null);
+    }
     
     /**
      * Returns new instance/copy of overview with given filter set.

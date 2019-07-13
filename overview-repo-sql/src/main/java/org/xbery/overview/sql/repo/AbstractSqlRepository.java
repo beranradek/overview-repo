@@ -256,7 +256,7 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 			overview.getPagination(),
 			overview.getGrouping(),
 			entityMapper,
-			as -> entityMapper.buildEntity(as)
+			as -> entityMapper.buildEntityWithAttributeNames(as, selectedAttributes, null)
 		);
 	}
 
