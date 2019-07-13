@@ -252,17 +252,50 @@ public interface EntityMapper<T, F> {
 			.map(v -> (v.getNameFull() + (aliasPrefix != null ? (" AS " + aliasPrefix + v.getName()) : "")))
 			.collect(Collectors.toList());
 	}
+
+	/**
+	 * Builds new data entity from attribute source. Only selected attributes of entity will be filled.
+	 * This method can be overridden when you are working with immutable entity class.
+	 * @param attributeSource source of values of DB attributes
+	 * @param attributeNames names of attributes to fill in
+	 * @param aliasPrefix alias prefix for all database fields
+	 * @return
+	 */
+	default T buildEntityWithAttributeNames(AttributeSource attributeSource, List<String> attributeNames, String aliasPrefix) {
+		return buildEntityWithAttributes(attributeSource, getAttributes().stream().filter(a -> attributeNames.contains(a.getName())).collect(Collectors.toList()), aliasPrefix);
+	}
 	
 	/**
 	 * Builds new data entity from attribute source.
 	 * This method can be overridden when you are working with immutable entity class.
-	 * @param attributeSource
+	 * @param attributeSource source of values of DB attributes
 	 * @param aliasPrefix alias prefix for all database fields 
 	 * @return
 	 */
 	default T buildEntity(AttributeSource attributeSource, String aliasPrefix) {
+		return buildEntityWithAttributes(attributeSource, getAttributes(), aliasPrefix);
+	}
+	
+	/**
+	 * Builds new data entity from attribute source.
+	 * @param attributeSource source of values of DB attributes
+	 * @return
+	 */
+	default T buildEntity(AttributeSource attributeSource) {
+		return buildEntity(attributeSource, null);
+	}
+
+	/**
+	 * Builds new data entity from attribute source. Only given attributes of entity will be filled.
+	 * This method can be overridden when you are working with immutable entity class.
+	 * @param attributeSource source of values of DB attributes
+	 * @param attributes attributes to fill in
+	 * @param aliasPrefix alias prefix for all database fields
+	 * @return
+	 */
+	default T buildEntityWithAttributes(AttributeSource attributeSource, List<Attribute<T, ?>> attributes, String aliasPrefix) {
 		T instance = createEntity();
-		for (Attribute<T, ?> attr : getAttributes()) {
+		for (Attribute<T, ?> attr : attributes) {
 			String alias = null;
 			if (aliasPrefix != null) {
 				alias = aliasPrefix + attr.getName();
@@ -271,15 +304,6 @@ public interface EntityMapper<T, F> {
 		}
 		boolean primaryKeyFilled = getPrimaryAttributeValues(instance).stream().anyMatch(v -> v != null);
 		return primaryKeyFilled ? instance : null;
-	}
-	
-	/**
-	 * Builds new data entity from attribute source.
-	 * @param attributeSource
-	 * @return
-	 */
-	default T buildEntity(AttributeSource attributeSource) {
-		return buildEntity(attributeSource, null);
 	}
 
 	/**
