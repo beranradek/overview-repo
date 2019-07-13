@@ -8,6 +8,7 @@ Library has no dependencies except a database-type-specific client API and loggi
 
 
  * **[SQL](overview-repo-sql/README.md) - production ready JDBC implementation** of full-featured generic repository.
+ * **[SQL for Scala](overview-repo-sql-scala/README.md) - generic repository adapted for Scala language 
  * **[Mongo](overview-repo-mongo/README.md) - Mongo DB implementation**. Still work in progress, does not yet support nested documents and arrays of documents.
 
 
