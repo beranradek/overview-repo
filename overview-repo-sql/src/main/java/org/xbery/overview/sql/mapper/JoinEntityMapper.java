@@ -28,6 +28,7 @@ import org.xbery.overview.sql.filter.SqlConditionBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -105,8 +106,12 @@ public class JoinEntityMapper<T, F, U, G, V, H, O> implements EntityMapper<V, H>
     }
 
     @Override
-    public V createEntity() {
-        return composeEntity.apply(firstMapper.createEntity(), secondMapper.createEntity());
+    public V createEntity(AttributeSource attributeSource, List<Attribute<V, ?>> attributes, String aliasPrefix) {
+        Set<String> firstAttrNames = firstMapper.getAttributeNames().stream().collect(Collectors.toSet());
+        Set<String> secondAttrNames = secondMapper.getAttributeNames().stream().collect(Collectors.toSet());
+        List<Attribute<T, ?>> firstAttributes = convertInstanceOfObject(attributes.stream().filter(a -> firstAttrNames.contains(a.getName())).collect(Collectors.toList()), List.class);
+        List<Attribute<U, ?>> secondAttributes = convertInstanceOfObject(attributes.stream().filter(a -> secondAttrNames.contains(a.getName())).collect(Collectors.toList()), List.class);
+        return composeEntity.apply(firstMapper.createEntity(attributeSource, firstAttributes, aliasPrefix), secondMapper.createEntity(attributeSource, secondAttributes, aliasPrefix));
     }
 
     @Override
@@ -220,5 +225,13 @@ public class JoinEntityMapper<T, F, U, G, V, H, O> implements EntityMapper<V, H>
 
     protected DbTypeConvertor getDbTypeConvertor() {
         return dbTypeConvertor;
+    }
+
+    private <T> T convertInstanceOfObject(Object o, Class<T> clazz) {
+        try {
+            return clazz.cast(o);
+        } catch (ClassCastException e) {
+            return null;
+        }
     }
 }

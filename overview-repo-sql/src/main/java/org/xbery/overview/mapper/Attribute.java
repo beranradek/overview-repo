@@ -35,6 +35,21 @@ public interface Attribute<E, A> {
 	A getValue(E entity);
 
 	/**
+	 * Returns value of attribute extracted from given source.
+	 * @param attributeSource
+	 * @param aliasPrefix
+	 * @return
+	 */
+	default A getValueFromSource(AttributeSource attributeSource, String aliasPrefix) {
+		String alias = null;
+		if (aliasPrefix != null) {
+			alias = aliasPrefix + getName();
+		}
+		String attributeName = getName(alias);
+		return attributeSource.get(getAttributeClass(), attributeName);
+	}
+
+	/**
 	 * Name of attribute.
 	 * @return
      */
@@ -69,15 +84,6 @@ public interface Attribute<E, A> {
 	 * @return
 	 */
 	Attribute<E, A> withNamePrefix(String namePrefix);
-
-	/**
-	 * Returns instance of entity updated with given attribute.
-	 * @param entity
-	 * @param attributeSource
-	 * @param attributeName name of attribute that should be used to extract attribute value from given attribute source
-     * @return
-     */
-	E entityWithAttribute(E entity, AttributeSource attributeSource, String attributeName);
 
 	/**
 	 * Full name of attribute including "entity namespace".

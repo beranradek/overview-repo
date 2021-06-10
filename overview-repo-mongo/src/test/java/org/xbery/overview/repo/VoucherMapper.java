@@ -21,6 +21,7 @@ import org.xbery.overview.domain.Voucher;
 import org.xbery.overview.mapper.Attr;
 import org.xbery.overview.mapper.Attribute;
 import org.xbery.overview.filter.Condition;
+import org.xbery.overview.mapper.AttributeSource;
 import org.xbery.overview.mapper.DynamicEntityMapper;
 
 import java.math.BigDecimal;
@@ -55,20 +56,20 @@ public class VoucherMapper extends DynamicEntityMapper<Voucher, Object> {
 	public final Attribute<Voucher, String> invoice_note;
 
 	private VoucherMapper() {
-		code = add(Attr.ofString(cls, "code").primary().get(e -> e.getCode()).set((e, a) -> e.setCode(a)).maxLength(20));
-		creation_time = add(Attr.ofInstant(cls, "creation_time").get(e -> e.getCreationTime()).set((e, a) -> e.setCreationTime(a)));
-		discount_price = add(Attr.ofBigDecimal(cls, "discount_price").get(e -> e.getDiscountPrice()).set((e, a) -> e.setDiscountPrice(a)).maxLength(10));
-		valid_from = add(Attr.ofInstant(cls, "valid_from").get(e -> e.getValidFrom()).set((e, a) -> e.setValidFrom(a)));
-		valid_to = add(Attr.ofInstant(cls, "valid_to").get(e -> e.getValidTo()).set((e, a) -> e.setValidTo(a)));
-		redemption_time = add(Attr.ofInstant(cls, "redemption_time").get(e -> e.getRedemptionTime()).set((e, a) -> e.setRedemptionTime(a)));
-		invalidation_time = add(Attr.ofInstant(cls, "invalidation_time").get(e -> e.getInvalidationTime()).set((e, a) -> e.setInvalidationTime(a)));
-		invalidation_note = add(Attr.ofString(cls, "invalidation_note").get(e -> e.getInvalidationNote()).set((e, a) -> e.setInvalidationNote(a)).maxLength(200));
-		renewal_note = add(Attr.ofString(cls, "renewal_note").get(e -> e.getRenewalNote()).set((e, a) -> e.setRenewalNote(a)).maxLength(200));
-		reserved_by = add(Attr.ofString(cls, "reserved_by").get(e -> e.getReservedBy()).set((e, a) -> e.setReservedBy(a)).maxLength(40));
-		redeemed_by = add(Attr.ofString(cls, "redeemed_by").get(e -> e.getRedeemedBy()).set((e, a) -> e.setRedeemedBy(a)).maxLength(40));
-		sold_by = add(Attr.ofString(cls, "sold_by").get(e -> e.getSoldBy()).set((e, a) -> e.setSoldBy(a)).maxLength(40));
-		invoice_time = add(Attr.ofInstant(cls, "invoice_time").get(e -> e.getInvoiceTime()).set((e, a) -> e.setInvoiceTime(a)));
-		invoice_note = add(Attr.ofString(cls, "invoice_note").get(e -> e.getInvoiceNote()).set((e, a) -> e.setInvoiceNote(a)).maxLength(400));
+		code = add(Attr.ofString(cls, "code").primary().get(e -> e.getCode()).maxLength(20));
+		creation_time = add(Attr.ofInstant(cls, "creation_time").get(e -> e.getCreationTime()));
+		discount_price = add(Attr.ofBigDecimal(cls, "discount_price").get(e -> e.getDiscountPrice()).maxLength(10));
+		valid_from = add(Attr.ofInstant(cls, "valid_from").get(e -> e.getValidFrom()));
+		valid_to = add(Attr.ofInstant(cls, "valid_to").get(e -> e.getValidTo()));
+		redemption_time = add(Attr.ofInstant(cls, "redemption_time").get(e -> e.getRedemptionTime()));
+		invalidation_time = add(Attr.ofInstant(cls, "invalidation_time").get(e -> e.getInvalidationTime()));
+		invalidation_note = add(Attr.ofString(cls, "invalidation_note").get(e -> e.getInvalidationNote()).maxLength(200));
+		renewal_note = add(Attr.ofString(cls, "renewal_note").get(e -> e.getRenewalNote()).maxLength(200));
+		reserved_by = add(Attr.ofString(cls, "reserved_by").get(e -> e.getReservedBy()).maxLength(40));
+		redeemed_by = add(Attr.ofString(cls, "redeemed_by").get(e -> e.getRedeemedBy()).maxLength(40));
+		sold_by = add(Attr.ofString(cls, "sold_by").get(e -> e.getSoldBy()).maxLength(40));
+		invoice_time = add(Attr.ofInstant(cls, "invoice_time").get(e -> e.getInvoiceTime()));
+		invoice_note = add(Attr.ofString(cls, "invoice_note").get(e -> e.getInvoiceNote()).maxLength(400));
 	}
 
 	public static VoucherMapper getInstance() {
@@ -81,8 +82,23 @@ public class VoucherMapper extends DynamicEntityMapper<Voucher, Object> {
 	}
 	
 	@Override
-	public Voucher createEntity() {
-		return new Voucher();
+	public Voucher createEntity(AttributeSource attributeSource, List<Attribute<Voucher, ?>> attributes, String aliasPrefix) {
+		Voucher voucher = new Voucher();
+		voucher.setCode(code.getValueFromSource(attributeSource, aliasPrefix));
+		voucher.setCreationTime(creation_time.getValueFromSource(attributeSource, aliasPrefix));
+		voucher.setDiscountPrice(discount_price.getValueFromSource(attributeSource, aliasPrefix));
+		voucher.setValidFrom(valid_from.getValueFromSource(attributeSource, aliasPrefix));
+		voucher.setValidTo(valid_to.getValueFromSource(attributeSource, aliasPrefix));
+		voucher.setRedemptionTime(redemption_time.getValueFromSource(attributeSource, aliasPrefix));
+		voucher.setInvalidationTime(invalidation_time.getValueFromSource(attributeSource, aliasPrefix));
+		voucher.setInvalidationNote(invalidation_note.getValueFromSource(attributeSource, aliasPrefix));
+		voucher.setRenewalNote(renewal_note.getValueFromSource(attributeSource, aliasPrefix));
+		voucher.setReservedBy(reserved_by.getValueFromSource(attributeSource, aliasPrefix));
+		voucher.setRedeemedBy(redeemed_by.getValueFromSource(attributeSource, aliasPrefix));
+		voucher.setSoldBy(sold_by.getValueFromSource(attributeSource, aliasPrefix));
+		voucher.setInvoiceTime(invoice_time.getValueFromSource(attributeSource, aliasPrefix));
+		voucher.setInvoiceNote(invoice_note.getValueFromSource(attributeSource, aliasPrefix));
+		return voucher;
 	}
 
 	@Override

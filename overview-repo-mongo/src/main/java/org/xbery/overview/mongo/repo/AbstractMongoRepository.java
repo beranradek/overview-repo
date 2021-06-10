@@ -82,7 +82,7 @@ public abstract class AbstractMongoRepository<T, K, F> implements Repository<T, 
             String id = generateId();
             K generatedKey = convertGeneratedKey(id);
             doc.append(getIdFieldName(), id);
-            createdEntity = entityUpdatedWithId(createdEntity, generatedKey);
+            createdEntity = findById(generatedKey).get();
         }
         getCollection().insertOne(doc);
         return createdEntity;
@@ -205,35 +205,6 @@ public abstract class AbstractMongoRepository<T, K, F> implements Repository<T, 
         List<Condition> conditions = new ArrayList<>();
         conditions.add(Conditions.eq(attribute, attrValue));
         return CollectionFuns.headOpt(findByFilterConditions(conditions, createDefaultOrdering()));
-    }
-
-    /**
-     * Updates given entity with key and returns updated entity.
-     * This method can be overridden when you are working with immutable entity class.
-     * @param entity
-     * @param key
-     * @return entity updated with given id
-     */
-    protected T entityUpdatedWithId(T entity, K key) {
-        List<Pair<Attribute<T, ?>, Object>> attributesToValues = new ArrayList<>();
-        attributesToValues.addAll(getEntityMapper().decomposePrimaryKey(key));
-
-        // Fill in attribute source for binding key values to entity
-        Map<String, Object> keyAttrSource = new LinkedHashMap<>();
-        for (Pair<Attribute<T, ?>, Object> p : attributesToValues) {
-            Attribute<T, ?> attr = p.getFirst();
-            Object value = p.getSecond();
-            keyAttrSource.put(attr.getName(), value);
-        }
-        MapAttributeSource attrSource = new MapAttributeSource(keyAttrSource);
-
-        // Binding values of primary key parts to entity
-        T updatedEntity = entity;
-        for (Pair<Attribute<T, ?>, Object> p : attributesToValues) {
-            Attribute<T, ?> attr = p.getFirst();
-            updatedEntity = attr.entityWithAttribute(updatedEntity, attrSource, attr.getName());
-        }
-        return updatedEntity;
     }
 
     /**

@@ -44,7 +44,7 @@ public abstract class InMemoryRepository<T, K, F> implements Repository<T, K, F>
 			throw new RepositoryException("Duplicate key " + getEntityId(entity));
 		}
 		if (autogerateKey) {
-			entity = entityUpdatedWithId(entity, generateId());
+			throw new RepositoryException("autogerateKey not supported by InMemoryRepository");
 		}
 		records.add(entity);
 		return entity;
@@ -102,10 +102,6 @@ public abstract class InMemoryRepository<T, K, F> implements Repository<T, K, F>
 		throw new UnsupportedOperationException("Aggregation is not supported by generic in-memory implementation");
 	}
 
-	abstract protected T entityUpdatedWithId(T entity, K id);
-
 	abstract protected K getEntityId(T entity);
-
-	abstract protected K generateId();
 	
 }

@@ -20,8 +20,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -41,7 +39,6 @@ public class Attr<E, A> implements Attribute<E, A> {
     private final String name;
     private final boolean primary;
     private final Function<E, A> fromEntity;
-    private final BiFunction<E, A, E> toEntity;
     private final String namePrefix;
     private final Optional<Integer> maxLength;
 
@@ -89,6 +86,15 @@ public class Attr<E, A> implements Attribute<E, A> {
         return of(entityClass, BigDecimal.class, name);
     }
 
+    public static <T extends Enum<T>> T getEnumValueFromSource(Class<T> enumType, Attribute<?, String> attr, AttributeSource attributeSource, String aliasPrefix) {
+        String str = attr.getValueFromSource(attributeSource, aliasPrefix);
+        T enumValue = null;
+        if (str != null && !str.isEmpty()) {
+            enumValue = Enum.valueOf(enumType, str);
+        }
+        return enumValue;
+    }
+
     /**
      * Copy constructor.
      */
@@ -98,7 +104,6 @@ public class Attr<E, A> implements Attribute<E, A> {
         this.name = source.name;
         this.primary = source.primary;
         this.fromEntity = source.fromEntity;
-        this.toEntity = source.toEntity;
         this.namePrefix = namePrefix;
         this.maxLength = source.maxLength;
     }
@@ -109,7 +114,6 @@ public class Attr<E, A> implements Attribute<E, A> {
         private final Class<A> attributeClass;
         private final String name;
         private Function<E, A> fromEntity;
-        private BiFunction<E, A, E> toEntity;
         private String namePrefix;
 
         // Optional parameters - initialized to default values (these are only here in a single location)
@@ -146,15 +150,6 @@ public class Attr<E, A> implements Attribute<E, A> {
             return this;
         }
 
-        public Builder<E, A> updatedEntity(BiFunction<E, A, E> toEntity) {
-            this.toEntity = toEntity;
-            return this;
-        }
-
-        public Builder<E, A> set(BiConsumer<E, A> setToEntity) {
-            return updatedEntity((e, a) -> { setToEntity.accept(e, a); return e; });
-        }
-
         public Builder<E, A> namePrefix(String namePrefix) {
             this.namePrefix = namePrefix;
             return this;
@@ -176,10 +171,6 @@ public class Attr<E, A> implements Attribute<E, A> {
             return fromEntity;
         }
 
-        public BiFunction<E, A, E> getToEntity() {
-            return toEntity;
-        }
-
         public String getNamePrefix() {
             return namePrefix;
         }
@@ -195,9 +186,6 @@ public class Attr<E, A> implements Attribute<E, A> {
         public Attr build() {
             Attr attr = new Attr(this);
             // Possible validations here (checks on fields)...
-            if (toEntity == null) {
-                throw new IllegalStateException("updatedEntity mapping is missing");
-            }
             if (fromEntity == null) {
                 throw new IllegalStateException("get mapping is missing");
             }
@@ -211,7 +199,6 @@ public class Attr<E, A> implements Attribute<E, A> {
         name = builder.name;
         primary = builder.primary;
         fromEntity = builder.fromEntity;
-        toEntity = builder.toEntity;
         namePrefix = builder.namePrefix;
         maxLength = builder.maxLength;
     }
@@ -237,12 +224,6 @@ public class Attr<E, A> implements Attribute<E, A> {
     }
 
     @Override
-    public E entityWithAttribute(E entity, AttributeSource attributeSource, String attributeName) {
-        A value = attributeSource.get(attributeClass, attributeName);
-        return toEntity.apply(entity, value);
-    }
-
-    @Override
     public boolean isPrimary() {
         return primary;
     }
@@ -254,10 +235,6 @@ public class Attr<E, A> implements Attribute<E, A> {
 
     public Function<E, A> getFromEntity() {
         return fromEntity;
-    }
-
-    public BiFunction<E, A, E> getToEntity() {
-        return toEntity;
     }
 
     @Override
@@ -274,7 +251,6 @@ public class Attr<E, A> implements Attribute<E, A> {
     public <T> Attribute<E, T> as(Class<T> attrClass, Function<A, T> toNewType, Function<T, A> toOldType) {
         return Attr.of(entityClass, attrClass, name)
             .get(e -> { A v = fromEntity.apply(e); return v != null ? toNewType.apply(v) : null; })
-            .updatedEntity((e, t) -> toEntity.apply(e, t != null ? toOldType.apply(t) : null))
             .primary(primary)
             .namePrefix(namePrefix)
             .maxLength(maxLength)

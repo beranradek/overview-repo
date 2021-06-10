@@ -59,6 +59,7 @@ public class CustomerRepositoryImplTest {
 			Customer customerCreated = repo.create(customer, true);
 			assertTrue("Created customer has id assigned", customerCreated.getId() != null);
 			customer.setId(customerCreated.getId()); // so the entities are now equal
+			customer.setCreationTime(customerCreated.getCreationTime()); // so the entities are now equal (precision differs)
 			assertTrue("Created customer " + customerCreated + " equals customer to store " + customer, EqualsBuilder.reflectionEquals(customer, customerCreated));
 
 			Optional<Customer> foundCustomerOpt = repo.findById(customer.getId());
@@ -101,10 +102,14 @@ public class CustomerRepositoryImplTest {
 			assertEquals(martina.getEmail(), martinaLoaded.getEmail());
 
 			assertTrue("Jan has one voucher", janLoaded.getVoucher() != null && janLoaded.getVoucher().getCode() != null);
+			jan.setCreationTime(janLoaded.getCreationTime()); // so the entities are now equal (precision differs)
 			assertTrue(janLoaded + " equals " + jan, EqualsBuilder.reflectionEquals(janLoaded, jan));
+			janVoucher.setCreationTime(janLoaded.getVoucher().getCreationTime()); // so the entities are now equal (precision differs)
+			janVoucher.setValidFrom(janLoaded.getVoucher().getValidFrom()); // so the entities are now equal (precision differs)
 			assertTrue(janVoucher + " equals " + janLoaded.getVoucher(), EqualsBuilder.reflectionEquals(janVoucher, janLoaded.getVoucher()));
 
 			assertTrue("Martina has no voucher", martinaLoaded.getVoucher() == null);
+			martina.setCreationTime(martinaLoaded.getCreationTime()); // so the entities are now equal (precision differs)
 			assertTrue(martinaLoaded + " equals " + martina, EqualsBuilder.reflectionEquals(martinaLoaded, martina));
 		} finally {
 			// TODO RBe: Clear VoucherTestDb

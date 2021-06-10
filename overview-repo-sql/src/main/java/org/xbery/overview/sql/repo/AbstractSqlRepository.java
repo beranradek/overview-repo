@@ -64,13 +64,8 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 
 		String sql = "INSERT INTO " + tableName + " (" + attributeNamesCommaSeparated + ") VALUES (" + questionMarks + ")";
 
-		T createdEntity = entity;
 		K generatedKey = create(sql, attributeValues, autogenerateKey);
-
-		if (autogenerateKey) {
-			createdEntity = entityUpdatedWithId(createdEntity, generatedKey);
-		}
-		return createdEntity;
+		return autogenerateKey ? findById(generatedKey).get() : entity;
 	}
 	
 	@Override
@@ -287,35 +282,6 @@ public abstract class AbstractSqlRepository<T, K, F> implements Repository<T, K,
 		List<Condition> conditions = new ArrayList<>();
 		conditions.add(Conditions.eq(attribute, attrValue));
 		return CollectionFuns.headOpt(findByFilterConditions(conditions, null, null, entityMapper));
-	}
-	
-	/**
-	 * Returns entity with updated primary key attributes.
-	 * This method can be overridden when you are working with immutable entity class.
-	 * @param entity
-	 * @param key
-	 * @return entity updated with given id
-	 */
-	protected T entityUpdatedWithId(T entity, K key) {
-		List<Pair<Attribute<T, ?>, Object>> attributesToValues = new ArrayList<>();
-		attributesToValues.addAll(getEntityMapper().decomposePrimaryKey(key));
-
-		// Fill in attribute source for binding key values to entity
-		Map<String, Object> keyAttrSource = new LinkedHashMap<>();
-		for (Pair<Attribute<T, ?>, Object> p : attributesToValues) {
-			Attribute<T, ?> attr = p.getFirst();
-			Object value = p.getSecond();
-			keyAttrSource.put(attr.getName(), value);
-		}
-		MapAttributeSource attrSource = new MapAttributeSource(keyAttrSource);
-
-		// Binding values of primary key parts to entity
-		T updatedEntity = entity;
-		for (Pair<Attribute<T, ?>, Object> p : attributesToValues) {
-			Attribute<T, ?> attr = p.getFirst();
-			updatedEntity = attr.entityWithAttribute(updatedEntity, attrSource, attr.getName());
-		}
-		return updatedEntity;
 	}
 	
 	/**

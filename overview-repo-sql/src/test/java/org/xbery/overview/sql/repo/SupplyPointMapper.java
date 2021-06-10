@@ -22,9 +22,12 @@ import org.xbery.overview.domain.SupplyPointFilter;
 import org.xbery.overview.filter.Condition;
 import org.xbery.overview.mapper.Attr;
 import org.xbery.overview.mapper.Attribute;
+import org.xbery.overview.mapper.AttributeSource;
 import org.xbery.overview.mapper.DynamicEntityMapper;
 import org.xbery.overview.repo.Conditions;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,43 +44,34 @@ public class SupplyPointMapper extends DynamicEntityMapper<SupplyPoint, SupplyPo
 
 	public final Attribute<SupplyPoint, Integer> id;
 	public final Attribute<SupplyPoint, String> code;
+	public final Attribute<SupplyPoint, String> address_street;
+	public final Attribute<SupplyPoint, String> address_street_number;
+	public final Attribute<SupplyPoint, String> address_city;
+	public final Attribute<SupplyPoint, String> address_postal_code;
 	public final Attribute<SupplyPoint, Integer> customer_id;
+	public final Attribute<SupplyPoint, Instant> creation_time;
+	public final Attribute<SupplyPoint, Integer> bonus_points;
+	public final Attribute<SupplyPoint, BigDecimal> previous_year_consumption;
+	public final Attribute<SupplyPoint, BigDecimal> current_year_consumption;
+	public final Attribute<SupplyPoint, BigDecimal> consumption_diff;
+	public final Attribute<SupplyPoint, BigDecimal> voucher_discount;
+	public final Attribute<SupplyPoint, Integer> benefit_years;
 
 	protected SupplyPointMapper() {
-		id = add(Attr.ofInteger(cls, "id").primary().get(e -> e.getId()).set((e, a) -> e.setId(a)));
-		code = add(Attr.ofString(cls, "code").get(e -> e.getCode()).set((e, a) -> e.setCode(a)));
-		add(Attr.ofString(cls, "address_street").get(e -> e.getAddress() != null ? e.getAddress().getStreet() : null).set((e, a) -> {
-			if (a != null) {
-				ensureAddressExists(e);
-				e.getAddress().setStreet(a);
-			}
-		}));
-		add(Attr.ofString(cls, "address_street_number").get(e -> e.getAddress() != null ? e.getAddress().getStreetNumber() : null).set((e, a) -> {
-			if (a != null) {
-				ensureAddressExists(e);
-				e.getAddress().setStreetNumber(a);
-			}
-		}));
-		add(Attr.ofString(cls, "address_city").get(e -> e.getAddress() != null ? e.getAddress().getCity() : null).set((e, a) -> {
-			if (a != null) {
-				ensureAddressExists(e);
-				e.getAddress().setCity(a);
-			}
-		}));
-		add(Attr.ofString(cls, "address_postal_code").get(e -> e.getAddress() != null ? e.getAddress().getPostalCode() : null).set((e, a) -> {
-			if (a != null) {
-				ensureAddressExists(e);
-				e.getAddress().setPostalCode(a);
-			}
-		}));
-		customer_id = add(Attr.ofInteger(cls, "customer_id").get(e -> e.getCustomerId()).set((e, a) -> e.setCustomerId(a)));
-		add(Attr.ofInstant(cls, "creation_time").get(e -> e.getCreationTime()).set((e, a) -> e.setCreationTime(a)));
-		add(Attr.ofInteger(cls, "bonus_points").get(e -> e.getBonusPoints()).set((e, a) -> e.setBonusPoints(a)));
-		add(Attr.ofBigDecimal(cls, "previous_year_consumption").get(e -> e.getPreviousYearConsumption()).set((e, a) -> e.setPreviousYearConsumption(a)));
-		add(Attr.ofBigDecimal(cls, "current_year_consumption").get(e -> e.getCurrentYearConsumption()).set((e, a) -> e.setCurrentYearConsumption(a)));
-		add(Attr.ofBigDecimal(cls, "consumption_diff").get(e -> e.getConsumptionDiff()).set((e, a) -> e.setConsumptionDiff(a)));
-		add(Attr.ofBigDecimal(cls, "voucher_discount").get(e -> e.getVoucherDiscount()).set((e, a) -> e.setVoucherDiscount(a)));
-		add(Attr.ofInteger(cls, "benefit_years").get(e -> e.getBenefitYears()).set((e, a) -> e.setBenefitYears(a)));
+		id = add(Attr.ofInteger(cls, "id").primary().get(e -> e.getId()));
+		code = add(Attr.ofString(cls, "code").get(e -> e.getCode()));
+		address_street = add(Attr.ofString(cls, "address_street").get(e -> e.getAddress() != null ? e.getAddress().getStreet() : null));
+		address_street_number = add(Attr.ofString(cls, "address_street_number").get(e -> e.getAddress() != null ? e.getAddress().getStreetNumber() : null));
+		address_city = add(Attr.ofString(cls, "address_city").get(e -> e.getAddress() != null ? e.getAddress().getCity() : null));
+		address_postal_code = add(Attr.ofString(cls, "address_postal_code").get(e -> e.getAddress() != null ? e.getAddress().getPostalCode() : null));
+		customer_id = add(Attr.ofInteger(cls, "customer_id").get(e -> e.getCustomerId()));
+		creation_time = add(Attr.ofInstant(cls, "creation_time").get(e -> e.getCreationTime()));
+		bonus_points = add(Attr.ofInteger(cls, "bonus_points").get(e -> e.getBonusPoints()));
+		previous_year_consumption = add(Attr.ofBigDecimal(cls, "previous_year_consumption").get(e -> e.getPreviousYearConsumption()));
+		current_year_consumption = add(Attr.ofBigDecimal(cls, "current_year_consumption").get(e -> e.getCurrentYearConsumption()));
+		consumption_diff = add(Attr.ofBigDecimal(cls, "consumption_diff").get(e -> e.getConsumptionDiff()));
+		voucher_discount = add(Attr.ofBigDecimal(cls, "voucher_discount").get(e -> e.getVoucherDiscount()));
+		benefit_years = add(Attr.ofInteger(cls, "benefit_years").get(e -> e.getBenefitYears()));
 	}
 
 	public static SupplyPointMapper getInstance() {
@@ -89,8 +83,25 @@ public class SupplyPointMapper extends DynamicEntityMapper<SupplyPoint, SupplyPo
 	}
 
 	@Override
-	public SupplyPoint createEntity() {
-		return new SupplyPoint();
+	public SupplyPoint createEntity(AttributeSource attributeSource, List<Attribute<SupplyPoint, ?>> attributes, String aliasPrefix) {
+		SupplyPoint p = new SupplyPoint();
+		p.setId(id.getValueFromSource(attributeSource, aliasPrefix));
+		p.setCode(code.getValueFromSource(attributeSource, aliasPrefix));
+		Address address = new Address();
+		address.setStreet(address_street.getValueFromSource(attributeSource, aliasPrefix));
+		address.setStreetNumber(address_street_number.getValueFromSource(attributeSource, aliasPrefix));
+		address.setCity(address_city.getValueFromSource(attributeSource, aliasPrefix));
+		address.setPostalCode(address_postal_code.getValueFromSource(attributeSource, aliasPrefix));
+		p.setAddress(address);
+		p.setCustomerId(customer_id.getValueFromSource(attributeSource, aliasPrefix));
+		p.setCreationTime(creation_time.getValueFromSource(attributeSource, aliasPrefix));
+		p.setBonusPoints(bonus_points.getValueFromSource(attributeSource, aliasPrefix));
+		p.setPreviousYearConsumption(previous_year_consumption.getValueFromSource(attributeSource, aliasPrefix));
+		p.setCurrentYearConsumption(current_year_consumption.getValueFromSource(attributeSource, aliasPrefix));
+		p.setConsumptionDiff(consumption_diff.getValueFromSource(attributeSource, aliasPrefix));
+		p.setVoucherDiscount(voucher_discount.getValueFromSource(attributeSource, aliasPrefix));
+		p.setBenefitYears(benefit_years.getValueFromSource(attributeSource, aliasPrefix));
+		return p;
 	}
 
 	@Override
@@ -106,11 +117,5 @@ public class SupplyPointMapper extends DynamicEntityMapper<SupplyPoint, SupplyPo
 			conditions.add(Conditions.in(customer_id, filter.getCustomerIds()));
 		}
 		return conditions;
-	}
-
-	protected void ensureAddressExists(SupplyPoint sp) {
-		if (sp.getAddress() == null) {
-			sp.setAddress(new Address());
-		}
 	}
 }

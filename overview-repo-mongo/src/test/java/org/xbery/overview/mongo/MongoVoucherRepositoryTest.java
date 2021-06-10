@@ -53,6 +53,9 @@ public class MongoVoucherRepositoryTest {
         voucherToUpdate.setDiscountPrice(BigDecimal.valueOf(200000, 2));
 
         Optional<Voucher> voucherUpdatedOpt = repo.update(voucherToUpdate);
+        voucherToUpdate.setCreationTime(voucherUpdatedOpt.get().getCreationTime()); // so the entities are now equal (precision differs)
+        voucherToUpdate.setValidFrom(voucherUpdatedOpt.get().getValidFrom()); // so the entities are now equal (precision differs)
+        voucherToUpdate.setRedemptionTime(voucherUpdatedOpt.get().getRedemptionTime()); // so the entities are now equal (precision differs)
         assertTrue("Updated voucher equals voucher to update", EqualsBuilder.reflectionEquals(voucherUpdatedOpt.get(), voucherToUpdate));
     }
 

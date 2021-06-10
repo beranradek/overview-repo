@@ -76,6 +76,8 @@ public class VoucherRepositoryImplTest {
 		
 		assertEquals(voucher.getCode(), voucher.getCode());
 		Optional<Voucher> foundVoucherOpt = repo.findById(voucher.getCode());
+		voucher.setCreationTime(foundVoucherOpt.get().getCreationTime()); // so the entities are now equal (precision differs)
+		voucher.setValidFrom(foundVoucherOpt.get().getValidFrom()); // so the entities are now equal (precision differs)
 		assertTrue("Found voucher " + foundVoucherOpt.get() + " equals voucher to store " + voucher, EqualsBuilder.reflectionEquals(voucher, foundVoucherOpt.get()));
 		
 		repo.delete(voucher.getCode());
@@ -98,6 +100,9 @@ public class VoucherRepositoryImplTest {
 		assertTrue("Updated voucher " + voucherUpdatedOpt.get() + " equals voucher to update " + voucherToUpdate, EqualsBuilder.reflectionEquals(voucherUpdatedOpt.get(), voucherToUpdate));
 		
 		Optional<Voucher> foundVoucherOpt = repo.findById(voucher.getCode());
+		voucherToUpdate.setCreationTime(foundVoucherOpt.get().getCreationTime()); // so the entities are now equal (precision differs)
+		voucherToUpdate.setValidFrom(foundVoucherOpt.get().getValidFrom()); // so the entities are now equal (precision differs)
+		voucherToUpdate.setRedemptionTime(foundVoucherOpt.get().getRedemptionTime()); // so the entities are now equal (precision differs)
 		assertTrue("Found voucher " + foundVoucherOpt.get() + " is equal to voucher to update " + voucherToUpdate, EqualsBuilder.reflectionEquals(foundVoucherOpt.get(), voucherToUpdate));
 	}
 
@@ -166,6 +171,8 @@ public class VoucherRepositoryImplTest {
 		repo.create(voucher, false);
 		Optional<Voucher> foundVoucherOpt = repo.findById(code);
 		assertTrue("Voucher is available in DB", foundVoucherOpt.isPresent());
+		voucher.setCreationTime(foundVoucherOpt.get().getCreationTime()); // so the entities are now equal (precision differs)
+		voucher.setValidFrom(foundVoucherOpt.get().getValidFrom()); // so the entities are now equal (precision differs)
 		assertTrue("Found voucher equals voucher to store", EqualsBuilder.reflectionEquals(voucher, foundVoucherOpt.get()));
 	}
 

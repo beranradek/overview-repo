@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.2.0] - 2021-06-10
+- Attribute without entityWithAttribute, Attr without updatedEntity and EntityMapper.createEntity contract including filling of instance with all necessary data so the immutable objects are constructed effectively only once 
+
 ## [1.1.1] - 2019-07-13
 - DbTypeConvertor for converting types to DB-supported types
 - buildEntityWithAttributes to fetch only partially filled entity from DB

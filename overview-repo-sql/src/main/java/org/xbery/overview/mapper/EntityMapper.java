@@ -72,10 +72,13 @@ public interface EntityMapper<T, F> {
 	}
 
 	/**
-	 * Creates new instance of entity.
+	 * Creates new instance of entity from attribute source.
+	 * @param attributeSource
+	 * @param attributes attributes to extract from source of values
+	 * @param aliasPrefix prefix used for attribute names
 	 * @return
      */
-	T createEntity();
+	T createEntity(AttributeSource attributeSource, List<Attribute<T, ?>> attributes, String aliasPrefix);
 
 	/**
 	 * Defines default ordering for entity.
@@ -295,17 +298,11 @@ public interface EntityMapper<T, F> {
 	 * @return
 	 */
 	default T buildEntityWithAttributes(AttributeSource attributeSource, List<Attribute<T, ?>> attributes, String aliasPrefix) {
-		T instance = createEntity();
-		for (Attribute<T, ?> attr : attributes) {
-			String alias = null;
-			if (aliasPrefix != null) {
-				alias = aliasPrefix + attr.getName();
-			}
-			instance = attr.entityWithAttribute(instance, attributeSource, attr.getName(alias));
-		}
+		T instance = createEntity(attributeSource, attributes, aliasPrefix);
 		if (this instanceof JoinEntityMapper) {
 			return instance;
 		}
+		// Right-joined entity should be available only if it has data available in DB (not all nulls)
 		boolean primaryKeyFilled = getPrimaryAttributeValues(instance).stream().anyMatch(v -> v != null);
 		return primaryKeyFilled ? instance : null;
 	}
