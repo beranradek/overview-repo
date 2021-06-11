@@ -70,14 +70,14 @@ public class VoucherMapper extends DynamicEntityMapper<Voucher, VoucherFilter> {
 	public final Attribute<Voucher, String> redeemed_by;
 
 	private VoucherMapper() {
-		code = add(Attr.ofString(cls, "code").primary().get(e -> e.getCode()).set((e, a) -> e.setCode(a)).maxLength(20));
-		creation_time = add(Attr.ofInstant(cls, "creation_time").get(e -> e.getCreationTime()).set((e, a) -> e.setCreationTime(a)));
-		discount_price = add(Attr.ofBigDecimal(cls, "discount_price").get(e -> e.getDiscountPrice()).set((e, a) -> e.setDiscountPrice(a)).maxLength(10));
-		valid_from = add(Attr.ofInstant(cls, "valid_from").get(e -> e.getValidFrom()).set((e, a) -> e.setValidFrom(a)));
-		valid_to = add(Attr.ofInstant(cls, "valid_to").get(e -> e.getValidTo()).set((e, a) -> e.setValidTo(a)));
-		redemption_time = add(Attr.ofInstant(cls, "redemption_time").get(e -> e.getRedemptionTime()).set((e, a) -> e.setRedemptionTime(a)));
-		reserved_by = add(Attr.ofString(cls, "reserved_by").get(e -> e.getReservedBy()).set((e, a) -> e.setReservedBy(a)).maxLength(40));
-		redeemed_by = add(Attr.ofString(cls, "redeemed_by").get(e -> e.getRedeemedBy()).set((e, a) -> e.setRedeemedBy(a)).maxLength(40));
+        code = add(Attr.ofString(cls, "code").primary().get(e -> e.getCode()).maxLength(20));
+        creation_time = add(Attr.ofInstant(cls, "creation_time").get(e -> e.getCreationTime()));
+        discount_price = add(Attr.ofBigDecimal(cls, "discount_price").get(e -> e.getDiscountPrice()).maxLength(10));
+        valid_from = add(Attr.ofInstant(cls, "valid_from").get(e -> e.getValidFrom()));
+        valid_to = add(Attr.ofInstant(cls, "valid_to").get(e -> e.getValidTo()));
+        redemption_time = add(Attr.ofInstant(cls, "redemption_time").get(e -> e.getRedemptionTime()));
+        reserved_by = add(Attr.ofString(cls, "reserved_by").get(e -> e.getReservedBy()).maxLength(40));
+        redeemed_by = add(Attr.ofString(cls, "redeemed_by").get(e -> e.getRedeemedBy()).maxLength(40));
 	}
 
 	public static VoucherMapper getInstance() {
@@ -88,10 +88,19 @@ public class VoucherMapper extends DynamicEntityMapper<Voucher, VoucherFilter> {
 	public String getTableName() {
 		return DB_TABLE_NAME;
 	}
-	
-	@Override
-	public Voucher createEntity() {
-		return new Voucher();
+
+    @Override
+    public Voucher createEntity(AttributeSource attributeSource, List<Attribute<Voucher, ?>> attributes, String aliasPrefix) {
+        Voucher voucher = new Voucher();
+        voucher.setCode(code.getValueFromSource(attributeSource, aliasPrefix));
+        voucher.setCreationTime(creation_time.getValueFromSource(attributeSource, aliasPrefix));
+        voucher.setDiscountPrice(discount_price.getValueFromSource(attributeSource, aliasPrefix));
+        voucher.setValidFrom(valid_from.getValueFromSource(attributeSource, aliasPrefix));
+        voucher.setValidTo(valid_to.getValueFromSource(attributeSource, aliasPrefix));
+        voucher.setRedemptionTime(redemption_time.getValueFromSource(attributeSource, aliasPrefix));
+        voucher.setReservedBy(reserved_by.getValueFromSource(attributeSource, aliasPrefix));
+        voucher.setRedeemedBy(redeemed_by.getValueFromSource(attributeSource, aliasPrefix));
+        return voucher;
 	}
 
 	@Override
@@ -103,7 +112,7 @@ public class VoucherMapper extends DynamicEntityMapper<Voucher, VoucherFilter> {
 
 Entity mapper describes:
   * name of database table to store the entities in,
-  * persisted attributes of an entity and the way they are read from an entity and written to an existing entity (one-by-one so the updated entity is returned for each updated attribute), 
+  * persisted attributes of an entity and the way they are read from an entity, 
   * how a new entity can be created,
   * how filtering conditions are constructed from a filter object if there are any filtering requirements (we will cover filtering criteria later in a moment; basically, the filter object can be anything suitable to you).
 
