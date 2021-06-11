@@ -5,11 +5,11 @@ description = 'JDBC implementation of rich generic SQL repository with filtering
 apply plugin: 'scala'
 
 dependencies {
-    compile project(":overview-repo-sql")
-    compile "org.scala-lang:scala-library:2.12.8"
+    implementation project(":overview-repo-sql")
+    implementation "org.scala-lang:scala-library:2.12.8"
 
-    testCompile project(":overview-repo-sql")
-    testCompile "ch.qos.logback:logback-classic:1.2.2"
-    testCompile "junit:junit:4.8.2"
-    testCompile "org.mockito:mockito-core:2.7.5"
+    testImplementation project(":overview-repo-sql")
+    testImplementation "ch.qos.logback:logback-classic:1.2.2"
+    testImplementation "junit:junit:4.8.2"
+    testImplementation "org.mockito:mockito-core:2.7.5"
 }
