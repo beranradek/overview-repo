@@ -55,21 +55,21 @@ database attributes:
  */
 public class VoucherMapper extends DynamicEntityMapper<Voucher, VoucherFilter> {
 
-	/** Mapped entity class. */
-	private static final Class<Voucher> cls = Voucher.class;
-	private static final String DB_TABLE_NAME = "voucher";
-	private static final VoucherMapper INSTANCE = new VoucherMapper();
-
-	public final Attribute<Voucher, String> code;
-	public final Attribute<Voucher, Instant> creation_time;
-	public final Attribute<Voucher, BigDecimal> discount_price;
-	public final Attribute<Voucher, Instant> valid_from;
-	public final Attribute<Voucher, Instant> valid_to;
-	public final Attribute<Voucher, Instant> redemption_time;
-	public final Attribute<Voucher, String> reserved_by;
-	public final Attribute<Voucher, String> redeemed_by;
-
-	private VoucherMapper() {
+    /** Mapped entity class. */
+    private static final Class<Voucher> cls = Voucher.class;
+    private static final String DB_TABLE_NAME = "voucher";
+    private static final VoucherMapper INSTANCE = new VoucherMapper();
+    
+    public final Attribute<Voucher, String> code;
+    public final Attribute<Voucher, Instant> creation_time;
+    public final Attribute<Voucher, BigDecimal> discount_price;
+    public final Attribute<Voucher, Instant> valid_from;
+    public final Attribute<Voucher, Instant> valid_to;
+    public final Attribute<Voucher, Instant> redemption_time;
+    public final Attribute<Voucher, String> reserved_by;
+    public final Attribute<Voucher, String> redeemed_by;
+	    
+    private VoucherMapper() {
         code = add(Attr.ofString(cls, "code").primary().get(e -> e.getCode()).maxLength(20));
         creation_time = add(Attr.ofInstant(cls, "creation_time").get(e -> e.getCreationTime()));
         discount_price = add(Attr.ofBigDecimal(cls, "discount_price").get(e -> e.getDiscountPrice()).maxLength(10));
@@ -78,16 +78,16 @@ public class VoucherMapper extends DynamicEntityMapper<Voucher, VoucherFilter> {
         redemption_time = add(Attr.ofInstant(cls, "redemption_time").get(e -> e.getRedemptionTime()));
         reserved_by = add(Attr.ofString(cls, "reserved_by").get(e -> e.getReservedBy()).maxLength(40));
         redeemed_by = add(Attr.ofString(cls, "redeemed_by").get(e -> e.getRedeemedBy()).maxLength(40));
-	}
+    }
 
-	public static VoucherMapper getInstance() {
-		return INSTANCE;
-	}
+    public static VoucherMapper getInstance() {
+        return INSTANCE;
+    }
 
-	@Override
-	public String getTableName() {
-		return DB_TABLE_NAME;
-	}
+    @Override
+    public String getTableName() {
+        return DB_TABLE_NAME;
+    }
 
     @Override
     public Voucher createEntity(AttributeSource attributeSource, List<Attribute<Voucher, ?>> attributes, String aliasPrefix) {
@@ -101,12 +101,12 @@ public class VoucherMapper extends DynamicEntityMapper<Voucher, VoucherFilter> {
         voucher.setReservedBy(reserved_by.getValueFromSource(attributeSource, aliasPrefix));
         voucher.setRedeemedBy(redeemed_by.getValueFromSource(attributeSource, aliasPrefix));
         return voucher;
-	}
+    }
 
-	@Override
-	public List<Condition> composeFilterConditions(VoucherFilter filter) {
-		return new ArrayList<>();
-	}
+    @Override
+    public List<Condition> composeFilterConditions(VoucherFilter filter) {
+        return new ArrayList<>();
+    }
 }
 ```
 
